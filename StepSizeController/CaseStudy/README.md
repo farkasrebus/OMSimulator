@@ -61,6 +61,7 @@ Critical situation over. Communication interval set to 0.01
 info:    Logging information has been saved to "TrafficLightScenario.log"
 ```
 
+The same scenario can be simulated by _TLSwoithSSC.lua_ that uses the _StepSizeCpontroller.lua_ file, however, that doesn't print the car's distance (notheless, the result is shown in the generated plot).
 
 
 

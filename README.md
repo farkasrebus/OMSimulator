@@ -13,4 +13,23 @@ OMSimulator co-simulates FMUs by iteratively making the FMUs do a step (calculat
 
 This repository is forked from [OpenModelica/OMSimulator](https://github.com/OpenModelica/OMSimulator) and synchronized accoring to the [GitHub recommendation](https://help.github.com/articles/syncing-a-fork/).
 
-Clone the project using the `--recursive` flag then follow the instructions of the original repository for building and installing OMSimulator. The step size controller is currently implemented in lua and you can find a case study in the _StepSizeController_ folder.
+Clone the project using the `--recursive` flag then follow the instructions of the original repository for building and installing OMSimulator. The step size controller is currently implemented in lua and you can find a case study in the _StepSizeController/CaseStudy_ folder.
+
+## Working with the step size controller
+
+The adaptive step size controller is the file _StepSizeController.lua_ located in the _StepSizeController_ folder. To use it just import the file.
+
+```lua
+package.path = package.path .. ";path/to/StepSizeController/StepSizeController.lua"
+require("StepSizeController")
+```
+
+After this you can use the _simulateWithAdaptiveStepSizeControl_ function that takes four parameters:
+* _model_ denotes the model to simulate
+* _criticalVarName_ is the name of a boolean variable whose value is true when the step size have to be low and false otherwise
+* _bigStepSize_ is the size of the large steps
+* _smallStepSize_ is the size of small steps
+
+An example can be found in the _StepSizeController/CaseStudy_ folder called _TLSwithSSC.lua_.
+
+This is a preliminary step size controller that requires the user to configure everything. The step size controller will be improved with more functionality.
