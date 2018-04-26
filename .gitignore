@@ -5,6 +5,7 @@
 /install/
 /StepSizeController/CaseStudy/*.log
 /StepSizeController/CaseStudy/*.mat
+/StepSizeController/CaseStudy/temp_*
 
 
 # local files
