@@ -67,7 +67,7 @@ do
 	end
 	--]]
 	if ((not stopDistanceInfo) and getInteger(model,"Car.stateInteger")==3.0) then
-		print("Car's distance from pedestrian crossing afeter breaking: ".. dist)
+		print("Car's distance from pedestrian crossing after breaking: ".. dist)
 		stopDistanceInfo=true
 	end
 	tcur=getCurrentTime(model)
