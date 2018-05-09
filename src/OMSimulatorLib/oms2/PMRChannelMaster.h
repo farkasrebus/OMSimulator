@@ -47,17 +47,16 @@ namespace oms2
    * It spawns threads with the function threadPMRChannel().
    */
   template <template<class> class PMRChannel>
-  oms_status_enu_t stepUntilPMRChannel(ResultWriter& resultWriter, double stopTime, double communicationInterval, std::string compositeName, oms2::DirectedGraph& outputsGraph, std::map<oms2::ComRef, oms2::FMISubModel*>& subModels);
+  oms_status_enu_t stepUntilPMRChannel(ResultWriter& resultWriter, double stopTime, double communicationInterval, std::string compositeName, oms2::DirectedGraph& outputsGraph, std::map<oms2::ComRef, oms2::FMISubModel*>& subModels, bool realtime_sync);
 
   /**
    * \brief Thread for communication channel based parallel multi-rate simulation approach.
    *
-   * PMR experiment, clocks not yet supported. Instead all FMUs will run with the same rate / communicationInterval.
+   * PMR experiment, with experimental "clocks".
    *
-   * \TODO Full multi-rate clock support
    */
   template <template<class> class PMRChannel>
-  void threadPMRChannel(int tid, std::string subModelCrefStr, oms2::PMRChannelMap<PMRChannel>& channels, oms2::FMISubModel* fmu, double stopTime, double communicationInterval);
+  void threadPMRChannel(int tid, std::string subModelCrefStr, oms2::PMRChannelMap<PMRChannel>& channels, oms2::FMISubModel* fmu, double stopTime, double communicationInterval, bool realtime_sync);
 
   template <template<class> class PMRChannel>
   inline void writeOutputToConnectedInputChannels(int output, oms2::PMRChannelMap<PMRChannel>& channels, oms2::FMISubModel* fmu);
@@ -73,7 +72,7 @@ namespace oms2
 /* ************************************ */
 
 template <template<class> class PMRChannel>
-oms_status_enu_t oms2::stepUntilPMRChannel(ResultWriter& resultWriter, double stopTime, double communicationInterval, std::string compositeName, oms2::DirectedGraph& outputsGraph, std::map<oms2::ComRef, oms2::FMISubModel*>& subModels)
+oms_status_enu_t oms2::stepUntilPMRChannel(ResultWriter& resultWriter, double stopTime, double communicationInterval, std::string compositeName, oms2::DirectedGraph& outputsGraph, std::map<oms2::ComRef, oms2::FMISubModel*>& subModels, bool realtime_sync)
 {
   logTrace();
 
@@ -89,8 +88,10 @@ oms_status_enu_t oms2::stepUntilPMRChannel(ResultWriter& resultWriter, double st
     /* Question: Nicer to use actual ComRef objects as key instead of strings? */
     std::string cref_str =  compositeName + std::string(".") + fmuInstName;
     oms2::FMISubModel* fmiSubModel = it->second;
+    int activationRatio = fmiSubModel->getActivationRatio();
     // logInfo(std::string("oms2::simulatePMRChannel: Spawning thread for ") + cref_str);
-    t.push_back(std::thread(threadPMRChannel<PMRChannel>, i, cref_str, std::ref(channels), fmiSubModel, stopTime, communicationInterval));
+    t.push_back(std::thread(threadPMRChannel<PMRChannel>, i, cref_str, std::ref(channels), fmiSubModel,
+      stopTime, communicationInterval*activationRatio, realtime_sync));
   }
 
   /* Join the threads with the main thread */
@@ -102,7 +103,7 @@ oms_status_enu_t oms2::stepUntilPMRChannel(ResultWriter& resultWriter, double st
 }
 
 template <template<class> class PMRChannel>
-void oms2::threadPMRChannel(int tid, std::string subModelCrefStr, oms2::PMRChannelMap<PMRChannel>& channels, oms2::FMISubModel* fmu, double stopTime, double communicationInterval)
+void oms2::threadPMRChannel(int tid, std::string subModelCrefStr, oms2::PMRChannelMap<PMRChannel>& channels, oms2::FMISubModel* fmu, double stopTime, double communicationInterval, bool realtime_sync)
 {
   logTrace();
   logInfo(std::string("oms2::threadPMRChannel: Started thread ") + std::to_string(tid) + " for submodule (FMU): " + subModelCrefStr);
@@ -111,8 +112,10 @@ void oms2::threadPMRChannel(int tid, std::string subModelCrefStr, oms2::PMRChann
 
   std::vector<int> orderedIOAcceses = channels.orderedIOAccess(subModelCrefStr);
   double tcur = 0;
-  while(tcur < stopTime)
+  auto start = std::chrono::steady_clock::now();
+  while(tcur < stopTime - 0.1*communicationInterval) // FIXME seem to need some tolerance, but not sure why?
   {
+    // std::cout << std::string("oms2::threadPMRChannel: step START while ") + std::to_string(tid) + " for submodule (FMU): " + subModelCrefStr << " tcur=" << tcur << std::endl;
     for (int i: orderedIOAcceses) {
       if (graph->nodes[i].isOutput()) {
         writeOutputToConnectedInputChannels(i, channels, fmu);
@@ -126,7 +129,23 @@ void oms2::threadPMRChannel(int tid, std::string subModelCrefStr, oms2::PMRChann
     if (tcur > stopTime)
       tcur = stopTime;
     fmu->doStep(tcur);
+
+    if (realtime_sync)
+    {
+      auto now = std::chrono::steady_clock::now();
+      // seems a cast to a sufficient high resolution of time is necessary for avoiding truncation errors
+      auto next = start + std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::duration<double>(tcur));
+      std::chrono::duration<double> margin = next - now;
+      // std::cout << "oms2::threadPMRChannel] doStep: " << std::to_string(tcur  - communicationInterval) << "s -> " << std::to_string(tcur) << "s, submodule (FMU)=" << subModelCrefStr << ", real-time margin=" << std::to_string(margin.count()) << "s" << std::endl;
+      if (margin < std::chrono::duration<double>(0))
+        logError(std::string("[oms2::threadPMRChannel] real-time frame overrun, time=") + std::to_string(tcur) + std::string("s, submodule (FMU)=") + subModelCrefStr + std::string(", exceeded margin=") + std::to_string(margin.count()) + std::string("s\n"));
+
+      std::this_thread::sleep_until(next);
+    }
+
+    // std::cout << std::string("oms2::threadPMRChannel: step END while ") + std::to_string(tid) + " for submodule (FMU): " + subModelCrefStr << " tcur=" << tcur << std::endl;
   }
+  // std::cout << std::string("oms2::threadPMRChannel: Ending thread ") + std::to_string(tid) + " for submodule (FMU): " + subModelCrefStr + "\n";
 }
 
 template <template<class> class PMRChannel>

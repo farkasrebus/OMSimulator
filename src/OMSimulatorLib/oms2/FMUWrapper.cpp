@@ -155,7 +155,10 @@ oms2::FMUWrapper* oms2::FMUWrapper::newSubModel(const oms2::ComRef& cref, const 
   model->callbacks.context = 0;
 
   // set temp directory
-  model->tempDir = fmi_import_mk_temp_dir(&model->callbacks, oms2::Scope::GetInstance().getTempDirectory().c_str(), "temp_");
+  char* temp_tempDir = fmi_import_mk_temp_dir(&model->callbacks, oms2::Scope::GetInstance().getTempDirectory().c_str(), "temp_");
+  model->tempDir = std::string(temp_tempDir);
+  free(temp_tempDir);
+
   logDebug("Using \"" + model->tempDir + "\" as temp directory for " + cref);
 
   model->context = fmi_import_allocate_context(&model->callbacks);
@@ -782,6 +785,19 @@ oms_status_enu_t oms2::FMUWrapper::getReal(const oms2::Variable& var, double& re
   return oms_status_error;
 }
 
+oms_status_enu_t oms2::FMUWrapper::setRealInputDerivatives(const oms2::Variable &var, int order, double realValue)
+{
+  logTrace();
+  if (!fmu || !var.isTypeReal())
+    return logError("oms2::FMUWrapper::setRealInputDerivatives failed");
+
+  fmi2_value_reference_t vr = var.getValueReference();
+  if (fmi2_status_ok == fmi2_import_set_real_input_derivatives(fmu, &vr, 1, &order, &realValue))
+    return oms_status_ok;
+
+  return oms_status_error;
+}
+
 oms_status_enu_t oms2::FMUWrapper::setInteger(const oms2::Variable& var, int integerValue)
 {
   logTrace();
@@ -885,6 +901,14 @@ oms_status_enu_t oms2::FMUWrapper::getBoolean(const oms2::SignalRef& sr, bool& v
   if (!var)
     return oms_status_error;
   return getBoolean(*var, value);
+}
+
+oms_status_enu_t oms2::FMUWrapper::setRealInputDerivatives(const oms2::SignalRef &sr, int order, double value)
+{
+  oms2::Variable* var = getVariable(sr.getVar());
+  if(!var)
+    return oms_status_error;
+  return setRealInputDerivatives(*var, order, value);
 }
 
 oms_status_enu_t oms2::FMUWrapper::registerSignalsForResultFile(ResultWriter& resultWriter)

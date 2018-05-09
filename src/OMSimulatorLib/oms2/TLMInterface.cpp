@@ -36,7 +36,7 @@ oms2::TLMInterface::TLMInterface(const oms2::ComRef &cref,
                                  const std::string name,
                                  oms_causality_enu_t causality,
                                  const std::string domain,
-                                 const int dimensions, const std::vector<SignalRef> &sigrefs)
+                                 const int dimensions, oms_tlm_interpolation_t interpolation, const std::vector<SignalRef> &sigrefs)
   : sig(cref, name)
 {
   this->cref = cref;
@@ -45,6 +45,16 @@ oms2::TLMInterface::TLMInterface(const oms2::ComRef &cref,
   this->domain = domain;
   this->dimensions = dimensions;
   this->sigrefs = sigrefs;
+  this->interpolationMethod = interpolation;
+}
+
+std::vector<oms2::SignalRef> oms2::TLMInterface::getSubSignalSet(std::vector<int> ids)
+{
+  std::vector<oms2::SignalRef> retval;
+  for(int i : ids) {
+    retval.push_back(sigrefs[i]);
+  }
+  return retval;
 }
 
 oms_status_enu_t oms2::TLMInterface::doRegister(TLMPlugin *plugin)

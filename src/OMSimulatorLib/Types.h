@@ -64,6 +64,12 @@ typedef enum {
   oms_causality_undefined   ///< REMOVE ME
 } oms_causality_enu_t;
 
+typedef enum {
+  oms_tlm_no_interpolation,
+  oms_tlm_coarse_grained,
+  oms_tlm_fine_grained
+} oms_tlm_interpolation_t;
+
 /* ************************************ */
 /* OMSimulator 2.0                      */
 /* ************************************ */
@@ -105,67 +111,6 @@ typedef enum {
   oms_message_debug,   ///< Debug message. (Only enabled if library is configured with OMS_DEBUG_LOGGING.)
   oms_message_trace    ///< Trace message for detailed debug logging. (Only enabled if library is configured with OMS_DEBUG_LOGGING.)
 } oms_message_type_enu_t;
-
-/**
- * \brief Vector indices for signal references in 1D signal TLM interfaces
- */
-typedef enum {
-  oms_tlm_sigref_value  ///< Only used to be consistent with bidirectional interfaces
-} oms_tlm_sigref_signal_t;
-
-/**
- * \brief Vector indices for signal references in 1D bidirectional TLM interfaces
- */
-typedef enum {
-  oms_tlm_sigref_1d_state  = 0, ///< E.g. position or charge
-  oms_tlm_sigref_1d_flow   = 1, ///< E.g. speed, current or flow
-  oms_tlm_sigref_1d_effort = 2  ///< E.g. force, voltage or pressure
-} oms_tlm_sigref_1d_t;
-
-/**
- * \brief Vector indices for signal references in 2D bidirectional TLM interfaces
- */
-typedef enum {
-  oms_tlm_sigref_2d_state_1  = 0, ///< E.g. y-position
-  oms_tlm_sigref_2d_state_2  = 1, ///< E.g. x-position
-  oms_tlm_sigref_2d_state_3  = 2, ///< E.g. angle
-  oms_tlm_sigref_2d_flow_1   = 3, ///< E.g. x-speed
-  oms_tlm_sigref_2d_flow_2   = 4, ///< E.g. y-speed
-  oms_tlm_sigref_2d_flow_3   = 5, ///< E.g. angular speed
-  oms_tlm_sigref_2d_effort_1 = 6, ///< E.g. x-force
-  oms_tlm_sigref_2d_effort_2 = 7, ///< E.g. y-force
-  oms_tlm_sigref_2d_effort_3 = 8  ///< E.g. torque
-} oms_tlm_sigref_2d_t;
-
-/**
- * \brief Vector indices for signal references in 3D bidirectional TLM interfaces
- */
-typedef enum {
-  oms_tlm_sigref_3d_x1 = 0, ///< E.g. position or charge
-  oms_tlm_sigref_3d_x2 = 1, ///< E.g. position or charge
-  oms_tlm_sigref_3d_x3 = 2, ///< E.g. position or charge
-  oms_tlm_sigref_3d_A1 = 3, ///< E.g. position or charge
-  oms_tlm_sigref_3d_A2 = 4, ///< E.g. position or charge
-  oms_tlm_sigref_3d_A3 = 5, ///< E.g. position or charge
-  oms_tlm_sigref_3d_A4 = 6, ///< E.g. position or charge
-  oms_tlm_sigref_3d_A5 = 7, ///< E.g. position or charge
-  oms_tlm_sigref_3d_A6 = 8, ///< E.g. position or charge
-  oms_tlm_sigref_3d_A7 = 9, ///< E.g. position or charge
-  oms_tlm_sigref_3d_A8 = 10, ///< E.g. position or charge
-  oms_tlm_sigref_3d_A9 = 11, ///< E.g. position or charge
-  oms_tlm_sigref_3d_v1 = 12, ///< E.g. speed, current or flow
-  oms_tlm_sigref_3d_v2 = 13, ///< E.g. speed, current or flow
-  oms_tlm_sigref_3d_v3 = 14, ///< E.g. speed, current or flow
-  oms_tlm_sigref_3d_w1 = 15, ///< E.g. speed, current or flow
-  oms_tlm_sigref_3d_w2 = 16, ///< E.g. speed, current or flow
-  oms_tlm_sigref_3d_w3 = 17, ///< E.g. speed, current or flow
-  oms_tlm_sigref_3d_f1 = 18, ///< E.g. force, voltage or pressure
-  oms_tlm_sigref_3d_f2 = 19, ///< E.g. force, voltage or pressure
-  oms_tlm_sigref_3d_f3 = 20, ///< E.g. force, voltage or pressure
-  oms_tlm_sigref_3d_t1 = 21, ///< E.g. force, voltage or pressure
-  oms_tlm_sigref_3d_t2 = 22, ///< E.g. force, voltage or pressure
-  oms_tlm_sigref_3d_t3 = 23  ///< E.g. force, voltage or pressure
-} oms_tlm_sigref_3d_t;
 
 /**
  * \brief 5.2.1.1 ssd:ConnectorGeometry
@@ -488,6 +433,11 @@ typedef struct {
    * fmi2GetDirectionalDerivative(..).
    */
   bool providesDirectionalDerivative;
+  /**
+   * The slave is able to interpolate continuous inputs. Calling of
+   * fmi2SetRealInputDerivatives(...) has an effect for the slave.
+   */
+  bool canInterpolateInputs;
 } oms_fmu_info_t;
 
 

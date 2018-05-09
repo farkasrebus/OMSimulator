@@ -57,6 +57,18 @@ oms2::TLMCompositeModel::TLMCompositeModel(const ComRef& name)
 
 oms2::TLMCompositeModel::~TLMCompositeModel()
 {
+    //Cleanup TLM interfaces
+    for(TLMInterface *ifc : interfaces) {
+        delete ifc;
+    }
+    interfaces.clear();
+
+    //Cleanup external models
+    std::map<ComRef, ExternalModel*>::iterator it;
+    for(it = externalModels.begin(); it != externalModels.end(); ++it) {
+        delete it->second;
+    }
+    externalModels.clear();
 }
 
 oms2::TLMCompositeModel* oms2::TLMCompositeModel::NewModel(const ComRef& name)
@@ -105,8 +117,23 @@ oms_status_enu_t oms2::TLMCompositeModel::addInterface(oms2::TLMInterface *ifc)
     }
     if(ifc->getDimensions() == 1 &&
        ifc->getCausality() == oms_causality_bidir &&
+       ifc->getInterpolationMethod() == oms_tlm_no_interpolation &&
        ifc->getSubSignals().size() != 3) {
       logError("Wrong number of variables for TLM interface (should be 3)");
+      return oms_status_error;
+    }
+    if(ifc->getDimensions() == 1 &&
+       ifc->getCausality() == oms_causality_bidir &&
+       ifc->getInterpolationMethod() == oms_tlm_coarse_grained &&
+       ifc->getSubSignals().size() != 4) {
+      logError("Wrong number of variables for TLM interface (should be 4)");
+      return oms_status_error;
+    }
+    if(ifc->getDimensions() == 1 &&
+       ifc->getCausality() == oms_causality_bidir &&
+       ifc->getInterpolationMethod() == oms_tlm_fine_grained &&
+       ifc->getSubSignals().size() != 23) {
+      logError("Wrong number of variables for TLM interface (should be 23)");
       return oms_status_error;
     }
     if(ifc->getDimensions() == 2 &&
@@ -120,6 +147,20 @@ oms_status_enu_t oms2::TLMCompositeModel::addInterface(oms2::TLMInterface *ifc)
        ifc->getSubSignals().size() != 24) {
       logError("Wrong number of variables for TLM interface (should be 24)");
 
+      return oms_status_error;
+    }
+    if(ifc->getDimensions() == 3 &&
+       ifc->getCausality() == oms_causality_bidir &&
+       ifc->getInterpolationMethod() == oms_tlm_coarse_grained &&
+       ifc->getSubSignals().size() != 25) {
+      logError("Wrong number of variables for TLM interface (should be 25)");
+      return oms_status_error;
+    }
+    if(ifc->getDimensions() == 3 &&
+       ifc->getCausality() == oms_causality_bidir &&
+       ifc->getInterpolationMethod() == oms_tlm_fine_grained &&
+       ifc->getSubSignals().size() != 89) {
+      logError("Wrong number of variables for TLM interface (should be 89)");
       return oms_status_error;
     }
   }
@@ -156,13 +197,14 @@ oms_status_enu_t oms2::TLMCompositeModel::addInterface(oms2::TLMInterface *ifc)
 }
 
 oms_status_enu_t oms2::TLMCompositeModel::addInterface(std::string name,
-                                                   int dimensions,
-                                                   oms_causality_enu_t causality,
-                                                   std::string domain,
-                                                   const oms2::ComRef &cref,
-                                                   std::vector<SignalRef> &sigrefs)
+                                                       int dimensions,
+                                                       oms_causality_enu_t causality,
+                                                       std::string domain,
+                                                       oms_tlm_interpolation_t interpolation,
+                                                       const oms2::ComRef &cref,
+                                                       std::vector<SignalRef> &sigrefs)
 {
-  oms2::TLMInterface *ifc = new TLMInterface(cref,name,causality,domain,dimensions, sigrefs);
+  oms2::TLMInterface *ifc = new TLMInterface(cref,name,causality,domain,dimensions,interpolation,sigrefs);
   return addInterface(ifc);
 }
 
@@ -319,7 +361,7 @@ oms_status_enu_t oms2::TLMCompositeModel::doSteps(ResultWriter& resultWriter, co
   return logError("oms2::TLMCompositeModel::doSteps: not implemented yet");
 }
 
-oms_status_enu_t oms2::TLMCompositeModel::stepUntil(ResultWriter &resultWriter, double stopTime, double communicationInterval, oms2::MasterAlgorithm masterAlgorithm)
+oms_status_enu_t oms2::TLMCompositeModel::stepUntil(ResultWriter &resultWriter, double stopTime, double communicationInterval, oms2::MasterAlgorithm masterAlgorithm, bool realtime_sync)
 {
   if(fmiModels.empty() && externalModels.empty())
     logWarning("oms2::TLMCompositeModel::stepUntil: Simulating empty model...");

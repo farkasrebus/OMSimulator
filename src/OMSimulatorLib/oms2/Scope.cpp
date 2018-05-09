@@ -111,7 +111,7 @@ oms_status_enu_t oms2::Scope::newTLMModel(const oms2::ComRef& name)
   return oms_status_ok;
 }
 
-oms_status_enu_t oms2::Scope::unloadModel(const oms2::ComRef& name)
+oms_status_enu_t oms2::Scope::unloadModel(const oms2::ComRef name)
 {
   logTrace();
 
@@ -282,6 +282,17 @@ oms_status_enu_t oms2::Scope::simulate(const ComRef& name)
     return oms_status_error;
 
   return model->simulate();
+}
+
+oms_status_enu_t oms2::Scope::simulate_realtime(const ComRef& name)
+{
+  logTrace();
+
+  oms2::Model* model = getModel(name);
+  if (!model)
+    return oms_status_error;
+
+  return model->simulate_realtime();
 }
 
 oms_status_enu_t oms2::Scope::simulate_asynchronous(const ComRef& name, void (*cb)(const char* ident, double time, oms_status_enu_t status))
@@ -1285,7 +1296,7 @@ oms_status_enu_t oms2::Scope::addExternalModel(const oms2::ComRef &cref, const o
   return model->getTLMCompositeModel()->addExternalModel(modelfile, startscript, name);
 }
 
-oms_status_enu_t oms2::Scope::addTLMInterface(const oms2::ComRef &cref, const oms2::ComRef &subref, const oms2::ComRef &name, int dimensions, oms_causality_enu_t causality, std::string domain, std::vector<SignalRef> &sigrefs)
+oms_status_enu_t oms2::Scope::addTLMInterface(const oms2::ComRef &cref, const oms2::ComRef &subref, const oms2::ComRef &name, int dimensions, oms_causality_enu_t causality, std::string domain, oms_tlm_interpolation_t interpolation, std::vector<SignalRef> &sigrefs)
 {
   oms2::Model* model = getModel(cref);
   if (!model) {
@@ -1297,7 +1308,7 @@ oms_status_enu_t oms2::Scope::addTLMInterface(const oms2::ComRef &cref, const om
     return oms_status_error;
   }
 
-  return model->getTLMCompositeModel()->addInterface(name.toString(), dimensions, causality, domain, subref, sigrefs);
+  return model->getTLMCompositeModel()->addInterface(name.toString(), dimensions, causality, domain, interpolation, subref, sigrefs);
 }
 
 
@@ -1431,7 +1442,7 @@ oms_status_enu_t oms2::Scope::setMasterAlgorithm(const ComRef& cref, const std::
     logError("[oms2::Scope::setMasterAlgorithm] failed");
     return oms_status_error;
   }
-  oms2::MasterAlgorithm ma_;
+
   if (masterAlgorithm == "standard")
   {
     model->setMasterAlgorithm(oms2::MasterAlgorithm::STANDARD);
@@ -1465,6 +1476,41 @@ oms_status_enu_t oms2::Scope::setMasterAlgorithm(const ComRef& cref, const std::
     return oms_status_warning;
   }
 
+  return oms_status_ok;
+}
+
+
+oms_status_enu_t oms2::Scope::setActivationRatio(const ComRef& cref, int k)
+{
+  if (!cref.isIdent())
+  {
+    // Sub-model
+    ComRef modelCref = cref.first();
+    Model* model = getModel(modelCref);
+    if (!model)
+    {
+      logError("[oms2::Scope::setActivationRatio] failed");
+      return oms_status_error;
+    }
+
+    // FMI model?
+    if (oms_component_fmi == model->getType())
+    {
+      FMICompositeModel* fmiModel = model->getFMICompositeModel();
+      FMISubModel* subModel = fmiModel->getSubModel(cref);
+      if (!subModel)
+      {
+        logError("[oms2::Scope::setActivationRatio] failed");
+        return oms_status_error;
+      }
+      subModel->setActivationRatio(k);
+    }
+    else
+    {
+      logError("[oms2::Scope::setActivationRatio] is only implemented for FMI models yet");
+      return oms_status_error;
+    }
+  }
   return oms_status_ok;
 }
 

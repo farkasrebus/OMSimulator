@@ -61,7 +61,7 @@ namespace oms2
     oms_status_enu_t addFMIModel(FMICompositeModel *model);
 
     oms_status_enu_t addInterface(oms2::TLMInterface* ifc);
-    oms_status_enu_t addInterface(std::string name, int dimensions, oms_causality_enu_t causality, std::string domain, const ComRef &cref, std::vector<SignalRef> &sigrefs);
+    oms_status_enu_t addInterface(std::string name, int dimensions, oms_causality_enu_t causality, std::string domain, oms_tlm_interpolation_t interpolation, const ComRef &cref, std::vector<SignalRef> &sigrefs);
 
     oms_status_enu_t addExternalModel(ExternalModel *externalModel);
     oms_status_enu_t addExternalModel(std::string modelFile, std::string startScript, const ComRef& cref);
@@ -81,7 +81,7 @@ namespace oms2
     oms_status_enu_t simulate(ResultWriter &resultWriter, double stopTime, double communicationInterval, oms2::MasterAlgorithm masterAlgorithm);
     void simulate_asynchronous(ResultWriter& resultWriter, double stopTime, double communicationInterval, void (*cb)(const char* ident, double time, oms_status_enu_t status));
     oms_status_enu_t doSteps(ResultWriter& resultWriter, const int numberOfSteps, double communicationInterval);
-    oms_status_enu_t stepUntil(ResultWriter &resultWriter, double stopTime, double communicationInterval, oms2::MasterAlgorithm masterAlgorithm);
+    oms_status_enu_t stepUntil(ResultWriter &resultWriter, double stopTime, double communicationInterval, oms2::MasterAlgorithm masterAlgorithm, bool realtime_sync);
 
     oms_status_enu_t registerSignalsForResultFile(ResultWriter& resultWriter) {return oms_status_ok;}
     oms_status_enu_t emit(ResultWriter& resultWriter) {return oms_status_ok;}

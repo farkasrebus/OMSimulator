@@ -793,14 +793,14 @@ oms_status_enu_t oms2_addExternalModel(const char *cref, const char *name, const
   return oms2::Scope::GetInstance().addExternalModel(oms2::ComRef(cref), oms2::ComRef(name), modelfile, startscript);
 }
 
-oms_status_enu_t oms2_addTLMInterface(const char *cref, const char *subref, const char *name, int dimensions, oms_causality_enu_t causality, const char *domain, const char **sigrefs, int nsigrefs)
+oms_status_enu_t oms2_addTLMInterface(const char *cref, const char *subref, const char *name, int dimensions, oms_causality_enu_t causality, oms_tlm_interpolation_t interpolation, const char *domain, const char **sigrefs, int nsigrefs)
 {
   logTrace();
   std::vector<oms2::SignalRef>vSigrefs;
   for(int i=0; i<nsigrefs; ++i) {
     vSigrefs.push_back(oms2::SignalRef(sigrefs[i]));
   }
-  return oms2::Scope::GetInstance().addTLMInterface(oms2::ComRef(cref), oms2::ComRef(subref), oms2::ComRef(name), dimensions, causality, domain, vSigrefs);
+  return oms2::Scope::GetInstance().addTLMInterface(oms2::ComRef(cref), oms2::ComRef(subref), oms2::ComRef(name), dimensions, causality, domain, interpolation, vSigrefs);
 }
 
 oms_status_enu_t oms2_addTLMConnection(const char *cref, const char *from, const char *to, double delay, double alpha, double Zf, double Zfr)
@@ -847,10 +847,22 @@ oms_status_enu_t oms2_setResultFile(const char* cref, const char* filename)
   return oms2::Scope::GetInstance().setResultFile(oms2::ComRef(cref), std::string(filename));
 }
 
-oms_status_enu_t oms2_setMasterAlgorithm(const char* cref, const char* masterAlgorithm)
+oms_status_enu_t oms2_setMasterAlgorithm(const char* ident, const char* masterAlgorithm)
 {
   logTrace();
-  return oms2::Scope::GetInstance().setMasterAlgorithm(oms2::ComRef(cref), std::string(masterAlgorithm));
+  return oms2::Scope::GetInstance().setMasterAlgorithm(oms2::ComRef(ident), std::string(masterAlgorithm));
+}
+
+oms_status_enu_t experimental_setActivationRatio(const char* cref, int k)
+{
+  logTrace();
+  return oms2::Scope::GetInstance().setActivationRatio(oms2::ComRef(cref), k);
+}
+
+oms_status_enu_t experimental_simulate_realtime(const char* ident)
+{
+  logTrace();
+  return oms2::Scope::GetInstance().simulate_realtime(oms2::ComRef(ident));
 }
 
 oms_status_enu_t oms2_exportCompositeStructure(const char* cref, const char* filename)

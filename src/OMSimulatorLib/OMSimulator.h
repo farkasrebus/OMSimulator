@@ -480,6 +480,13 @@ oms_status_enu_t oms2_initialize(const char* ident);
  */
 oms_status_enu_t oms2_simulate(const char* ident);
 
+/**
+ * \brief Simulates a composite model in its own thread.
+ *
+ * \param ident            [in] Name of the model instance
+ * \param cb               [in] Callback function which is called after every completed step of the composite model
+ * \return                 Error status
+ */
 oms_status_enu_t oms2_simulate_asynchronous(const char* ident, void (*cb)(const char* ident, double time, oms_status_enu_t status));
 
 /**
@@ -584,7 +591,7 @@ oms_status_enu_t oms2_setTLMSocketData(const char* cref, const char* address,
  * \param domain       [in] Domain of TLM interface
  * \return             Error status
  */
-oms_status_enu_t oms2_addTLMInterface(const char *cref, const char* subref, const char *name, int dimensions, oms_causality_enu_t causality, const char* domain,
+oms_status_enu_t oms2_addTLMInterface(const char *cref, const char* subref, const char *name, int dimensions, oms_causality_enu_t causality, oms_tlm_interpolation_t interpolation, const char* domain,
                                       const char **sigrefs, int nsigrefs);
 
 
@@ -778,11 +785,36 @@ oms_status_enu_t oms2_setResultFile(const char* cref, const char* filename);
  *
  * Experimental master algorithms (no stable API!): "pctpl", "pmrchannela", "pmrchannelcv", "pmrchannelm"
  *
- * \param cref              [in] Name of the model instance
+ * \param ident              [in] Name of the model instance
  * \param masterAlgorithm   [in] Master algorithm.
  * \return                  Error status
  */
-oms_status_enu_t oms2_setMasterAlgorithm(const char* cref, const char* masterAlgorithm);
+oms_status_enu_t oms2_setMasterAlgorithm(const char* ident, const char* masterAlgorithm);
+
+
+/**
+ * \brief Experimental feature for setting the activation ratio of FMUs for
+ *  experimenting with multi-rate master algorithms.
+ *
+ * \warning Not part of the stable API, will be changed or removed without notice.
+ *
+ * \param cref      [in] Full identifier of a component
+ * \param k         [in] Activation ratio (k=1 means activate every communicationInterval)
+ * \return          Error status
+ */
+oms_status_enu_t experimental_setActivationRatio(const char* cref, int k);
+
+
+/**
+ * \brief Experimental feature for (soft) real-time simulation.
+ *
+ * \warning Not part of the stable API, will be changed or removed without notice.
+ *
+ * \param ident   [in] Name of the model instance
+ * \return        Error status
+ */
+oms_status_enu_t experimental_simulate_realtime(const char* ident);
+
 
 /**
  * \brief Export the composite structure of a given model to a dot file.
