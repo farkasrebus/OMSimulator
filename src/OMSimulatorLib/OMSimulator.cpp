@@ -397,12 +397,12 @@ oms_status_enu_t oms2_setLogFile(const char* filename)
   return Log::setLogFile(filename);
 }
 
-const char* oms_getVersion()
+const char* oms2_getVersion()
 {
   return oms_git_version;
 }
 
-int oms_compareSimulationResults(const char* filenameA, const char* filenameB, const char* var, double relTol, double absTol)
+int oms2_compareSimulationResults(const char* filenameA, const char* filenameB, const char* var, double relTol, double absTol)
 {
   ResultReader* readerA = ResultReader::newReader(filenameA);
   ResultReader* readerB = ResultReader::newReader(filenameB);
@@ -875,4 +875,11 @@ oms_status_enu_t oms2_exportDependencyGraphs(const char* cref, const char* initi
 {
   logTrace();
   return oms2::Scope::GetInstance().exportDependencyGraphs(oms2::ComRef(cref), std::string(initialization), std::string(simulation));
+}
+
+oms_status_enu_t oms2_getCurrentTime(const char* model, double* time)
+{
+  logTrace();
+  return oms2::Scope::GetInstance().getCurrentTime(oms2::ComRef(model), time);
+
 }

@@ -891,6 +891,7 @@ oms_status_enu_t oms2::FMICompositeModel::doSteps(ResultWriter& resultWriter, co
       it.second->doStep(time);
 
     // input := output
+    emit(resultWriter);
     updateInputs(outputsGraph);
     emit(resultWriter);
   }
@@ -929,6 +930,7 @@ oms_status_enu_t oms2::FMICompositeModel::stepUntilStandard(ResultWriter& result
     }
 
     // input := output
+    emit(resultWriter);
     updateInputs(outputsGraph);
     emit(resultWriter);
   }
@@ -984,6 +986,7 @@ oms_status_enu_t oms2::FMICompositeModel::stepUntilPCTPL(ResultWriter& resultWri
     }
 
     // input := output
+    emit(resultWriter);
     updateInputs(outputsGraph);
     emit(resultWriter);
   }
@@ -1012,6 +1015,7 @@ void oms2::FMICompositeModel::simulate_asynchronous(ResultWriter& resultWriter, 
     }
 
     // input := output
+    emit(resultWriter);
     updateInputs(outputsGraph);
     emit(resultWriter);
 
@@ -1045,6 +1049,7 @@ oms_status_enu_t oms2::FMICompositeModel::simulateTLM(ResultWriter* resultWriter
     writeToSockets();
 
     // input := output
+    emit(*resultWriter);
     updateInputs(outputsGraph);
     emit(*resultWriter);
   }
@@ -1066,8 +1071,10 @@ oms_status_enu_t oms2::FMICompositeModel::initializeSockets(double stopTime, dou
   for(TLMInterface* ifc: tlmInterfaces) {
       if(communicationInterval > ifc->getDelay()*0.5) {
         communicationInterval = ifc->getDelay()*0.5;
+        logInfo("Limiting communicationInterval to "+std::to_string(communicationInterval));
       }
   }
+  this->communicationInterval = communicationInterval;
 
   logInfo("Creating plugin instance.");
 
@@ -1188,14 +1195,15 @@ void oms2::FMICompositeModel::readFromSockets()
             ifc->getInterpolationMethod() == oms_tlm_coarse_grained) {
       oms_tlm_sigrefs_3d_cg_t tlmrefs;
       std::vector<double> waves(6,0);
-      double impedance;
-      plugin->GetWaveImpedance3D(ifc->getId(), time, &impedance, &waves[0]);
+      double Zt, Zr;
+      plugin->GetWaveImpedance3D(ifc->getId(), time, &Zt, &Zr, &waves[0]);
       this->setReals(ifc->getSubSignalSet(tlmrefs.c), waves);
-      this->setReal(ifc->getSubSignal(tlmrefs.Z), impedance);
+      this->setReal(ifc->getSubSignal(tlmrefs.Zt), Zt);
+      this->setReal(ifc->getSubSignal(tlmrefs.Zr), Zr);
 
       std::vector<double> waves2(6,0);
-      double impedance2;
-      plugin->GetWaveImpedance3D(ifc->getId(), time+communicationInterval, &impedance2, &waves2[0]);
+      double Zt2, Zr2;
+      plugin->GetWaveImpedance3D(ifc->getId(), time+communicationInterval, &Zt2, &Zr2, &waves2[0]);
 
       std::vector<double> dWaves(6,0);
       for(size_t i=0; i<6; ++i) {
@@ -1207,19 +1215,21 @@ void oms2::FMICompositeModel::readFromSockets()
             ifc->getInterpolationMethod() == oms_tlm_fine_grained) {
       oms_tlm_sigrefs_3d_fg_t tlmrefs;
 
-      std::vector<double> waves;
-      double impedance;
+      std::vector<double> waves(6,0);
+      double Zt,Zr;
 
       double t = time;
+
       for(size_t i=0; i<10; ++i) {
-        plugin->GetWaveImpedance3D(ifc->getId(), t, &impedance, &waves[0]);
+        plugin->GetWaveImpedance3D(ifc->getId(), t, &Zt, &Zr, &waves[0]);
         t += communicationInterval/9;
 
         this->setReals(ifc->getSubSignalSet(tlmrefs.c[i]), waves);
         this->setReal(ifc->getSubSignal(tlmrefs.t[i]), t);
       }
 
-      this->setReal(ifc->getSubSignal(tlmrefs.Z), impedance);
+      this->setReal(ifc->getSubSignal(tlmrefs.Zt), Zt);
+      this->setReal(ifc->getSubSignal(tlmrefs.Zr), Zr);
     }
   }
 }

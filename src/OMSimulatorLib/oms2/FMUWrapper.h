@@ -47,8 +47,13 @@
 #include <fmilib.h>
 #include <pugixml.hpp>
 
+#include "cvode/cvode.h"             /* prototypes for CVODE fcts., consts. */
+#include "nvector/nvector_serial.h"  /* serial N_Vector types, fcts., macros */
+
 namespace oms2
 {
+  int cvode_rhs(realtype t, N_Vector y, N_Vector ydot, void *user_data);
+
   class FMUWrapper : public FMISubModel
   {
   public:
@@ -82,8 +87,8 @@ namespace oms2
     oms_status_enu_t getReal(const oms2::SignalRef& sr, double& value);
     oms_status_enu_t setInteger(const oms2::SignalRef& sr, int value);
     oms_status_enu_t getInteger(const oms2::SignalRef& sr, int& value);
-    oms_status_enu_t setBoolean(const oms2::SignalRef& sr, bool booleanValue);
-    oms_status_enu_t getBoolean(const oms2::SignalRef& sr, bool& booleanValue);
+    oms_status_enu_t setBoolean(const oms2::SignalRef& sr, bool value);
+    oms_status_enu_t getBoolean(const oms2::SignalRef& sr, bool& value);
     oms_status_enu_t setRealInputDerivatives(const oms2::SignalRef& sr, int order, double value);
 
     oms_status_enu_t registerSignalsForResultFile(ResultWriter& resultWriter);
@@ -102,6 +107,28 @@ namespace oms2
     oms_status_enu_t getBoolean(const oms2::Variable& var, bool& booleanValue);
 
     oms2::Variable* getVariable(const std::string& var);
+
+    enum Solver_t { NO_SOLVER, EXPLICIT_EULER, CVODE };
+
+    struct SolverDataEuler_t
+    {
+      // empty
+    };
+
+    struct SolverDataCVODE_t
+    {
+      void *mem;
+      N_Vector y;
+      N_Vector abstol;
+    };
+
+    union SolverData_t
+    {
+      SolverDataEuler_t euler;
+      SolverDataCVODE_t cvode;
+    };
+
+    friend int oms2::cvode_rhs(realtype t, N_Vector y, N_Vector ydot, void *user_data);
 
   private:
     FMUWrapper(const ComRef& cref, const std::string& filename);
@@ -140,6 +167,8 @@ namespace oms2
     double* states_nominal;
     double* event_indicators;
     double* event_indicators_prev;
+    Solver_t solverMethod;
+    SolverData_t solverData;
   };
 }
 

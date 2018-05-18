@@ -102,7 +102,6 @@ oms_status_enu_t oms2::TLMCompositeModel::addInterface(oms2::TLMInterface *ifc)
 {
   if (std::find(interfaces.begin(), interfaces.end(), ifc) != interfaces.end())
     return logError("Interface " + ifc->getSignal().toString() + " is already added.");
-
   FMICompositeModel *pFMISubModel = 0;
   if(Scope::GetInstance().hasFMICompositeModel(ifc->getSubModelName())) {
     pFMISubModel = Scope::GetInstance().getFMICompositeModel(ifc->getSubModelName());
@@ -144,6 +143,7 @@ oms_status_enu_t oms2::TLMCompositeModel::addInterface(oms2::TLMInterface *ifc)
     }
     if(ifc->getDimensions() == 3 &&
        ifc->getCausality() == oms_causality_bidir &&
+       ifc->getInterpolationMethod() == oms_tlm_no_interpolation &&
        ifc->getSubSignals().size() != 24) {
       logError("Wrong number of variables for TLM interface (should be 24)");
 
@@ -152,15 +152,15 @@ oms_status_enu_t oms2::TLMCompositeModel::addInterface(oms2::TLMInterface *ifc)
     if(ifc->getDimensions() == 3 &&
        ifc->getCausality() == oms_causality_bidir &&
        ifc->getInterpolationMethod() == oms_tlm_coarse_grained &&
-       ifc->getSubSignals().size() != 25) {
-      logError("Wrong number of variables for TLM interface (should be 25)");
+       ifc->getSubSignals().size() != 26) {
+      logError("Wrong number of variables for TLM interface (should be 26)");
       return oms_status_error;
     }
     if(ifc->getDimensions() == 3 &&
        ifc->getCausality() == oms_causality_bidir &&
        ifc->getInterpolationMethod() == oms_tlm_fine_grained &&
-       ifc->getSubSignals().size() != 89) {
-      logError("Wrong number of variables for TLM interface (should be 89)");
+       ifc->getSubSignals().size() != 90) {
+      logError("Wrong number of variables for TLM interface (should be 90)");
       return oms_status_error;
     }
   }
@@ -275,8 +275,10 @@ oms_status_enu_t oms2::TLMCompositeModel::setSocketData(const std::string& addre
                                                         int managerPort,
                                                         int monitorPort)
 {
+#ifndef _WIN32
   omtlm_checkPortAvailability(&managerPort);
   omtlm_checkPortAvailability(&monitorPort);
+#endif
 
   omtlm_setAddress(model, address);
   omtlm_setManagerPort(model, managerPort);
@@ -333,8 +335,12 @@ oms_status_enu_t oms2::TLMCompositeModel::initialize(double startTime, double to
   omtlm_setNumLogStep(model, 1000); //Hard-coded for now
 
   //Initialize sub-models
-  for(auto it = fmiModels.begin(); it!=fmiModels.end(); ++it)
-    it->second->initialize(startTime, tolerance);
+  for(auto it = fmiModels.begin(); it!=fmiModels.end(); ++it) {
+    Model* pSubModel = oms2::Scope::GetInstance().getModel(it->second->getName());
+    pSubModel->setStartTime(startTime);
+    pModel->setTolerance(pModel->getTolerance());
+    pSubModel->initialize();
+  }
 
   this->startTime = startTime;
 
@@ -371,7 +377,9 @@ oms_status_enu_t oms2::TLMCompositeModel::stepUntil(ResultWriter &resultWriter, 
   std::vector<std::thread*> fmiModelThreads;
   for(auto it = fmiModels.begin(); it!=fmiModels.end(); ++it)
   {
-    std::thread *t = new std::thread(&FMICompositeModel::simulateTLM, it->second, &resultWriter, stopTime, communicationInterval, server);
+    Model* pModel = oms2::Scope::GetInstance().getModel(it->second->getName());
+    ResultWriter *pWriter = pModel->getResultWriter();
+    std::thread *t = new std::thread(&FMICompositeModel::simulateTLM, it->second, pWriter, stopTime, communicationInterval, server);
     fmiModelThreads.push_back(t);
   }
 
