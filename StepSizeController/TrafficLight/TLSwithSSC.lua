@@ -1,25 +1,25 @@
 package.path = package.path .. ";../StepSizeController.lua"
 require("StepSizeController")
 
-setLogFile("TrafficLightScenario.log")
-model = newModel()
-setTempDirectory(".")
+oms2_setLogFile("TrafficLightScenario.log")
+oms2_setTempDirectory("./tmp")
+oms2_newFMIModel("TrafficLight")
 -- instantiate FMU
-instantiateFMU(model, "TrafficLightScenario_Car.fmu", "Car")
-instantiateFMU(model, "TrafficLightScenario_DummyTrafficLight.fmu", "Light")
+status = oms2_addFMU("TrafficLight", "TrafficLightScenario_Car.fmu", "Car")
+status = oms2_addFMU("TrafficLight", "TrafficLightScenario_DummyTrafficLight.fmu", "Light")
 -- add connections: connect(light.color,car.lightColorInteger);
-addConnection(model, "Car.color", "Light.color")
+oms2_addConnection("TrafficLight", "Car:color", "Light:color")
 -- set result file
-setResultFile(model, "TrafficLightScenario.mat")
+oms2_setResultFile("TrafficLight", "TrafficLightScenario.mat")
 -- Simulate for 5 secs
-setStopTime(model, 5.0)
+oms2_setStopTime("TrafficLight", 5.0)
 -- Initial communication interval
-setCommunicationInterval(model, 0.01)
+oms2_setCommunicationInterval("TrafficLight", 0.01)
 
-initialize(model)
+oms2_initialize("TrafficLight")
 
-simulateWithAdaptiveStepSizeControl(model,"Car.criticalSituation",0.01,0.005,5.0)
+simulateWithAdaptiveStepSizeControl("TrafficLight","TrafficLight.Car:criticalSituation",0.01,0.005,5.0)
 
-terminate(model)
-unload(model)
+oms2_terminate("TrafficLight")
+oms2_unloadModel("TrafficLight")
 

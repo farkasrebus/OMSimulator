@@ -1,15 +1,15 @@
 local bigSteps=true
 function doAdaptiveStep (model,criticalVarName,bigStepSize,smallStepSize)
-	doSteps(model,1)
-	local crit=getBoolean(model,criticalVarName)
+	oms2_doSteps(model,1)
+	local crit=oms2_getBoolean(criticalVarName)
 	if bigSteps==true then
 		if crit==1.0 then 
-			setCommunicationInterval(model, smallStepSize)
+			oms2_setCommunicationInterval(model, smallStepSize)
 			print("Critical situation. Communication interval set to " .. smallStepSize)
 			bigSteps=false
 		end
 	elseif crit==0.0 then 
-		setCommunicationInterval(model, bigStepSize)
+		oms2_setCommunicationInterval(model, bigStepSize)
 		print("Critical situation over. Communication interval set to " .. bigStepSize)
 		bigSteps=true
 	end
@@ -20,7 +20,7 @@ function simulateWithAdaptiveStepSizeControl(model,criticalVarName,bigStepSize,s
 	while (tcur<tmax)
 	do
 		doAdaptiveStep (model,criticalVarName,bigStepSize,smallStepSize)
-		tcur=getCurrentTime(model)
+		tcur=oms2_getCurrentTime(model)
 	end
 end
 

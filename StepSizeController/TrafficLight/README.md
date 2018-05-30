@@ -28,7 +28,7 @@ One way to avoid this is to chose the step size to be small, however, that would
 
 A good compromise between efficiency and accuracy is to adapt the step size: when it is more important to be accurate (e.g. when the car is driving up to the pedestrian crossing) the step size can be decreased but when the critical situation is over (e.g. when the car has already passed the zebra) it can be increased again. `TrafficLightScenario.lua` demonstrates this based on the variable _criticalSituation_ in the car's model (the situation is considered _critical_ when the car is close to the zebra - but not reaching it yet - and has not stopped yet).
 
-## Usage
+## Usage - this is deprecated
 
 `TrafficLightScenario.lua` could be used as an example for establishing the connections and the models. The simulation can be run by the following command (executed from this folder).
 

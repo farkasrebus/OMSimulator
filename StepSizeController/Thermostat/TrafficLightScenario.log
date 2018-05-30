@@ -1,0 +1,11 @@
+Wed May 30 14:48:12 2018 | info:    Initializing logging (OMSimulator v0.1.0-456-g41d30fd)
+Wed May 30 14:48:12 2018 | info:    New temp directory has been created: "./tmp"
+Wed May 30 14:48:12 2018 | info:    New temp directory: "/home/farkasr/git/OMSimulator/StepSizeController/Thermostat/tmp"
+Wed May 30 14:48:12 2018 | error:   module FMIXML: Cannot open file '/home/farkasr/git/OMSimulator/StepSizeController/Thermostat/tmp/temp_465qoP/modelDescription.xml' for parsing
+Wed May 30 14:48:12 2018 | error:   Unsupported FMI version: unknown
+Wed May 30 14:48:12 2018 | info:    Result file: Thermostat.mat
+Wed May 30 14:48:12 2018 | error:   No submodel called "ThermostatExample.Thermostat" found.
+Wed May 30 14:48:12 2018 | error:   [oms2::Scope::getInteger] failed
+Wed May 30 14:48:12 2018 | info:    Simulation finished.
+Wed May 30 14:48:12 2018 | info:    Removed model from scope: ThermostatExample
+Wed May 30 14:48:12 2018 | info:    Logging completed properly

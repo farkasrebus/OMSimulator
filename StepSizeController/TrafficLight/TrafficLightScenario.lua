@@ -1,83 +1,69 @@
--- Uncomment below if script shall be executed by a standard Lua interpreter (see README.md)
- require("package")
- OMSimulatorLua = package.loadlib("../../install/linux/lib/libOMSimulatorLua.so", "luaopen_OMSimulatorLua")
- OMSimulatorLua()
- OMFitLua = package.loadlib("../../install/linux/lib/libOMFitLua.so", "luaopen_OMFitLua")
- OMFitLua()
-
-setLogFile("TrafficLightScenario.log")
-
-version = getVersion()
--- print(version)
-
-model = newModel()
-setTempDirectory(".")
+oms2_setLogFile("TrafficLightScenario.log")
+oms2_setTempDirectory("./tmp")
+oms2_newFMIModel("TrafficLight")
 
 -- instantiate FMU
-instantiateFMU(model, "TrafficLightScenario_Car.fmu", "Car")
-instantiateFMU(model, "TrafficLightScenario_DummyTrafficLight.fmu", "Light")
+status = oms2_addFMU("TrafficLight", "TrafficLightScenario_Car.fmu", "Car")
+status = oms2_addFMU("TrafficLight", "TrafficLightScenario_DummyTrafficLight.fmu", "Light")
 
 -- add connections: connect(light.color,car.lightColorInteger);
-addConnection(model, "Car.color", "Light.color")
+oms2_addConnection("TrafficLight", "Car:color", "Light:color")
 
--- describe(model)
+
 
 -- configure simulation
 -- set result file
-setResultFile(model, "TrafficLightScenario.mat")
+oms2_setResultFile("TrafficLight", "TrafficLightScenario.mat")
 -- Simulate for 5 secs
-setStopTime(model, 5.0)
+oms2_setStopTime("TrafficLight", 5.0)
 -- Initial communication interval
-setCommunicationInterval(model, 0.01)
+oms2_setCommunicationInterval("TrafficLight", 0.01)
 bigSteps=true
 print("Initialization: Communication interval set to 0.01")
 
-initialize(model)
+oms2_initialize("TrafficLight")
 
 -- For constant step size simulation
--- simulate(model)
+-- oms2_simulate("TrafficLight")
 
 -- For step size control  specific to this model
--- stepUntil(model,0.4)
---setCommunicationInterval(model, 0.005)
---stepUntil(model,2.0)
+-- oms2_stepUntil("TrafficLight",0.4)
+-- oms2_setCommunicationInterval("TrafficLight", 0.005)
+-- oms2_stepUntil("TrafficLight",2.0)
 
 -- For step size control by variable checking
 tcur=0.0
 stopDistanceInfo=false
 while (tcur<=5.0)
 do
-	doSteps(model,1)
-	dist=getReal(model, "Car.distance")
-	crit=getBoolean(model,"Car.criticalSituation")
-	--print(dist .." ".. crit .." " .. getInteger(model,"Car.stateInteger"), bigSteps)
-	--[[
+	oms2_doSteps("TrafficLight",1)
+	dist=oms2_getReal("TrafficLight.Car:distance")
+	crit=oms2_getBoolean("TrafficLight.Car:criticalSituation")
+	--print(dist .." ".. crit .." " .. oms2_getInteger("TrafficLight.Car:stateInteger"), bigSteps)
+	---[[
 	if bigSteps==true then
 		if crit==1.0 then 
-			setCommunicationInterval(model, 0.005)
+			oms2_setCommunicationInterval("TrafficLight", 0.005)
 			print("Critical situation. Communication interval set to 0.005")
 			bigSteps=false
 		end
 	elseif crit==0.0 then 
-		setCommunicationInterval(model, 0.01)
+		oms2_setCommunicationInterval("TrafficLight", 0.01)
 		print("Critical situation over. Communication interval set to 0.01")
 		bigSteps=true
 	--else 
 	--	print("No changes necessary")
 	end
 	--]]
-	if ((not stopDistanceInfo) and getInteger(model,"Car.stateInteger")==3.0) then
+	if ((not stopDistanceInfo) and oms2_getInteger("TrafficLight.Car:stateInteger")==3.0) then
 		print("Car's distance from pedestrian crossing after breaking: ".. dist)
 		stopDistanceInfo=true
 	end
-	tcur=getCurrentTime(model)
+	tcur=oms2_getCurrentTime("TrafficLight")
 end
 
-dist=getReal(model, "Car.distance")
+dist=oms2_getReal("TrafficLight.Car:distance")
 
+oms2_terminate("TrafficLight")
+oms2_unloadModel("TrafficLight")
 
-terminate(model)
-unload(model)
-
--- Result:
--- endResult
