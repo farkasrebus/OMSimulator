@@ -29,50 +29,52 @@
  *
  */
 
-#ifndef _OMS2_DIRECTED_GRAPH_H_
-#define _OMS2_DIRECTED_GRAPH_H_
+#ifndef _OMS_EXTERNAL_MODEL_H_
+#define _OMS_EXTERNAL_MODEL_H_
 
+#include "ComRef.h"
+#include "Option.h"
 #include "Variable.h"
-
-#include <fmilib.h>
-#include <string>
+#include "Element.h"
+#include "Types.h"
 #include <vector>
 #include <map>
-#include <deque>
-#include <stack>
 
 namespace oms2
 {
-  class DirectedGraph
+  class ExternalModel
   {
   public:
-    DirectedGraph();
-    ~DirectedGraph();
+    ExternalModel(const ComRef& cref,
+                  const std::string& filename,
+                  const std::string& startScript);
 
-    void clear();
+    oms_element_type_enu_t getType() const {return oms_component_external;}
 
-    int addVariable(const oms2::Variable& var);
-    void addEdge(const oms2::Variable& var1, const oms2::Variable& var2);
 
-    void dotExport(const std::string& filename);
+    void setName(const ComRef& name) {element.setName(name);}
+    void setGeometry(const oms2::ssd::ElementGeometry& geometry) {element.setGeometry(&geometry);}
 
-    void includeGraph(const DirectedGraph& graph);
+    const ComRef getName() const {return oms2::ComRef(element.getName());}
+    const oms2::ssd::ElementGeometry* getGeometry() {return element.getGeometry();}
+    oms2::Element* getElement() {return &element;}
 
-    const std::vector< std::vector< std::pair<int, int> > >& getSortedConnections();
-    std::vector<oms2::Variable> nodes;
-    std::vector< std::pair<int, int> > edges;
+    oms_status_enu_t setRealParameter(const std::string& var, double value);
+    oms_status_enu_t getRealParameter(const std::string& var, double& value);
+    const std::string& getModelPath() const {return filename;}
+    const std::string& getStartScript() const {return startScript;}
+    const std::map<std::string, oms2::Option<double>>& getRealParameters() const {return realParameters;}
+
+  protected:
+    ComRef cref;
+    oms2::Element element;
 
   private:
-    std::deque< std::vector<int> > getSCCs();
-    void calculateSortedConnections();
-    void strongconnect(int v, std::vector< std::vector<int> > G, int& index, int *d, int *low, std::stack<int>& S, bool *stacked, std::deque< std::vector<int> >& components);
 
-    static int getEdgeIndex(const std::vector< std::pair<int, int> >& edges, int from, int to);
+    std::string filename;
+    std::string startScript;
 
-  private:
-    std::vector< std::vector<int> > G;
-    std::vector< std::vector< std::pair<int, int> > > sortedConnections;
-    bool sortedConnectionsAreValid;
+    std::map<std::string, oms2::Option<double>> realParameters;
   };
 }
 

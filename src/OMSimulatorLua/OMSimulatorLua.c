@@ -1,6 +1,7 @@
 #include <lua.h>
 #include <lauxlib.h>
 #include <lualib.h>
+#include <stdlib.h>
 
 #include <OMSimulator.h>
 
@@ -331,6 +332,21 @@ static int OMSimulatorLua_oms2_setRealParameter(lua_State *L)
   return 1;
 }
 
+//oms_status_enu_t oms2_getStartTime(const char* cref, double* startTime);
+static int OMSimulatorLua_oms2_getStartTime(lua_State *L)
+{
+  if (lua_gettop(L) != 1)
+    return luaL_error(L, "expecting exactly 1 argument");
+  luaL_checktype(L, 1, LUA_TSTRING);
+
+  const char* cref = lua_tostring(L, 1);
+  double startTime = 0.0;
+  oms_status_enu_t status = oms2_getStartTime(cref, &startTime);
+  lua_pushnumber(L, startTime);
+  lua_pushinteger(L, status);
+  return 2;
+}
+
 //oms_status_enu_t oms2_setStartTime(const char* cref, double startTime);
 static int OMSimulatorLua_oms2_setStartTime(lua_State *L)
 {
@@ -344,6 +360,21 @@ static int OMSimulatorLua_oms2_setStartTime(lua_State *L)
   oms_status_enu_t status = oms2_setStartTime(cref, startTime);
   lua_pushinteger(L, status);
   return 1;
+}
+
+//oms_status_enu_t oms2_getStopTime(const char* cref, double* stopTime);
+static int OMSimulatorLua_oms2_getStopTime(lua_State *L)
+{
+  if (lua_gettop(L) != 1)
+    return luaL_error(L, "expecting exactly 1 argument");
+  luaL_checktype(L, 1, LUA_TSTRING);
+
+  const char* cref = lua_tostring(L, 1);
+  double stopTime = 1.0;
+  oms_status_enu_t status = oms2_getStopTime(cref, &stopTime);
+  lua_pushnumber(L, stopTime);
+  lua_pushinteger(L, status);
+  return 2;
 }
 
 //oms_status_enu_t oms2_setStopTime(const char* cref, double stopTime);
@@ -560,7 +591,7 @@ static int OMSimulatorLua_oms2_getReal(lua_State *L)
 
   oms_status_enu_t status = oms2_getReal(ident, &value);
   lua_pushnumber(L, value);
-  lua_pushnumber(L, status);
+  lua_pushinteger(L, status);
   return 2;
 }
 
@@ -591,7 +622,7 @@ static int OMSimulatorLua_oms2_getInteger(lua_State *L)
 
   oms_status_enu_t status = oms2_getInteger(ident, &value);
   lua_pushnumber(L, value);
-  lua_pushnumber(L, status);
+  lua_pushinteger(L, status);
   return 2;
 }
 
@@ -622,7 +653,7 @@ static int OMSimulatorLua_oms2_getBoolean(lua_State *L)
 
   oms_status_enu_t status = oms2_getBoolean(ident, &value);
   lua_pushnumber(L, value);
-  lua_pushnumber(L, status);
+  lua_pushinteger(L, status);
   return 2;
 }
 
@@ -653,7 +684,8 @@ static int OMSimulatorLua_oms2_getCurrentTime(lua_State *L)
   double time = 0.0;
   oms_status_enu_t status = oms2_getCurrentTime(model, &time);
   lua_pushnumber(L, time);
-  return 1;
+  lua_pushinteger(L, status);
+  return 2;
 }
 
 //oms_status_enu_t oms2_addExternalModel(const char *cref, const char *name, const char *modelfile, const char *startscript);
@@ -672,7 +704,7 @@ static int OMSimulatorLua_oms2_addExternalModel(lua_State *L)
   const char *startscript = lua_tostring(L, 4);
 
   oms_status_enu_t status = oms2_addExternalModel(cref, name, modelfile, startscript);
-  lua_pushnumber(L, status);
+  lua_pushinteger(L, status);
   return 1;
 }
 
@@ -688,7 +720,7 @@ static int OMSimulatorLua_oms2_addFMISubModel(lua_State *L)
   const char *subref =        lua_tostring(L, 2);
 
   oms_status_enu_t status = oms2_addFMISubModel(cref, subref);
-  lua_pushnumber(L, status);
+  lua_pushinteger(L, status);
   return 1;
 }
 
@@ -763,7 +795,7 @@ static int OMSimulatorLua_oms2_addTLMInterface(lua_State *L)
   }
 
   oms_status_enu_t status = oms2_addTLMInterface(cref, subref, name, dimensions, (oms_causality_enu_t)causality, (oms_tlm_interpolation_t)interpolation, domain, sigrefs, nsigrefs);
-  lua_pushnumber(L, status);
+  lua_pushinteger(L, status);
   return 1;
 }
 
@@ -791,7 +823,7 @@ static int OMSimulatorLua_oms2_addTLMConnection(lua_State *L)
 
   oms_status_enu_t status = oms2_addTLMConnection(cref, from, to, delay, alpha, Zf, Zfr);
 
-  lua_pushnumber(L, status);
+  lua_pushinteger(L, status);
   return 1;
 }
 
@@ -811,7 +843,7 @@ static int OMSimulatorLua_oms2_setTLMSocketData(lua_State *L)
   int monitorPort =      lua_tonumber(L, 4);
 
   oms_status_enu_t status = oms2_setTLMSocketData(cref, address, managerPort, monitorPort);
-  lua_pushnumber(L, status);
+  lua_pushinteger(L, status);
   return 1;
 }
 
@@ -1114,7 +1146,9 @@ DLLEXPORT int luaopen_OMSimulatorLua(lua_State *L)
   REGISTER_LUA_CALL(oms2_setReal);
   REGISTER_LUA_CALL(oms2_setRealParameter);
   REGISTER_LUA_CALL(oms2_setResultFile);
+  REGISTER_LUA_CALL(oms2_getStartTime);
   REGISTER_LUA_CALL(oms2_setStartTime);
+  REGISTER_LUA_CALL(oms2_getStopTime);
   REGISTER_LUA_CALL(oms2_setStopTime);
   REGISTER_LUA_CALL(oms2_setTempDirectory);
   REGISTER_LUA_CALL(oms2_setTLMSocketData);

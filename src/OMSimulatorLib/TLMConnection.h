@@ -29,51 +29,44 @@
  *
  */
 
-#ifndef _OMS2_DIRECTED_GRAPH_H_
-#define _OMS2_DIRECTED_GRAPH_H_
+#ifndef _OMS2_TLMCONNECTION_H_
+#define _OMS2_TLMCONNECTION_H_
 
-#include "Variable.h"
+#include "ComRef.h"
+#include "SignalRef.h"
+#include "Types.h"
+#include "Connection.h"
 
-#include <fmilib.h>
 #include <string>
-#include <vector>
-#include <map>
-#include <deque>
-#include <stack>
 
 namespace oms2
 {
-  class DirectedGraph
+  /**
+   * \brief Connection
+   */
+  class TLMConnection: public Connection
   {
   public:
-    DirectedGraph();
-    ~DirectedGraph();
+    TLMConnection(const ComRef& cref, const oms2::SignalRef &varA, const oms2::SignalRef &varB,
+                  double delay, double alpha, double Zf, double Zfr);
 
-    void clear();
+    const double getTimeDelay() const {return delay;}
+    const double getAlpha() const {return alpha;}
+    const double getZf() const {return Zf;}
+    const double getZfr() const {return Zfr;}
 
-    int addVariable(const oms2::Variable& var);
-    void addEdge(const oms2::Variable& var1, const oms2::Variable& var2);
-
-    void dotExport(const std::string& filename);
-
-    void includeGraph(const DirectedGraph& graph);
-
-    const std::vector< std::vector< std::pair<int, int> > >& getSortedConnections();
-    std::vector<oms2::Variable> nodes;
-    std::vector< std::pair<int, int> > edges;
+    friend bool operator==(const TLMConnection& lhs, const TLMConnection& rhs);
+    friend bool operator!=(const TLMConnection& lhs, const TLMConnection& rhs);
 
   private:
-    std::deque< std::vector<int> > getSCCs();
-    void calculateSortedConnections();
-    void strongconnect(int v, std::vector< std::vector<int> > G, int& index, int *d, int *low, std::stack<int>& S, bool *stacked, std::deque< std::vector<int> >& components);
-
-    static int getEdgeIndex(const std::vector< std::pair<int, int> >& edges, int from, int to);
-
-  private:
-    std::vector< std::vector<int> > G;
-    std::vector< std::vector< std::pair<int, int> > > sortedConnections;
-    bool sortedConnectionsAreValid;
+    double delay;
+    double alpha;
+    double Zf;
+    double Zfr;
   };
+
+  inline bool operator==(const TLMConnection& lhs, const TLMConnection& rhs) {return (Connection(lhs) == Connection(rhs));}
+  inline bool operator!=(const TLMConnection& lhs, const TLMConnection& rhs) {return (Connection(lhs) != Connection(rhs));}
 }
 
 #endif

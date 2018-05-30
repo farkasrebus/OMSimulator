@@ -29,50 +29,35 @@
  *
  */
 
-#ifndef _OMS2_DIRECTED_GRAPH_H_
-#define _OMS2_DIRECTED_GRAPH_H_
+#ifndef _OMS2_FMU_INFO_H_
+#define _OMS2_FMU_INFO_H_
 
-#include "Variable.h"
+#include "Types.h"
 
-#include <fmilib.h>
 #include <string>
-#include <vector>
-#include <map>
-#include <deque>
-#include <stack>
+#include <fmilib.h>
 
 namespace oms2
 {
-  class DirectedGraph
+  /**
+   * \brief FMU info
+   */
+  class FMUInfo : protected oms_fmu_info_t
   {
   public:
-    DirectedGraph();
-    ~DirectedGraph();
+    FMUInfo(const std::string& path);
+    ~FMUInfo();
 
-    void clear();
+    oms_status_enu_t setKind(fmi2_import_t* fmu);
+    oms_status_enu_t update(fmi2_import_t* fmu);
 
-    int addVariable(const oms2::Variable& var);
-    void addEdge(const oms2::Variable& var1, const oms2::Variable& var2);
-
-    void dotExport(const std::string& filename);
-
-    void includeGraph(const DirectedGraph& graph);
-
-    const std::vector< std::vector< std::pair<int, int> > >& getSortedConnections();
-    std::vector<oms2::Variable> nodes;
-    std::vector< std::pair<int, int> > edges;
+    std::string getPath() const {return std::string(path);}
+    oms_fmi_kind_enu_t getKind() const {return fmiKind;}
 
   private:
-    std::deque< std::vector<int> > getSCCs();
-    void calculateSortedConnections();
-    void strongconnect(int v, std::vector< std::vector<int> > G, int& index, int *d, int *low, std::stack<int>& S, bool *stacked, std::deque< std::vector<int> >& components);
-
-    static int getEdgeIndex(const std::vector< std::pair<int, int> >& edges, int from, int to);
-
-  private:
-    std::vector< std::vector<int> > G;
-    std::vector< std::vector< std::pair<int, int> > > sortedConnections;
-    bool sortedConnectionsAreValid;
+    // methods to copy the object
+    FMUInfo(const FMUInfo& rhs);            ///< not implemented
+    FMUInfo& operator=(const FMUInfo& rhs); ///< not implemented
   };
 }
 

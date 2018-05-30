@@ -29,50 +29,42 @@
  *
  */
 
-#ifndef _OMS2_DIRECTED_GRAPH_H_
-#define _OMS2_DIRECTED_GRAPH_H_
+#ifndef _OMS2_ELEMENT_H_
+#define _OMS2_ELEMENT_H_
 
-#include "Variable.h"
+#include "ComRef.h"
+#include "SignalRef.h"
+#include "Connector.h"
+#include "Types.h"
+#include "ssd/ElementGeometry.h"
 
-#include <fmilib.h>
 #include <string>
 #include <vector>
-#include <map>
-#include <deque>
-#include <stack>
 
 namespace oms2
 {
-  class DirectedGraph
+  /**
+   * \brief Element
+   */
+  class Element : protected oms_element_t
   {
   public:
-    DirectedGraph();
-    ~DirectedGraph();
+    Element(oms_element_type_enu_t type, const ComRef& name);
+    ~Element();
 
-    void clear();
+    const oms_element_type_enu_t getType() const {return type;}
+    const oms2::ComRef getName() const {return oms2::ComRef(std::string(name));}
+    oms2::Connector** getConnectors() const {return reinterpret_cast<oms2::Connector**>(connectors);}
+    const oms2::ssd::ElementGeometry* getGeometry() const {return reinterpret_cast<oms2::ssd::ElementGeometry*>(geometry);}
 
-    int addVariable(const oms2::Variable& var);
-    void addEdge(const oms2::Variable& var1, const oms2::Variable& var2);
-
-    void dotExport(const std::string& filename);
-
-    void includeGraph(const DirectedGraph& graph);
-
-    const std::vector< std::vector< std::pair<int, int> > >& getSortedConnections();
-    std::vector<oms2::Variable> nodes;
-    std::vector< std::pair<int, int> > edges;
+    void setName(const ComRef& name);
+    void setGeometry(const oms2::ssd::ElementGeometry* newGeometry);
+    void setConnectors(const std::vector<oms2::Connector> newConnectors);
 
   private:
-    std::deque< std::vector<int> > getSCCs();
-    void calculateSortedConnections();
-    void strongconnect(int v, std::vector< std::vector<int> > G, int& index, int *d, int *low, std::stack<int>& S, bool *stacked, std::deque< std::vector<int> >& components);
-
-    static int getEdgeIndex(const std::vector< std::pair<int, int> >& edges, int from, int to);
-
-  private:
-    std::vector< std::vector<int> > G;
-    std::vector< std::vector< std::pair<int, int> > > sortedConnections;
-    bool sortedConnectionsAreValid;
+    // methods to copy the object
+    Element(const Element& rhs);            ///< not implemented
+    Element& operator=(const Element& rhs); ///< not implemented
   };
 }
 

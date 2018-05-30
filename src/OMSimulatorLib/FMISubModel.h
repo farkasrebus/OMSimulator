@@ -29,60 +29,78 @@
  *
  */
 
-#ifndef _OMS2_COMPOSITE_MODEL_H_
-#define _OMS2_COMPOSITE_MODEL_H_
+#ifndef _OMS2_FMI_SUB_MODEL_H_
+#define _OMS2_FMI_SUB_MODEL_H_
 
 #include "Types.h"
-#include "Pkg_oms2.h"
 #include "ComRef.h"
+#include "DirectedGraph.h"
 #include "Element.h"
 #include "ssd/ElementGeometry.h"
-#include "ssd/SystemGeometry.h"
-
-#include <string>
+#include "Variable.h"
+#include "Pkg_oms2.h"
 
 class ResultWriter;
 
 namespace oms2
 {
-  class CompositeModel
+  class FMISubModel
   {
   public:
-    virtual oms_element_type_enu_t getType() = 0;
+    virtual oms_status_enu_t exportToSSD(pugi::xml_node& root) const = 0;
 
-    static void DeleteModel(CompositeModel *model) {if (model) delete model;}
+    oms_element_type_enu_t getType() {return element.getType();}
+    static void deleteSubModel(FMISubModel *model) {if (model) delete model;}
+
+    void setName(const ComRef& name) {element.setName(name);}
+    void setGeometry(const oms2::ssd::ElementGeometry& geometry) {element.setGeometry(&geometry);}
 
     const ComRef getName() const {return oms2::ComRef(element.getName());}
     const oms2::ssd::ElementGeometry* getGeometry() {return element.getGeometry();}
     oms2::Element* getElement() {return &element;}
 
-    void setName(const ComRef& name) {element.setName(name);}
-    void setGeometry(const oms2::ssd::ElementGeometry& geometry) {element.setGeometry(&geometry);}
+    virtual oms2::Variable* getVariable(const std::string& signal) = 0;
 
-    virtual oms_status_enu_t initialize(double startTime, double tolerance) = 0;
+    virtual oms_status_enu_t enterInitialization(const double time) = 0;
+    virtual oms_status_enu_t exitInitialization() = 0;
+
     virtual oms_status_enu_t reset() = 0;
     virtual oms_status_enu_t terminate() = 0;
+    virtual oms_status_enu_t doStep(double stopTime) = 0;
 
-    virtual oms_status_enu_t doSteps(ResultWriter& resultWriter, const int numberOfSteps, double communicationInterval) = 0;
-    virtual oms_status_enu_t stepUntil(ResultWriter& resultWriter, double stopTime, double communicationInterval, MasterAlgorithm masterAlgorithm, bool realtime_sync) = 0;
-    virtual void simulate_asynchronous(ResultWriter& resultWriter, double stopTime, double communicationInterval, void (*cb)(const char* ident, double time, oms_status_enu_t status)) = 0;
+    const DirectedGraph& getInitialUnknownsGraph() const {return initialUnknownsGraph;}
+    const DirectedGraph& getOutputsGraph() const {return outputsGraph;}
+
+    virtual oms_status_enu_t setReal(const oms2::SignalRef& sr, double value) = 0;
+    virtual oms_status_enu_t getReal(const oms2::SignalRef& sr, double& value) = 0;
+    virtual oms_status_enu_t setInteger(const oms2::SignalRef& sr, int value) = 0;
+    virtual oms_status_enu_t getInteger(const oms2::SignalRef& sr, int& value) = 0;
+    virtual oms_status_enu_t setBoolean(const oms2::SignalRef& sr, bool value) = 0;
+    virtual oms_status_enu_t getBoolean(const oms2::SignalRef& sr, bool& value) = 0;
+    virtual oms_status_enu_t setRealInputDerivatives(const oms2::SignalRef& sr, int order, double value) = 0;
 
     virtual oms_status_enu_t registerSignalsForResultFile(ResultWriter& resultWriter) = 0;
     virtual oms_status_enu_t emit(ResultWriter& resultWriter) = 0;
 
-    virtual oms_status_enu_t describe() { return oms_status_error; }
+    void setActivationRatio(int k) {eclock.k  = k;}
+    int getActivationRatio() const {return eclock.k;}
 
   protected:
-    CompositeModel(oms_element_type_enu_t type, const ComRef& cref);
-    virtual ~CompositeModel();
+    FMISubModel(oms_element_type_enu_t type, const ComRef& cref);
+    virtual ~FMISubModel();
 
   private:
     // stop the compiler generating methods copying the object
-    CompositeModel(CompositeModel const& copy);            ///< not implemented
-    CompositeModel& operator=(CompositeModel const& copy); ///< not implemented
+    FMISubModel(FMISubModel const& copy);            ///< not implemented
+    FMISubModel& operator=(FMISubModel const& copy); ///< not implemented
 
   protected:
     oms2::Element element;
+
+    DirectedGraph initialUnknownsGraph;
+    DirectedGraph outputsGraph;
+
+    Experimental_Clock eclock;
   };
 }
 
