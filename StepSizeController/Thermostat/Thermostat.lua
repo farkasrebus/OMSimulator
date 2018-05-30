@@ -1,0 +1,17 @@
+-- Uncomment below if script shall be executed by a standard Lua interpreter (see README.md)
+-- require("package")
+-- OMSimulatorLua = package.loadlib("../../install/linux/lib/libOMSimulatorLua.so", "luaopen_OMSimulatorLua")
+-- OMSimulatorLua()
+-- OMFitLua = package.loadlib("../../install/linux/lib/libOMFitLua.so", "luaopen_OMFitLua")
+-- OMFitLua()
+
+setLogFile("TrafficLightScenario.log")
+
+model = newModel()
+setTempDirectory(".")
+instantiateFMU(model, "AdvancedThermostat.fmu", "Thermostat")
+initialize(model)
+off=getInteger(model,"Thermostat.Thermostat_HeatingControlPort_turn_heating_off")
+print(off)
+terminate(model)
+unload(model)
