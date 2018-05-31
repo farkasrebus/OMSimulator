@@ -1,3 +1,4 @@
+-- simple, variable-driven step size control
 local bigSteps=true
 function doAdaptiveStep (model,criticalVarName,bigStepSize,smallStepSize)
 	oms2_doSteps(model,1)
@@ -24,4 +25,34 @@ function simulateWithAdaptiveStepSizeControl(model,criticalVarName,bigStepSize,s
 	end
 end
 
+-- sep size control based on a sensitivity model
+function getNextStepSize(sensitivityModel,communicationInterval)
+	local minStepSize=communicationInterval
+	-- discrete chains
+	-- tbd	
+	-- zero crossings
+	local zc=sensitivityModel
+	-- todo: sensitivityModel.zeroCrossings or something like that
+	for variable,bandFunc in pairs(zc)
+	do
+		value=oms2_getReal(k)
+		step=bandFunc(value)
+		if (step != nil and step<minStepSize) then
+			minStepSize=step
+		end
+	end
+	-- predictive models
+	-- tbd
+	return minStepSize
+end
 
+function oms2_simulateWithASSC(model,communicationInterval,sensitivityModel,tmax)
+	local tcur=0.0
+	while (tcur<tmax)
+	do
+		local nextStepSize = getNextStepSize(sensitivityModel,communicationInterval)
+		oms2_setCommunicationInterval(model, nextStepSize)
+		oms2_doSteps(model,1)
+		tcur=tcur+nextStepSize
+	end
+end
