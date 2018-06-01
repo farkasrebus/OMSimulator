@@ -1,0 +1,22 @@
+digraph G
+{
+  0 [label="EventChain.Inv:inverted", color="green", shape=box];
+  1 [label="EventChain.Link1:leftOut", color="green", shape=box];
+  2 [label="EventChain.Link1:rightOut", color="green", shape=box];
+  3 [label="EventChain.Link2:leftOut", color="green", shape=box];
+  4 [label="EventChain.Link2:rightOut", color="green", shape=box];
+  5 [label="EventChain.Gen:event", color="green", shape=box];
+  6 [label="EventChain.Link1:leftIn", color="red", shape=box];
+  7 [label="EventChain.Gen:reaction", color="red", shape=box];
+  8 [label="EventChain.Link2:leftIn", color="red", shape=box];
+  9 [label="EventChain.Link1:rightIn", color="red", shape=box];
+  10 [label="EventChain.Inv:original", color="red", shape=box];
+  11 [label="EventChain.Link2:rightIn", color="red", shape=box];
+
+  5 -> 6 [color="red"];
+  1 -> 7 [color="red"];
+  2 -> 8 [color="red"];
+  3 -> 9 [color="red"];
+  4 -> 10 [color="red"];
+  0 -> 11 [color="red"];
+}

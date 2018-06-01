@@ -1,0 +1,15 @@
+Fri Jun 01 10:40:34 2018 | info:    Initializing logging (OMSimulator v0.1.0-456-g41d30fd)
+Fri Jun 01 10:40:34 2018 | info:    New temp directory: "/home/farkasr/git/OMSimulator/StepSizeController/TrafficLight/tmp"
+Fri Jun 01 10:40:34 2018 | info:    Result file: TrafficLightScenario.mat
+Fri Jun 01 10:40:34 2018 | info:    Variable Car.lightColor will not be stored in the result file, because the signal type is not supported
+Fri Jun 01 10:40:34 2018 | info:    Variable Car.lightColorInteger will not be stored in the result file, because the signal type is not supported
+Fri Jun 01 10:40:34 2018 | info:    Variable Car.state will not be stored in the result file, because the signal type is not supported
+Fri Jun 01 10:40:34 2018 | info:    Variable Car.stateInteger will not be stored in the result file, because the signal type is not supported
+Fri Jun 01 10:40:34 2018 | info:    Variable Car._D_whenCondition1 will not be stored in the result file, because the signal type is not supported
+Fri Jun 01 10:40:34 2018 | info:    Variable Car._D_whenCondition2 will not be stored in the result file, because the signal type is not supported
+Fri Jun 01 10:40:34 2018 | info:    Variable Car._D_whenCondition3 will not be stored in the result file, because the signal type is not supported
+Fri Jun 01 10:40:34 2018 | info:    Variable Car.criticalSituation will not be stored in the result file, because the signal type is not supported
+Fri Jun 01 10:40:34 2018 | info:    Variable Light.state will not be stored in the result file, because the signal type is not supported
+Fri Jun 01 10:40:34 2018 | info:    Simulation finished.
+Fri Jun 01 10:40:34 2018 | info:    Removed model from scope: TrafficLight
+Fri Jun 01 10:40:34 2018 | info:    Logging completed properly
