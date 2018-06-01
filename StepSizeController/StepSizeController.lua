@@ -1,4 +1,4 @@
--- simple, variable-driven step size control
+-- simple, variable-driven step size control - deprecated
 local bigSteps=true
 function doAdaptiveStep (model,criticalVarName,bigStepSize,smallStepSize)
 	oms2_doSteps(model,1)
@@ -25,14 +25,26 @@ function simulateWithAdaptiveStepSizeControl(model,criticalVarName,bigStepSize,s
 	end
 end
 
--- sep size control based on a sensitivity model
+-- sensitivity model
+SensitivityModel = {}
+SensitivityModel.__index = SensitivityModel
+
+function SensitivityModel:create()
+	local sm = {}
+	setmetatable(sm,SensitivityModel)
+	sm.events = {} -- discrete events - collection of variables, where any change is interesting
+	sm.zeroCrossings = {} -- maps from variable name to step size adjustment based on value
+	-- sm.monitors -- todo: predictive monitors
+	return sm
+end
+
+-- step size control based on a sensitivity model
 function getNextStepSize(sensitivityModel,communicationInterval)
 	local minStepSize=communicationInterval
 	-- discrete chains
 	-- tbd	
 	-- zero crossings
-	local zc=sensitivityModel
-	-- todo: sensitivityModel.zeroCrossings or something like that
+	local zc=sensitivityModel.zeroCrossings
 	for variable,bandFunc in pairs(zc)
 	do
 		value=oms2_getReal(k)

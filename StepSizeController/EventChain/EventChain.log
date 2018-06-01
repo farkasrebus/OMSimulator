@@ -1,7 +1,7 @@
-Fri Jun 01 14:47:43 2018 | info:    Initializing logging (OMSimulator v0.1.0-456-g41d30fd)
-Fri Jun 01 14:47:43 2018 | info:    New temp directory: "/home/farkasr/git/OMSimulator/StepSizeController/EventChain/tmp"
-Fri Jun 01 14:47:43 2018 | info:    Result file: EventChain.mat
-Fri Jun 01 14:47:43 2018 | info:    oms2::FMICompositeModel::stepUntil: Using master algorithm 'standard'
-Fri Jun 01 14:47:44 2018 | info:    Simulation finished.
-Fri Jun 01 14:47:44 2018 | info:    Removed model from scope: EventChain
-Fri Jun 01 14:47:44 2018 | info:    Logging completed properly
+Fri Jun 01 16:32:55 2018 | info:    Initializing logging (OMSimulator v0.1.0-456-g41d30fd)
+Fri Jun 01 16:32:55 2018 | info:    New temp directory: "/home/farkasr/git/OMSimulator/StepSizeController/EventChain/tmp"
+Fri Jun 01 16:32:56 2018 | info:    Result file: EventChain.mat
+Fri Jun 01 16:32:56 2018 | info:    oms2::FMICompositeModel::stepUntil: Using master algorithm 'standard'
+Fri Jun 01 16:32:56 2018 | info:    Simulation finished.
+Fri Jun 01 16:32:56 2018 | info:    Removed model from scope: EventChain
+Fri Jun 01 16:32:56 2018 | info:    Logging completed properly

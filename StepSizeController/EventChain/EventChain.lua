@@ -20,10 +20,9 @@ oms2_setStopTime("EventChain", 1.0)
 oms2_setCommunicationInterval("EventChain", 0.01)
 
 oms2_initialize("EventChain")
+oms2_exportDependencyGraphs("EventChain","in.dot","out.dot")
 oms2_simulate("EventChain")
 
 oms2_terminate("EventChain")
-
-oms2_exportDependencyGraphs("EventChain","in.dot","out.dot")
 
 oms2_unloadModel("EventChain")
