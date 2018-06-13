@@ -44,7 +44,7 @@
 #include <pugixml.hpp>
 
 oms2::Model::Model(const oms2::ComRef& cref)
-  : systemGeometry(), resultFilename(cref.toString() + "_res.mat")
+  : systemGeometry(), resultFilename(cref.toString() + "_res.mat"), resultFile(NULL)
 {
   logTrace();
   modelState = oms_modelState_instantiated;
@@ -207,6 +207,18 @@ oms2::TLMCompositeModel* oms2::Model::getTLMCompositeModel()
   return NULL;
 }
 
+oms_status_enu_t oms2::Model::setTLMInitialValues(const oms2::SignalRef &ifc, std::vector<double> values)
+{
+  if(this->getType() != oms_component_tlm) {
+    logError("Can only set initial TLM values on TLM models.");
+    return oms_status_error;
+  }
+
+  TLMCompositeModel *tlmModel = this->getTLMCompositeModel();
+
+  return tlmModel->setTLMInitialValues(ifc, values);
+}
+
 oms_status_enu_t oms2::Model::initialize()
 {
   if (oms_modelState_instantiated != modelState)
@@ -224,7 +236,7 @@ oms_status_enu_t oms2::Model::initialize()
   if (!resultFilename.empty())
   {
     std::string resulttype;
-    if (resultFilename.length() > 5)
+    if (resultFilename.length() > 4)
       resulttype = resultFilename.substr(resultFilename.length() - 4);
 
     if (".csv" == resulttype)
@@ -234,6 +246,8 @@ oms_status_enu_t oms2::Model::initialize()
     else
       return logError("Unsupported format of the result file: " + resultFilename);
   }
+  else
+    resultFile = new VoidWriter(1);
 
   modelState = oms_modelState_initialization;
   oms_status_enu_t status = compositeModel->initialize(startTime, tolerance);
@@ -280,7 +294,7 @@ oms_status_enu_t oms2::Model::reset()
   if (!resultFilename.empty())
   {
     std::string resulttype;
-    if (resultFilename.length() > 5)
+    if (resultFilename.length() > 4)
       resulttype = resultFilename.substr(resultFilename.length() - 4);
 
     if (".csv" == resulttype)
@@ -290,6 +304,8 @@ oms_status_enu_t oms2::Model::reset()
     else
       return logError("Unsupported format of the result file: " + resultFilename);
   }
+  else
+    resultFile = new VoidWriter(1);
 
   oms_status_enu_t status = compositeModel->reset();
 
@@ -330,7 +346,7 @@ oms_status_enu_t oms2::Model::simulate()
   if (oms_modelState_simulation != modelState)
     return logError("[oms2::Model::simulate] Model cannot be simulated, because it isn't initialized.");
 
-  oms_status_enu_t status = compositeModel->stepUntil(*resultFile, stopTime, communicationInterval, masterAlgorithm, false);
+  oms_status_enu_t status = compositeModel->stepUntil(*resultFile, stopTime, communicationInterval, loggingInterval, masterAlgorithm, false);
   return status;
 }
 
@@ -339,7 +355,7 @@ oms_status_enu_t oms2::Model::doSteps(const int numberOfSteps)
   if (oms_modelState_simulation != modelState)
     return logError("[oms2::Model::doSteps] Model cannot be simulated, because it isn't initialized.");
 
-  oms_status_enu_t status = compositeModel->doSteps(*resultFile, numberOfSteps, communicationInterval);
+  oms_status_enu_t status = compositeModel->doSteps(*resultFile, numberOfSteps, communicationInterval, loggingInterval);
   return status;
 }
 
@@ -348,7 +364,7 @@ oms_status_enu_t oms2::Model::stepUntil(const double timeValue)
   if (oms_modelState_simulation != modelState)
     return logError("[oms2::Model::stepUntil] Model cannot be simulated, because it isn't initialized.");
 
-  oms_status_enu_t status = compositeModel->stepUntil(*resultFile, timeValue, communicationInterval, masterAlgorithm, false);
+  oms_status_enu_t status = compositeModel->stepUntil(*resultFile, timeValue, communicationInterval, loggingInterval, masterAlgorithm, false);
   return status;
 }
 
@@ -360,7 +376,7 @@ oms_status_enu_t oms2::Model::simulate_asynchronous(void (*cb)(const char* ident
     return oms_status_error;
   }
 
-  std::thread([=]{compositeModel->simulate_asynchronous(*resultFile, stopTime, communicationInterval, cb);}).detach();
+  std::thread([=]{compositeModel->simulate_asynchronous(*resultFile, stopTime, communicationInterval, loggingInterval, cb);}).detach();
 
   return oms_status_ok;
 }
@@ -370,7 +386,7 @@ oms_status_enu_t oms2::Model::simulate_realtime()
   if (oms_modelState_simulation != modelState)
     return logError("[oms2::Model::simulate_realtime] Model cannot be simulated, because it isn't initialized.");
 
-  oms_status_enu_t status = compositeModel->stepUntil(*resultFile, stopTime, communicationInterval, masterAlgorithm, true);
+  oms_status_enu_t status = compositeModel->stepUntil(*resultFile, stopTime, communicationInterval, loggingInterval, masterAlgorithm, true);
   return status;
 }
 
@@ -388,13 +404,13 @@ void oms2::Model::setResultFile(const std::string& value)
     if (!resultFilename.empty())
     {
       std::string resulttype;
-      if (resultFilename.length() > 5)
+      if (resultFilename.length() > 4)
         resulttype = resultFilename.substr(resultFilename.length() - 4);
 
       if (".csv" == resulttype)
         resultFile = new CSVWriter(1);
       else if (".mat" == resulttype)
-        resultFile = new MATWriter(1024);
+        resultFile = new MATWriter(96);
       else
       {
         logError("Unsupported format of the result file: " + resultFilename);

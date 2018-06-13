@@ -63,6 +63,8 @@ namespace oms2
     oms_status_enu_t addInterface(oms2::TLMInterface* ifc);
     oms_status_enu_t addInterface(std::string name, int dimensions, oms_causality_enu_t causality, std::string domain, oms_tlm_interpolation_t interpolation, const ComRef &cref, std::vector<SignalRef> &sigrefs);
 
+    oms_status_enu_t setPositionAndOrientation(const SignalRef& ifc, std::vector<double> x, std::vector<double> A);
+
     oms_status_enu_t addExternalModel(ExternalModel *externalModel);
     oms_status_enu_t addExternalModel(std::string modelFile, std::string startScript, const ComRef& cref);
 
@@ -73,15 +75,20 @@ namespace oms2
                                    int managerPort,
                                    int monitorPort);
 
+    oms_status_enu_t setTLMInitialValues(const SignalRef &ifc, std::vector<double> value);
+
+    void setLoggingLevel(int level);
+    void setDataSamples(int samples);
+
     oms_status_enu_t describe();
 
     oms_status_enu_t initialize(double startTime, double tolerance);
     oms_status_enu_t reset();
     oms_status_enu_t terminate();
-    oms_status_enu_t simulate(ResultWriter &resultWriter, double stopTime, double communicationInterval, oms2::MasterAlgorithm masterAlgorithm);
-    void simulate_asynchronous(ResultWriter& resultWriter, double stopTime, double communicationInterval, void (*cb)(const char* ident, double time, oms_status_enu_t status));
-    oms_status_enu_t doSteps(ResultWriter& resultWriter, const int numberOfSteps, double communicationInterval);
-    oms_status_enu_t stepUntil(ResultWriter &resultWriter, double stopTime, double communicationInterval, oms2::MasterAlgorithm masterAlgorithm, bool realtime_sync);
+    oms_status_enu_t simulate(ResultWriter &resultWriter, double stopTime, double communicationInterval, double loggingLevel, oms2::MasterAlgorithm masterAlgorithm);
+    void simulate_asynchronous(ResultWriter& resultWriter, double stopTime, double communicationInterval, double loggingLevel, void (*cb)(const char* ident, double time, oms_status_enu_t status));
+    oms_status_enu_t doSteps(ResultWriter& resultWriter, const int numberOfSteps, double communicationInterval, double loggingLevel);
+    oms_status_enu_t stepUntil(ResultWriter &resultWriter, double stopTime, double communicationInterval, double loggingLevel, oms2::MasterAlgorithm masterAlgorithm, bool realtime_sync);
 
     oms_status_enu_t registerSignalsForResultFile(ResultWriter& resultWriter) {return oms_status_ok;}
     oms_status_enu_t emit(ResultWriter& resultWriter) {return oms_status_ok;}

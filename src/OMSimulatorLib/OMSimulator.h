@@ -185,6 +185,15 @@ oms_status_enu_t oms2_getFMUPath(const char* cref, char** path);
 oms_status_enu_t oms2_getFMUInfo(const char* cref, const oms_fmu_info_t** fmuInfo);
 
 /**
+ * \brief Set geometry information to a given connector.
+ *
+ * \param cref       [in] Full identifier of a connector.
+ * \param geometry   [in] Geometry information
+ * \return           Error status
+ */
+oms_status_enu_t oms2_setConnectorGeometry(const char* connector, const ssd_connector_geometry_t* geometry);
+
+/**
  * \brief Get list of all connections from a given component.
  *
  * \param cref          [in] Full identifier of a component
@@ -340,6 +349,15 @@ oms_status_enu_t oms2_setTLMSocketData(const char* cref, const char* address,
                                        int managerPort, int monitorPort);
 
 /**
+ * \brief Sets initial value for a TLM interface
+ *
+ * \param cref  [in] Identifier of TLM composite model.
+ * \param from  [in] TLM interface (format: submodel:interface)
+ * \param value [in] Initial variable value
+ */
+oms_status_enu_t oms2_setTLMInitialValues(const char *cref, const char *ifc, const double values[], int nvalues);
+
+/**
  * \brief Adds an external model to a TLM composite model
  *
  * \param cref         [in] Identifier of TLM composite model.
@@ -353,6 +371,20 @@ oms_status_enu_t oms2_setTLMSocketData(const char* cref, const char* address,
 oms_status_enu_t oms2_addTLMInterface(const char *cref, const char* subref, const char *name, int dimensions, oms_causality_enu_t causality, oms_tlm_interpolation_t interpolation, const char* domain,
                                       const char **sigrefs, int nsigrefs);
 
+/**
+ * \brief Sets initial position and orientation for a TLM 3D interface
+ *
+ * \param cref                                [in] Identifier of TLM composite model.
+ * \param ifc                                 [in] Identifier of TLM interface (format: submodel:interface)
+ * \param x1,x2,x3                            [in] Position vector
+ * \param A11,A12,A13,A21,A22,A23,A31,A32,A33 [in] Orientation matrix (3x3)
+ * \return             Error status
+ */
+oms_status_enu_t oms2_setTLMPositionAndOrientation(const char *cref, const char *ifc,
+                                                   double x1, double x2, double x3,
+                                                   double A11, double A12, double A13,
+                                                   double A21, double A22, double A23,
+                                                   double A31, double A32, double A33);
 
 /**
  * \brief Adds an external model to a TLM composite model
@@ -367,6 +399,25 @@ oms_status_enu_t oms2_addTLMInterface(const char *cref, const char* subref, cons
  * \return        Error status
  */
 oms_status_enu_t oms2_addTLMConnection(const char* cref, const char* from, const char* to, double delay, double alpha, double Zf, double Zfr);
+
+
+/**
+ * \brief Specifies logging level for OMTLMSimulator
+ *
+ * \param cref    [in] Identifier of TLM composite model.
+ * \param levle   [in] Logging level (0=disabled,1=fatal,2=warning,3=info,4=debug)
+ * \return        Error status
+ */
+oms_status_enu_t oms2_setTLMLoggingLevel(const char* cref, const int level);
+
+/**
+ * \brief Specifies number of data samples for OMTLMSimulator result files
+ *
+ * \param cref    [in] Identifier of TLM composite model.
+ * \param levle   [in] Number of samples
+ * \return        Error status
+ */
+oms_status_enu_t oms2_setTLMDataSamples(const char* cref, const int samples);
 
 /**
  * \brief Redirects logging output to file or std streams. The warning/error counters are reset.
@@ -544,6 +595,15 @@ oms_status_enu_t oms2_setStopTime(const char* cref, double stopTime);
  * \return                        Error status
  */
 oms_status_enu_t oms2_setCommunicationInterval(const char* cref, double communicationInterval);
+
+/**
+ * \brief Set the logging interval of the simulation.
+ *
+ * \param cref                    [in] Name of the model instance
+ * \param loggingInterval         [in] Logging interval
+ * \return                        Error status
+ */
+oms_status_enu_t oms2_setLoggingInterval(const char* cref, double loggingInterval);
 
 /**
  * \brief Set the result file of the simulation.

@@ -85,10 +85,10 @@ namespace oms2
     oms_status_enu_t initialize(double startTime, double tolerance);
     oms_status_enu_t reset();
     oms_status_enu_t terminate();
-    oms_status_enu_t doSteps(ResultWriter& resultWriter, const int numberOfSteps, double communicationInterval);
-    oms_status_enu_t stepUntil(ResultWriter& resultWriter, double stopTime, double communicationInterval, MasterAlgorithm masterAlgorithm, bool realtime_sync);
-    oms_status_enu_t simulateTLM(ResultWriter *resultWriter, double stopTime, double communicationInterval, std::string address);
-    void simulate_asynchronous(ResultWriter& resultWriter, double stopTime, double communicationInterval, void (*cb)(const char* ident, double time, oms_status_enu_t status));
+    oms_status_enu_t doSteps(ResultWriter& resultWriter, const int numberOfSteps, double communicationInterval, double loggingInterval);
+    oms_status_enu_t stepUntil(ResultWriter& resultWriter, double stopTime, double communicationInterval, double loggingInterval, MasterAlgorithm masterAlgorithm, bool realtime_sync);
+    oms_status_enu_t simulateTLM(ResultWriter *resultWriter, double stopTime, double communicationInterval, double loggingInterval, std::string address);
+    void simulate_asynchronous(ResultWriter& resultWriter, double stopTime, double communicationInterval, double loggingInterval, void (*cb)(const char* ident, double time, oms_status_enu_t status));
 
     oms_status_enu_t setReal(const oms2::SignalRef& sr, double value);
     oms_status_enu_t setReals(const std::vector<oms2::SignalRef> &sr, std::vector<double> values);
@@ -98,6 +98,7 @@ namespace oms2
     oms_status_enu_t setRealInputDerivatives(const oms2::SignalRef& sr, int order, double value);
 
     oms_status_enu_t addTLMInterface(TLMInterface *ifc);
+    oms_status_enu_t setTLMInitialValues(std::string ifc, std::vector<double> value);
 
     double getCurrentTime() {return time;}
 
@@ -114,8 +115,8 @@ namespace oms2
     oms_status_enu_t registerSignalsForResultFile(ResultWriter& resultWriter);
     oms_status_enu_t emit(ResultWriter& resultWriter);
 
-    oms_status_enu_t stepUntilStandard(ResultWriter& resultWriter, double stopTime, double communicationInterval, bool realtime_sync);
-    oms_status_enu_t stepUntilPCTPL(ResultWriter& resultWriter, double stopTime, double communicationInterval, bool realtime_sync);
+    oms_status_enu_t stepUntilStandard(ResultWriter& resultWriter, double stopTime, double communicationInterval, double loggingInterval, bool realtime_sync);
+    oms_status_enu_t stepUntilPCTPL(ResultWriter& resultWriter, double stopTime, double communicationInterval, double loggingInterval, bool realtime_sync);
 
     oms_status_enu_t initializeSockets(double stopTime, double &communicationInterval, std::string server);
     void readFromSockets();
@@ -147,8 +148,11 @@ namespace oms2
     double time;
     double tolerance;
     double communicationInterval;
+    double loggingInterval;
+    double tLastEmit;
 
     std::vector<SignalRef> tlmSigRefs;
+    std::map<std::string, std::vector<double> > tlmInitialValues;
   };
 }
 

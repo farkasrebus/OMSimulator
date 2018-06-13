@@ -584,6 +584,67 @@ oms_status_enu_t oms2::Scope::setElementGeometry(const oms2::ComRef& cref, const
   return oms_status_error;
 }
 
+oms_status_enu_t oms2::Scope::setConnectorGeometry(const oms2::SignalRef& connector, const oms2::ssd::ConnectorGeometry* geometry)
+{
+  logTrace();
+
+  if (!geometry)
+  {
+    logWarning("[oms2::Scope::setConnectorGeometry] NULL pointer");
+    return oms_status_warning;
+  }
+
+  ComRef cref = connector.getCref();
+  std::string var = connector.getVar();
+
+  if (!cref.isIdent())
+  {
+    // Sub-model
+    ComRef modelCref = cref.first();
+    Model* model = getModel(modelCref);
+    if (!model)
+    {
+      logError("[oms2::Scope::setConnectorGeometry] failed");
+      return oms_status_error;
+    }
+
+    // FMI model?
+    if (oms_component_fmi == model->getType())
+    {
+      FMICompositeModel* fmiModel = model->getFMICompositeModel();
+      FMISubModel* subModel = fmiModel->getSubModel(cref);
+      if (!subModel)
+      {
+        logError("[oms2::Scope::setConnectorGeometry] failed");
+        return oms_status_error;
+      }
+
+      oms2::Element* element = subModel->getElement();
+      if (!element)
+      {
+        logError("[oms2::Scope::setConnectorGeometry] failed");
+        return oms_status_error;
+      }
+      oms2::Connector** connectors = element->getConnectors();
+      for (int i=0; connectors[i]; ++i)
+      {
+        if (connector == connectors[i]->getName())
+        {
+          connectors[i]->setGeometry(geometry);
+          return oms_status_ok;
+        }
+      }
+    }
+    else
+    {
+      logError("[oms2::Scope::setConnectorGeometry] is only implemented for FMI models yet");
+      return oms_status_error;
+    }
+  }
+
+  return oms_status_error;
+}
+
 oms_status_enu_t oms2::Scope::getConnections(const oms2::ComRef& cref, oms2::Connection*** connections)
 {
   logTrace();
@@ -1311,6 +1372,20 @@ oms_status_enu_t oms2::Scope::addTLMInterface(const oms2::ComRef &cref, const om
   return model->getTLMCompositeModel()->addInterface(name.toString(), dimensions, causality, domain, interpolation, subref, sigrefs);
 }
 
+oms_status_enu_t oms2::Scope::setTLMPositionAndOrientation(const oms2::ComRef &cref, const SignalRef &ifc, std::vector<double> x, std::vector<double> A)
+{
+  oms2::Model* model = getModel(cref);
+  if (!model) {
+    logError("In Scope::setTLMPositionAndOrientation(): Model \""+cref.toString()+"\" not found.");
+    return oms_status_error;
+  }
+  if(model->getType() != oms_component_tlm) {
+    logError("In Scope::setTLMPositionAndOrientation(): Not a TLM model.");
+    return oms_status_error;
+  }
+  return model->getTLMCompositeModel()->setPositionAndOrientation(ifc,x,A);
+}
+
 
 oms_status_enu_t oms2::Scope::addTLMConnection(const oms2::ComRef &cref, const oms2::SignalRef &from, const oms2::SignalRef &to,
                                            double delay, double alpha, double Zf, double Zfr)
@@ -1345,6 +1420,47 @@ oms_status_enu_t oms2::Scope::setTLMSocketData(oms2::ComRef modelIdent,
   TLMCompositeModel *tlmModel = model->getTLMCompositeModel();
 
   return tlmModel->setSocketData(address, managerPort, monitorPort);
+}
+
+oms_status_enu_t oms2::Scope::setTLMInitialValues(const oms2::ComRef &cref, const oms2::SignalRef &ifc, std::vector<double> values)
+{
+  Model *model = getModel(cref);
+  if(!model) {
+    logError("In Scope::setTLMSocketData(): Model \""+cref.toString()+"\" not found.");
+    return oms_status_error;
+  }
+
+  return model->setTLMInitialValues(ifc, values);
+}
+
+oms_status_enu_t oms2::Scope::setTLMLoggingLevel(const oms2::ComRef &cref, int level)
+{
+  oms2::Model* model = getModel(cref);
+  if (!model) {
+    logError("In Scope::setTLMLoggingLevel(): Model \""+cref.toString()+"\" not found.");
+    return oms_status_error;
+  }
+  if(model->getType() != oms_component_tlm) {
+    logError("In Scope::setTLMLoggingLevel(): Not a TLM model.");
+    return oms_status_error;
+  }
+  model->getTLMCompositeModel()->setLoggingLevel(level);
+  return oms_status_ok;
+}
+
+oms_status_enu_t oms2::Scope::setTLMDataSamples(const oms2::ComRef &cref, int samples)
+{
+  oms2::Model* model = getModel(cref);
+  if (!model) {
+    logError("In Scope::setTLMDataSamples(): Model \""+cref.toString()+"\" not found.");
+    return oms_status_error;
+  }
+  if(model->getType() != oms_component_tlm) {
+    logError("In Scope::setTLMDataSamples(): Not a TLM model.");
+    return oms_status_error;
+  }
+  model->getTLMCompositeModel()->setDataSamples(samples);
+  return oms_status_ok;
 }
 
 oms_status_enu_t oms2::Scope::describeModel(const oms2::ComRef &cref)
@@ -1439,6 +1555,23 @@ oms_status_enu_t oms2::Scope::setCommunicationInterval(const ComRef& cref, doubl
       return oms_status_error;
     }
     model->setCommunicationInterval(communicationInterval);
+    return oms_status_ok;
+  }
+  return oms_status_error;
+}
+
+oms_status_enu_t oms2::Scope::setLoggingInterval(const ComRef& cref, double loggingInterval)
+{
+  if (cref.isIdent())
+  {
+    // Model
+    Model* model = getModel(cref);
+    if (!model)
+    {
+      logError("[oms2::Scope::setLoggingInterval] failed");
+      return oms_status_error;
+    }
+    model->setLoggingInterval(loggingInterval);
     return oms_status_ok;
   }
   return oms_status_error;

@@ -1019,7 +1019,11 @@ oms_status_enu_t oms2::FMUWrapper::setIntegerParameter(const std::string& var, i
     return logError("No such parameter: " + var);
 
   it->second = value;
-  return oms_status_ok;
+
+  oms2::Variable* v = getVariable(var);
+  if (!v)
+    return oms_status_error;
+  return setInteger(*v, value);
 }
 
 oms_status_enu_t oms2::FMUWrapper::getIntegerParameter(const std::string& var, int& value)
@@ -1050,7 +1054,11 @@ oms_status_enu_t oms2::FMUWrapper::setBooleanParameter(const std::string& var, b
     return logError("No such parameter: " + var);
 
   it->second = value;
-  return oms_status_ok;
+
+  oms2::Variable* v = getVariable(var);
+  if (!v)
+    return oms_status_error;
+  return setBoolean(*v, value);
 }
 
 oms_status_enu_t oms2::FMUWrapper::getBooleanParameter(const std::string& var, bool& value)
@@ -1243,6 +1251,16 @@ oms_status_enu_t oms2::FMUWrapper::registerSignalsForResultFile(ResultWriter& re
         getReal(var, value.realValue);
         resultWriter.addParameter(name, description, SignalType_REAL, value);
       }
+      else if (var.isTypeInteger())
+      {
+        getInteger(var, value.intValue);
+        resultWriter.addParameter(name, description, SignalType_INT, value);
+      }
+      else if (var.isTypeBoolean())
+      {
+        getBoolean(var, value.boolValue);
+        resultWriter.addParameter(name, description, SignalType_BOOL, value);
+      }
       else
         logInfo("Parameter " + name + " will not be stored in the result file, because the signal type is not supported");
     }
@@ -1251,6 +1269,16 @@ oms_status_enu_t oms2::FMUWrapper::registerSignalsForResultFile(ResultWriter& re
       if (var.isTypeReal())
       {
         unsigned int ID = resultWriter.addSignal(name, description, SignalType_REAL);
+        resultFileMapping[ID] = i;
+      }
+      else if (var.isTypeInteger())
+      {
+        unsigned int ID = resultWriter.addSignal(name, description, SignalType_INT);
+        resultFileMapping[ID] = i;
+      }
+      else if (var.isTypeBoolean())
+      {
+        unsigned int ID = resultWriter.addSignal(name, description, SignalType_BOOL);
         resultFileMapping[ID] = i;
       }
       else

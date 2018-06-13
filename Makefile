@@ -1,6 +1,7 @@
 RM=rm -rf
 CP=cp -rf
 MKDIR=mkdir -p
+ROOT_DIR=$(shell pwd)
 
 # Option to build Ceres-Solver and its dependencies as part of the 3rdParty projects
 CERES ?= ON
@@ -10,6 +11,8 @@ LIBXML2 ?= ON
 OMSYSIDENT ?= ON
 # Option to enable AddressSanitizer
 ASAN ?= OFF
+# Option to switch between Debug and Release builds
+BUILD_TYPE ?= Release
 
 detected_OS := $(shell uname -s)
 ifeq ($(detected_OS),Darwin)
@@ -49,7 +52,7 @@ else
 	FEXT=.so
 endif
 
-.PHONY: OMSimulator OMSimulatorCore config-OMSimulator config-fmil config-lua config-cvode config-kinsol config-gflags config-glog config-ceres-solver config-3rdParty distclean testsuite doc doc-html doc-doxygen OMTLMSimulator
+.PHONY: OMSimulator OMSimulatorCore config-OMSimulator config-fmil config-lua config-cvode config-kinsol config-gflags config-glog config-ceres-solver config-3rdParty distclean testsuite doc doc-html doc-doxygen OMTLMSimulator OMTLMSimulatorClean
 
 OMSimulator:
 	@echo
@@ -57,6 +60,7 @@ OMSimulator:
 	@echo
 	@$(MAKE) OMTLMSimulator
 	@$(MAKE) OMSimulatorCore
+	$(INSTALL_DIR)/bin/OMSimulator --version
 
 OMSimulatorCore:
 	@echo
@@ -78,7 +82,19 @@ OMTLMSimulator:
 	cp OMTLMSimulator/bin/libomtlmsimulator$(FEXT) $(INSTALL_DIR)/bin/
 	test ! `uname` != Darwin || cp OMTLMSimulator/bin/FMIWrapper $(INSTALL_DIR)/bin/
 	test ! `uname` != Darwin || cp OMTLMSimulator/bin/StartTLMFmiWrapper $(INSTALL_DIR)/bin/
-	test ! `uname` != Darwin || cp OMTLMSimulator/bin/libfmilib_shared$(FEXT) $(INSTALL_DIR)/lib/
+
+OMTLMSimulatorStandalone: config-fmil
+	@echo
+	@echo "# make OMTLMSimulator Standalone"
+	@echo
+	@echo $(ABI)
+	@$(MAKE) -C OMTLMSimulator install
+
+OMTLMSimulatorClean:
+	@echo
+	@echo "# clean OMTLMSimulator"
+	@echo
+	@$(MAKE) -C OMTLMSimulator clean
 
 config-3rdParty: config-fmil config-lua config-cvode config-kinsol config-gflags config-glog config-ceres-solver config-libxml2
 
@@ -88,7 +104,7 @@ config-OMSimulator:
 	@echo
 	$(RM) $(BUILD_DIR)
 	$(MKDIR) $(BUILD_DIR)
-	cd $(BUILD_DIR) && cmake $(CMAKE_TARGET) ../.. -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON -DOMSYSIDENT:BOOL=$(OMSYSIDENT) -DASAN:BOOL=$(ASAN)
+	cd $(BUILD_DIR) && cmake $(CMAKE_TARGET) ../.. -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON -DOMSYSIDENT:BOOL=$(OMSYSIDENT) -DASAN:BOOL=$(ASAN) -DCMAKE_BUILD_TYPE=$(BUILD_TYPE)
 
 config-fmil:
 	@echo
@@ -169,14 +185,15 @@ config-libxml2:
 	@echo "# config libxml2"
 	@echo
 	$(MKDIR) 3rdParty/libxml2/$(INSTALL_DIR)
-	$(MKDIR) 3rdParty/libxml2/$(INSTALL_DIR)/lib
-	cd 3rdParty/libxml2 && ./autogen.sh prefix=$(PWD)/$(INSTALL_DIR) --without-python && $(MAKE) install 
+	cd 3rdParty/libxml2 && ./autogen.sh --prefix="$(ROOT_DIR)/3rdParty/libxml2/$(INSTALL_DIR)" --without-python && $(MAKE) && $(MAKE) install
+	cd 3rdParty/libxml2 && git clean -fdx -e 'install/'
 endif
 
 distclean:
 	@echo
 	@echo "# make distclean"
 	@echo
+	@$(MAKE) OMTLMSimulatorClean
 	$(RM) $(BUILD_DIR)
 	$(RM) $(INSTALL_DIR)
 	$(RM) 3rdParty/FMIL/$(BUILD_DIR)

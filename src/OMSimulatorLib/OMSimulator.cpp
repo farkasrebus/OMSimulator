@@ -176,6 +176,12 @@ oms_status_enu_t oms2_getFMUInfo(const char* cref, const oms_fmu_info_t** fmuInf
   return oms2::Scope::GetInstance().getFMUInfo(oms2::ComRef(cref), reinterpret_cast<const oms2::FMUInfo**>(fmuInfo));
 }
 
+oms_status_enu_t oms2_setConnectorGeometry(const char* connector, const ssd_connector_geometry_t* geometry)
+{
+  logTrace();
+  return oms2::Scope::GetInstance().setConnectorGeometry(oms2::SignalRef(connector), reinterpret_cast<const oms2::ssd::ConnectorGeometry*>(geometry));
+}
+
 oms_status_enu_t oms2_getConnections(const char* cref, oms_connection_t*** connections)
 {
   logTrace();
@@ -373,6 +379,18 @@ oms_status_enu_t oms2_addTLMInterface(const char *cref, const char *subref, cons
   return oms2::Scope::GetInstance().addTLMInterface(oms2::ComRef(cref), oms2::ComRef(subref), oms2::ComRef(name), dimensions, causality, domain, interpolation, vSigrefs);
 }
 
+oms_status_enu_t oms2_setTLMPositionAndOrientation(const char *cref, const char *ifc, double x1, double x2, double x3, double A11, double A12, double A13, double A21, double A22, double A23, double A31, double A32, double A33)
+{
+  logTrace();
+  std::vector<double> x = {x1,x2,x3};
+  std::vector<double> A = {A11,A12,A13,A21,A22,A23,A31,A32,A33};
+  std::string ifcstr = ifc;
+  if(ifcstr.find(':') == std::string::npos) {
+    ifcstr.append(":");
+  }
+  return oms2::Scope::GetInstance().setTLMPositionAndOrientation(oms2::ComRef(cref), oms2::SignalRef(ifcstr), x, A);
+}
+
 oms_status_enu_t oms2_addTLMConnection(const char *cref, const char *from, const char *to, double delay, double alpha, double Zf, double Zfr)
 {
   logTrace();
@@ -391,6 +409,12 @@ oms_status_enu_t oms2_setTLMSocketData(const char* cref, const char* address,
   logTrace();
   return oms2::Scope::GetInstance().setTLMSocketData(oms2::ComRef(cref), address,
                                                      managerPort, monitorPort);
+}
+
+oms_status_enu_t oms2_setTLMInitialValues(const char *cref, const char *ifc, const double values[], int nvalues)
+{
+  logTrace();
+  return oms2::Scope::GetInstance().setTLMInitialValues(oms2::ComRef(cref), oms2::SignalRef(ifc), std::vector<double>(values, values+nvalues));
 }
 
 oms_status_enu_t oms2_getStartTime(const char* cref, double* startTime)
@@ -421,6 +445,12 @@ oms_status_enu_t oms2_setCommunicationInterval(const char* cref, double communic
 {
   logTrace();
   return oms2::Scope::GetInstance().setCommunicationInterval(oms2::ComRef(cref), communicationInterval);
+}
+
+oms_status_enu_t oms2_setLoggingInterval(const char* cref, double loggingInterval)
+{
+  logTrace();
+  return oms2::Scope::GetInstance().setLoggingInterval(oms2::ComRef(cref), loggingInterval);
 }
 
 oms_status_enu_t oms2_setResultFile(const char* cref, const char* filename)
@@ -464,4 +494,16 @@ oms_status_enu_t oms2_getCurrentTime(const char* model, double* time)
   logTrace();
   return oms2::Scope::GetInstance().getCurrentTime(oms2::ComRef(model), time);
 
+}
+
+oms_status_enu_t oms2_setTLMLoggingLevel(const char *cref, const int level)
+{
+  logTrace();
+  return oms2::Scope::GetInstance().setTLMLoggingLevel(oms2::ComRef(cref), level);
+}
+
+oms_status_enu_t oms2_setTLMDataSamples(const char *cref, const int samples)
+{
+  logTrace();
+  return oms2::Scope::GetInstance().setTLMDataSamples(oms2::ComRef(cref), samples);
 }

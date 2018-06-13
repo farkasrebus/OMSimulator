@@ -79,6 +79,7 @@ namespace oms2
     oms_status_enu_t getElements(const ComRef& cref, oms2::Element*** elements);
     oms_status_enu_t getFMUPath(const ComRef& cref, char** path);
     oms_status_enu_t getFMUInfo(const ComRef& cref, const oms2::FMUInfo** fmuInfo);
+    oms_status_enu_t setConnectorGeometry(const SignalRef& connector, const oms2::ssd::ConnectorGeometry* geometry);
     oms_status_enu_t getConnections(const ComRef& cref, oms2::Connection*** connections);
     oms_status_enu_t addConnection(const ComRef& cref, const SignalRef& conA, const SignalRef& conB);
     oms_status_enu_t deleteConnection(const ComRef& cref, const SignalRef& conA, const SignalRef& conB);
@@ -102,6 +103,7 @@ namespace oms2
     oms_status_enu_t getStopTime(const ComRef& cref, double* stopTime);
     oms_status_enu_t setStopTime(const ComRef& cref, double stopTime);
     oms_status_enu_t setCommunicationInterval(const ComRef& cref, double communicationInterval);
+    oms_status_enu_t setLoggingInterval(const ComRef& cref, double loggingInterval);
     oms_status_enu_t setResultFile(const ComRef& cref, const std::string& filename);
     oms_status_enu_t setMasterAlgorithm(const ComRef& cref, const std::string& masterAlgorithm);
     oms_status_enu_t setActivationRatio(const ComRef& cref, int k);
@@ -123,8 +125,12 @@ namespace oms2
     oms_status_enu_t addFMISubModel(const ComRef& cref, const ComRef& subref);
     oms_status_enu_t addExternalModel(const ComRef& cref, const ComRef& name, const std::string& modelfile, const std::string &startscript);
     oms_status_enu_t addTLMInterface(const ComRef& cref, const ComRef& subref, const ComRef& name, int dimensions, oms_causality_enu_t causality, std::string domain, oms_tlm_interpolation_t interpolation, std::vector<SignalRef> &sigrefs);
+    oms_status_enu_t setTLMPositionAndOrientation(const ComRef& cref, const SignalRef& ifc, std::vector<double> x, std::vector<double> A);
     oms_status_enu_t addTLMConnection(const ComRef& cref, const SignalRef& from, const SignalRef& to, double delay, double alpha, double Zf, double Zfr);
     oms_status_enu_t setTLMSocketData(ComRef modelIdent, const std::string &address, int managerPort, int monitorPort);
+    oms_status_enu_t setTLMInitialValues(const ComRef& cref, const SignalRef& ifc, std::vector<double> values);
+    oms_status_enu_t setTLMLoggingLevel(const ComRef& cref, int level);
+    oms_status_enu_t setTLMDataSamples(const ComRef& cref, int samples);
     oms_status_enu_t describeModel(const ComRef& cref);
 
   private:

@@ -52,7 +52,8 @@ oms2::TLMCompositeModel::TLMCompositeModel(const ComRef& name)
 {
   logTrace();
   model = omtlm_newModel(name.c_str());
-  omtlm_setLogLevel(model, 1);  /// \todo Make debug log level selectable by user
+  omtlm_setLogLevel(model, 1);
+  omtlm_setNumLogStep(model, 1000);
 }
 
 oms2::TLMCompositeModel::~TLMCompositeModel()
@@ -70,7 +71,7 @@ oms2::TLMCompositeModel::~TLMCompositeModel()
     }
     externalModels.clear();
 
-    delete model;
+    omtlm_unloadModel(model);
 }
 
 oms2::TLMCompositeModel* oms2::TLMCompositeModel::NewModel(const ComRef& name)
@@ -210,6 +211,23 @@ oms_status_enu_t oms2::TLMCompositeModel::addInterface(std::string name,
   return addInterface(ifc);
 }
 
+oms_status_enu_t oms2::TLMCompositeModel::setPositionAndOrientation(const oms2::SignalRef &ifc, std::vector<double> x, std::vector<double> A)
+{
+  if(fmiModels.find(ifc.getCref()) == fmiModels.end() &&
+     externalModels.find(ifc.getCref()) == externalModels.end()) {
+    return logError("In TLMCompositeModel::setPositionAndOrientation(): Sub-model \""+ifc.getCref().toString()+"\" not found.");
+  }
+  std::string ifcname;
+  if(ifc.getVar().empty()) {
+    ifcname = ifc.getCref().toString();   //Apply to component
+  }
+  else {
+    ifcname = ifc.getCref().toString()+"."+ifc.getVar();  //Apply to interface
+  }
+  omtlm_setInitialPositionAndOrientation(model, ifcname.c_str(), x, A);
+  return oms_status_ok; //! @todo Check for success (needs changes to OMTLMSimulator API)
+}
+
 oms_status_enu_t oms2::TLMCompositeModel::addExternalModel(oms2::ExternalModel *externalModel)
 {
   auto it = externalModels.find(externalModel->getName());
@@ -218,10 +236,13 @@ oms_status_enu_t oms2::TLMCompositeModel::addExternalModel(oms2::ExternalModel *
 
   //Copy external model file to temporary directory
   std::string modelPath = Scope::GetInstance().getTempDirectory()+"/"+externalModel->getName();
+
 #ifdef WIN32
-  std::string cmd = "if not exists \""+modelPath+"\" mkdir \""+modelPath+"\"";
+  std::string cmd = "mkdir \""+modelPath+"\" 2> NUL";
   system(cmd.c_str());
-  cmd = "copy \""+externalModel->getModelPath()+"\" \""+modelPath;
+  std::string externalModelPath = externalModel->getModelPath();
+  std::replace(externalModelPath.begin(), externalModelPath.end(), '/', '\\');
+  cmd = "copy \""+externalModelPath+"\" \""+modelPath;
   system(cmd.c_str());
 #else
   std::string cmd = "mkdir -p \""+modelPath+"\"";
@@ -291,6 +312,26 @@ oms_status_enu_t oms2::TLMCompositeModel::setSocketData(const std::string& addre
   return oms_status_ok;
 }
 
+oms_status_enu_t oms2::TLMCompositeModel::setTLMInitialValues(const SignalRef& ifc, std::vector<double> values)
+{
+  FMICompositeModel *pFMISubModel = Scope::GetInstance().getFMICompositeModel(ifc.getCref());
+  if(pFMISubModel) {
+    return pFMISubModel->setTLMInitialValues(ifc.getVar(), values);
+  }
+  logError("In TLMCompositeModel::setTLMInitialValues(): FMI submodel \""+ifc.getCref().toString()+"\" not found.");
+  return oms_status_error;
+}
+
+void oms2::TLMCompositeModel::setLoggingLevel(int level)
+{
+  omtlm_setLogLevel(model, level);
+}
+
+void oms2::TLMCompositeModel::setDataSamples(int samples)
+{
+  omtlm_setNumLogStep(model, samples);
+}
+
 oms_status_enu_t oms2::TLMCompositeModel::describe()
 {
   omtlm_printModelStructure(model);
@@ -334,7 +375,6 @@ oms_status_enu_t oms2::TLMCompositeModel::initialize(double startTime, double to
 {
   Model* pModel = oms2::Scope::GetInstance().getModel(getName());
   omtlm_setStartTime(model, startTime);
-  omtlm_setNumLogStep(model, 1000); //Hard-coded for now
 
   //Initialize sub-models
   for(auto it = fmiModels.begin(); it!=fmiModels.end(); ++it) {
@@ -356,20 +396,24 @@ oms_status_enu_t oms2::TLMCompositeModel::reset()
 
 oms_status_enu_t oms2::TLMCompositeModel::terminate()
 {
-  return logError("oms2::TLMCompositeModel::terminate: not implemented yet");
+  for(auto it = fmiModels.begin(); it!=fmiModels.end(); ++it) {
+    Model* pSubModel = oms2::Scope::GetInstance().getModel(it->second->getName());
+    pSubModel->terminate();
+  }
+  return oms_status_ok;
 }
 
-oms_status_enu_t oms2::TLMCompositeModel::simulate(ResultWriter &resultWriter, double stopTime, double communicationInterval, oms2::MasterAlgorithm masterAlgorithm)
+oms_status_enu_t oms2::TLMCompositeModel::simulate(ResultWriter &resultWriter, double stopTime, double communicationInterval, double loggingInterval, oms2::MasterAlgorithm masterAlgorithm)
 {
   return logError("oms2::TLMCompositeModel::simulate: not implemented yet");
 }
 
-oms_status_enu_t oms2::TLMCompositeModel::doSteps(ResultWriter& resultWriter, const int numberOfSteps, double communicationInterval)
+oms_status_enu_t oms2::TLMCompositeModel::doSteps(ResultWriter& resultWriter, const int numberOfSteps, double communicationInterval, double loggingInterval)
 {
   return logError("oms2::TLMCompositeModel::doSteps: not implemented yet");
 }
 
-oms_status_enu_t oms2::TLMCompositeModel::stepUntil(ResultWriter &resultWriter, double stopTime, double communicationInterval, oms2::MasterAlgorithm masterAlgorithm, bool realtime_sync)
+oms_status_enu_t oms2::TLMCompositeModel::stepUntil(ResultWriter &resultWriter, double stopTime, double communicationInterval, double loggingInterval, oms2::MasterAlgorithm masterAlgorithm, bool realtime_sync)
 {
   if(fmiModels.empty() && externalModels.empty())
     logWarning("oms2::TLMCompositeModel::stepUntil: Simulating empty model...");
@@ -381,7 +425,7 @@ oms_status_enu_t oms2::TLMCompositeModel::stepUntil(ResultWriter &resultWriter, 
   {
     Model* pModel = oms2::Scope::GetInstance().getModel(it->second->getName());
     ResultWriter *pWriter = pModel->getResultWriter();
-    std::thread *t = new std::thread(&FMICompositeModel::simulateTLM, it->second, pWriter, stopTime, communicationInterval, server);
+    std::thread *t = new std::thread(&FMICompositeModel::simulateTLM, it->second, pWriter, stopTime, communicationInterval, loggingInterval, server);
     fmiModelThreads.push_back(t);
   }
 
@@ -400,7 +444,7 @@ oms_status_enu_t oms2::TLMCompositeModel::stepUntil(ResultWriter &resultWriter, 
   return oms_status_ok;
 }
 
-void oms2::TLMCompositeModel::simulate_asynchronous(ResultWriter& resultWriter, double stopTime, double communicationInterval, void (*cb)(const char* ident, double time, oms_status_enu_t status))
+void oms2::TLMCompositeModel::simulate_asynchronous(ResultWriter& resultWriter, double stopTime, double communicationInterval, double loggingInterval, void (*cb)(const char* ident, double time, oms_status_enu_t status))
 {
   logTrace();
 
