@@ -3,8 +3,8 @@ oms2_setTempDirectory("./tmp")
 oms2_newFMIModel("EventChain")
 
 oms2_addFMU("EventChain", "EventChain_DummyEventGenerator.fmu", "Gen")
-oms2_addFMU("EventChain", "EventChain_InverterEventChainLink2.fmu", "Link1")
-oms2_addFMU("EventChain", "EventChain_InverterEventChainLink.fmu", "Link2")
+oms2_addFMU("EventChain", "EventChain_EventChainLink2.fmu", "Link1")
+oms2_addFMU("EventChain", "EventChain_EventChainLink.fmu", "Link2")
 oms2_addFMU("EventChain", "EventChain_DummyInverter.fmu", "Inv")
 
 oms2_addConnection("EventChain", "Link1:leftIn", "Gen:event")
