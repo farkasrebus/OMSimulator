@@ -1,3 +1,6 @@
-Thu Jun 14 11:41:42 2018 | info:    Initializing logging (OMSimulator v0.1.0-503-ga39bd60-linux)
-Thu Jun 14 11:41:42 2018 | info:    New temp directory: "/home/farkasr/git/OMSimulator/StepSizeController/EventChainSimple/tmp"
-Thu Jun 14 11:41:42 2018 | info:    Logging completed properly
+Fri Jun 15 11:22:53 2018 | info:    Initializing logging (OMSimulator v0.1.0-503-ga39bd60-linux)
+Fri Jun 15 11:22:53 2018 | info:    New temp directory: "/home/farkasr/git/OMSimulator/StepSizeController/EventChainSimple/tmp"
+Fri Jun 15 11:22:53 2018 | info:    Result file: EventChainInv.mat
+Fri Jun 15 11:22:53 2018 | info:    Simulation finished.
+Fri Jun 15 11:22:53 2018 | info:    Removed model from scope: EventChain
+Fri Jun 15 11:22:53 2018 | info:    Logging completed properly
