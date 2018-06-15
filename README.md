@@ -25,12 +25,15 @@ package.path = package.path .. ";path/to/StepSizeController/StepSizeController.l
 require("StepSizeController")
 ```
 
-After this you can use the _simulateWithAdaptiveStepSizeControl_ function that takes four parameters:
+After this you can use the `oms2_simulateWithASSC` function that takes four parameters:
 * _model_ denotes the model to simulate
-* _criticalVarName_ is the name of a boolean variable whose value is true when the step size have to be low and false otherwise
-* _bigStepSize_ is the size of the large steps
-* _smallStepSize_ is the size of small steps
+* _communicationInterval_ denotes the _default_ communication interval (when there is no need to decrease it)
+* _sensitivityModel_ is an instance of the `SensitivityModel` class. It allows the user to describe two types of sensitivities (scenarios when the step size should be adjusted):
+  * The _events_ attribute should contain the set of output variables representing ocurrences of dicrete events. The step size controller detects a discrete event if any of the variables changes its value, and adjust the step size to the minimal value so that the chains of synchronized events can be simulated quickly. The step size will be adjusted back when no more events are detected.
+  * The _zeroCrossings_ attribute should contain a map from a variable to a funtion that takes the current value of the variable and returns an upper bound for the size of the next step.
+* _imin_ denotes the minimum size of the steps (this value will be used when an event is detected)
+* _tmax_ denotes the end of the simulation
 
-An example can be found in the _StepSizeController/TrafficLight_ folder called _TLSwithSSC.lua_.
+An example can be found in the _StepSizeController/EventChainSimple_ folder called _ECwithSSC.lua_.
 
-This is a preliminary step size controller that requires the user to configure everything. The step size controller will be improved with more functionality.
+This is a preliminary step size controller written in lua. It will be integrated to the OMSimulator.
