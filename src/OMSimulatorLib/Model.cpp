@@ -63,8 +63,11 @@ oms2::Model* oms2::Model::NewModel(oms_element_type_enu_t type, const oms2::ComR
   if (oms_component_fmi == type)
     model->compositeModel = oms2::FMICompositeModel::NewModel(cref);
   else if (oms_component_tlm == type)
+#if !defined(NO_TLM)
     model->compositeModel = oms2::TLMCompositeModel::NewModel(cref);
-
+#else
+    THROW_NO_TLM();
+#endif
   if (!model->compositeModel)
   {
     delete model;
@@ -109,7 +112,11 @@ oms2::Model* oms2::Model::LoadModel(const std::string& filename)
   if (modelType == oms_component_fmi)
     compositeModel = oms2::FMICompositeModel::LoadModel(root.child(oms2::ssd::ssd_system));
   else if (modelType == oms_component_tlm)
+#if !defined(NO_TLM)
     compositeModel = oms2::TLMCompositeModel::LoadModel(root.child("TLMModel"));
+#else
+    THROW_NO_TLM();
+#endif
 
   if (!compositeModel)
     return NULL;
@@ -189,6 +196,16 @@ oms_status_enu_t oms2::Model::save(const std::string& filename)
   return oms_status_ok;
 }
 
+void oms2::Model::setLoggingSamples(int value)
+{
+  loggingInterval = (stopTime-startTime)/value;
+}
+
+int oms2::Model::getLoggingSamples()
+{
+  return (stopTime-startTime)/loggingInterval;
+}
+
 oms2::FMICompositeModel* oms2::Model::getFMICompositeModel()
 {
   if (oms_component_fmi == getType())
@@ -198,6 +215,7 @@ oms2::FMICompositeModel* oms2::Model::getFMICompositeModel()
   return NULL;
 }
 
+#if !defined(NO_TLM)
 oms2::TLMCompositeModel* oms2::Model::getTLMCompositeModel()
 {
   if (oms_component_tlm == getType())
@@ -218,6 +236,7 @@ oms_status_enu_t oms2::Model::setTLMInitialValues(const oms2::SignalRef &ifc, st
 
   return tlmModel->setTLMInitialValues(ifc, values);
 }
+#endif
 
 oms_status_enu_t oms2::Model::initialize()
 {
@@ -240,9 +259,9 @@ oms_status_enu_t oms2::Model::initialize()
       resulttype = resultFilename.substr(resultFilename.length() - 4);
 
     if (".csv" == resulttype)
-      resultFile = new CSVWriter(1);
+      resultFile = new CSVWriter(bufferSize);
     else if (".mat" == resulttype)
-      resultFile = new MATWriter(1024);
+      resultFile = new MATWriter(bufferSize);
     else
       return logError("Unsupported format of the result file: " + resultFilename);
   }
@@ -258,7 +277,7 @@ oms_status_enu_t oms2::Model::initialize()
 
     if (resultFile)
     {
-      logInfo("Result file: " + resultFilename);
+      logInfo("Result file: " + resultFilename + " (bufferSize=" + std::to_string(bufferSize) + ")");
 
       // add all signals
       compositeModel->registerSignalsForResultFile(*resultFile);
@@ -286,6 +305,7 @@ oms_status_enu_t oms2::Model::reset()
 
   if (resultFile)
   {
+    compositeModel->emit(*resultFile);
     resultFile->close();
     delete resultFile;
     resultFile = NULL;
@@ -298,9 +318,9 @@ oms_status_enu_t oms2::Model::reset()
       resulttype = resultFilename.substr(resultFilename.length() - 4);
 
     if (".csv" == resulttype)
-      resultFile = new CSVWriter(1);
+      resultFile = new CSVWriter(bufferSize);
     else if (".mat" == resulttype)
-      resultFile = new MATWriter(1024);
+      resultFile = new MATWriter(bufferSize);
     else
       return logError("Unsupported format of the result file: " + resultFilename);
   }
@@ -324,18 +344,19 @@ oms_status_enu_t oms2::Model::terminate()
 
   modelState = oms_modelState_initialization;
 
+  if (resultFile)
+  {
+    compositeModel->emit(*resultFile);
+    resultFile->close();
+    delete resultFile;
+    resultFile = NULL;
+  }
+
   oms_status_enu_t status = compositeModel->terminate();
   if (oms_status_ok == status)
   {
     modelState = oms_modelState_instantiated;
     logInfo("Simulation finished.");
-  }
-
-  if (resultFile)
-  {
-    resultFile->close();
-    delete resultFile;
-    resultFile = NULL;
   }
 
   return status;
@@ -390,9 +411,10 @@ oms_status_enu_t oms2::Model::simulate_realtime()
   return status;
 }
 
-void oms2::Model::setResultFile(const std::string& value)
+void oms2::Model::setResultFile(const std::string& value, unsigned int bufferSize)
 {
   resultFilename = value;
+  this->bufferSize = bufferSize;
   if (oms_modelState_instantiated != modelState)
   {
     if (resultFile)
@@ -408,16 +430,16 @@ void oms2::Model::setResultFile(const std::string& value)
         resulttype = resultFilename.substr(resultFilename.length() - 4);
 
       if (".csv" == resulttype)
-        resultFile = new CSVWriter(1);
+        resultFile = new CSVWriter(bufferSize);
       else if (".mat" == resulttype)
-        resultFile = new MATWriter(96);
+        resultFile = new MATWriter(bufferSize);
       else
       {
         logError("Unsupported format of the result file: " + resultFilename);
         return;
       }
 
-      logInfo("Result file: " + resultFilename);
+      logInfo("Result file: " + resultFilename + " (bufferSize=" + std::to_string(bufferSize) + ")");
 
       // add all signals
       compositeModel->registerSignalsForResultFile(*resultFile);

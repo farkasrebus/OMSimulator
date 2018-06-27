@@ -90,6 +90,7 @@ oms_status_enu_t oms2::Scope::newFMIModel(const oms2::ComRef& name)
   return oms_status_ok;
 }
 
+#if !defined(NO_TLM)
 oms_status_enu_t oms2::Scope::newTLMModel(const oms2::ComRef& name)
 {
   logTrace();
@@ -110,6 +111,7 @@ oms_status_enu_t oms2::Scope::newTLMModel(const oms2::ComRef& name)
 
   return oms_status_ok;
 }
+#endif
 
 oms_status_enu_t oms2::Scope::unloadModel(const oms2::ComRef name)
 {
@@ -544,8 +546,10 @@ oms_status_enu_t oms2::Scope::setElementGeometry(const oms2::ComRef& cref, const
     }
     if (model->getFMICompositeModel())
       model->getFMICompositeModel()->setGeometry(*geometry);
+#if !defined(NO_TLM)
     else if (model->getTLMCompositeModel())
       model->getTLMCompositeModel()->setGeometry(*geometry);
+#endif
     else
       return oms_status_error;
     return oms_status_ok;
@@ -817,6 +821,7 @@ bool oms2::Scope::hasFMICompositeModel(const oms2::ComRef &name)
   return (models.find(name) != models.end());
 }
 
+#if !defined(NO_TLM)
 oms2::FMICompositeModel* oms2::Scope::getFMICompositeModel(const ComRef& name)
 {
   logTrace();
@@ -836,6 +841,7 @@ oms2::TLMCompositeModel* oms2::Scope::getTLMCompositeModel(const ComRef& name)
     return NULL;
   return model->getTLMCompositeModel();
 }
+#endif
 
 oms_status_enu_t oms2::Scope::getRealParameter(const oms2::SignalRef& signal, double& value)
 {
@@ -1317,6 +1323,7 @@ oms_status_enu_t oms2::Scope::setBooleanParameter(const oms2::SignalRef& signal,
   return oms_status_error;
 }
 
+#if !defined(NO_TLM)
 oms_status_enu_t oms2::Scope::addFMISubModel(const oms2::ComRef &cref, const oms2::ComRef &subref)
 {
   Model* model = getModel(cref);
@@ -1448,29 +1455,29 @@ oms_status_enu_t oms2::Scope::setTLMLoggingLevel(const oms2::ComRef &cref, int l
   return oms_status_ok;
 }
 
-oms_status_enu_t oms2::Scope::setTLMDataSamples(const oms2::ComRef &cref, int samples)
+oms_status_enu_t oms2::Scope::setLoggingSamples(const oms2::ComRef &cref, int loggingSamples)
 {
-  oms2::Model* model = getModel(cref);
-  if (!model) {
-    logError("In Scope::setTLMDataSamples(): Model \""+cref.toString()+"\" not found.");
-    return oms_status_error;
+  if (cref.isIdent())
+  {
+    // Model
+    Model* model = getModel(cref);
+    if (!model)
+    {
+      logError("[oms2::Scope::setLoggingInterval] failed");
+      return oms_status_error;
+    }
+    model->setLoggingSamples(loggingSamples);
+    return oms_status_ok;
   }
-  if(model->getType() != oms_component_tlm) {
-    logError("In Scope::setTLMDataSamples(): Not a TLM model.");
-    return oms_status_error;
-  }
-  model->getTLMCompositeModel()->setDataSamples(samples);
-  return oms_status_ok;
+  return oms_status_error;
 }
+#endif
 
 oms_status_enu_t oms2::Scope::describeModel(const oms2::ComRef &cref)
 {
   oms2::Model* model = getModel(cref);
   if (!model)
-  {
-    logError("Model: "+cref.toString()+" not found.");
-    return oms_status_error;
-  }
+    return logError("Model: " + cref.toString() + " not found.");
 
   return model->describe();
 }
@@ -1577,7 +1584,7 @@ oms_status_enu_t oms2::Scope::setLoggingInterval(const ComRef& cref, double logg
   return oms_status_error;
 }
 
-oms_status_enu_t oms2::Scope::setResultFile(const ComRef& cref, const std::string& filename)
+oms_status_enu_t oms2::Scope::setResultFile(const ComRef& cref, const std::string& filename, unsigned int bufferSize)
 {
   if (cref.isIdent())
   {
@@ -1588,7 +1595,7 @@ oms_status_enu_t oms2::Scope::setResultFile(const ComRef& cref, const std::strin
       logError("[oms2::Scope::setResultFile] failed");
       return oms_status_error;
     }
-    model->setResultFile(filename);
+    model->setResultFile(filename, bufferSize);
     return oms_status_ok;
   }
   return oms_status_error;
@@ -1753,6 +1760,90 @@ oms_status_enu_t oms2::Scope::getCurrentTime(const oms2::ComRef& cref, double* t
 
     logError("[oms2::Scope::getCurrentTime] is only implemented for FMI models yet");
     return oms_status_error;
+  }
+  return oms_status_error;
+}
+
+oms_status_enu_t oms2::Scope::addSignalsToResults(const ComRef& cref, const std::string& regex)
+{
+  if (cref.isIdent())
+  {
+    // Model
+    Model* model = getModel(cref);
+    if (!model)
+    {
+      logError("[oms2::Scope::addSignalsToResults] failed");
+      return oms_status_error;
+    }
+
+    // FMI model?
+    if (oms_component_fmi == model->getType())
+    {
+      FMICompositeModel* fmiModel = model->getFMICompositeModel();
+      return fmiModel->addSignalsToResults(regex);
+    }
+
+    logError("[oms2::Scope::addSignalsToResults] is only implemented for FMI models yet");
+    return oms_status_error;
+  }
+  return oms_status_error;
+}
+
+oms_status_enu_t oms2::Scope::removeSignalsFromResults(const ComRef& cref, const std::string& regex)
+{
+  if (cref.isIdent())
+  {
+    // Model
+    Model* model = getModel(cref);
+    if (!model)
+    {
+      logError("[oms2::Scope::removeSignalsFromResults] failed");
+      return oms_status_error;
+    }
+
+    // FMI model?
+    if (oms_component_fmi == model->getType())
+    {
+      FMICompositeModel* fmiModel = model->getFMICompositeModel();
+      return fmiModel->removeSignalsFromResults(regex);
+    }
+
+    logError("[oms2::Scope::removeSignalsFromResults] is only implemented for FMI models yet");
+    return oms_status_error;
+  }
+  return oms_status_error;
+}
+
+oms_status_enu_t oms2::Scope::setFlags(const ComRef& cref, const std::string& flags)
+{
+  if (!cref.isIdent())
+  {
+    // Sub-model
+    ComRef modelCref = cref.first();
+    Model* model = getModel(modelCref);
+    if (!model)
+    {
+      logError("[oms2::Scope::setFlags] failed");
+      return oms_status_error;
+    }
+
+    // FMI model?
+    if (oms_component_fmi == model->getType())
+    {
+      FMICompositeModel* fmiModel = model->getFMICompositeModel();
+      FMISubModel* subModel = fmiModel->getSubModel(cref);
+      if (!subModel)
+      {
+        logError("[oms2::Scope::setFlags] failed");
+        return oms_status_error;
+      }
+      return subModel->setFlags(flags);
+    }
+    else
+    {
+      logError("[oms2::Scope::setFlags] is only implemented for FMI models yet");
+      return oms_status_error;
+    }
   }
   return oms_status_error;
 }

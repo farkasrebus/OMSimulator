@@ -67,8 +67,11 @@ namespace oms2
     double getStopTime() const {return stopTime;}
     void setCommunicationInterval(double value) {communicationInterval = value;}
     void setLoggingInterval(double value) {loggingInterval = value;}
+    double getLoggingInterval() const {return loggingInterval;}
+    void setLoggingSamples(int value);
+    int getLoggingSamples();
     double getCommunicationInterval() const {return communicationInterval;}
-    void setResultFile(const std::string& value);
+    void setResultFile(const std::string& value, unsigned int bufferSize);
     const std::string& getResultFile() const {return resultFilename;}
     ResultWriter *getResultWriter() const {return resultFile;}
     void setMasterAlgorithm(MasterAlgorithm value) {masterAlgorithm = value;}
@@ -77,7 +80,9 @@ namespace oms2
     double getTolerance() const {return tolerance;}
 
     FMICompositeModel* getFMICompositeModel();
+#if !defined(NO_TLM)
     TLMCompositeModel* getTLMCompositeModel();
+#endif
 
     oms_element_type_enu_t getType() {return compositeModel->getType();}
     oms2::Element* getElement() {return compositeModel->getElement();}
@@ -86,7 +91,7 @@ namespace oms2
 
     oms_status_enu_t setTLMInitialValues(const SignalRef& ifc, std::vector<double> value);
 
-    virtual oms_status_enu_t describe() { return compositeModel->describe(); }
+    oms_status_enu_t describe() { return compositeModel->describe(); }
     oms_status_enu_t initialize();
     oms_status_enu_t reset();
     oms_status_enu_t terminate();
@@ -114,6 +119,7 @@ namespace oms2
     double communicationInterval = 1.0e-2;  ///< experiment, default 1.0e-2
     double loggingInterval = 0.0;           ///< experiment, default 0.0
     std::string resultFilename;             ///< experiment, default <name>_res.mat
+    unsigned int bufferSize = 1;
     ResultWriter *resultFile = NULL;
     MasterAlgorithm masterAlgorithm = MasterAlgorithm::STANDARD;  ///< master algorithm for FMI co-simulation, default MasterAlgorithm::STANDARD
 

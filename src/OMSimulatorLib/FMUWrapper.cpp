@@ -38,6 +38,8 @@
 #include "Variable.h"
 #include "ssd/Tags.h"
 
+#include <cmath>
+#include <regex>
 #include <fmilib.h>
 #include <JM/jm_portability.h>
 
@@ -125,7 +127,7 @@ int oms2::cvode_rhs(realtype t, N_Vector y, N_Vector ydot, void *user_data)
 }
 
 oms2::FMUWrapper::FMUWrapper(const oms2::ComRef& cref, const std::string& filename)
-  : oms2::FMISubModel(oms_component_fmu, cref), fmuInfo(filename), solverMethod(EXPLICIT_EULER)
+  : oms2::FMISubModel(oms_component_fmu, cref), fmuInfo(filename), solverMethod(CVODE)
 {
   this->context = NULL;
   this->fmu = NULL;
@@ -211,18 +213,18 @@ oms2::FMUWrapper* oms2::FMUWrapper::newSubModel(const oms2::ComRef& cref, const 
 
   model->fmuInfo.setKind(model->fmu);
 
-  model->callBackFunctions.logger = oms2::fmi2logger;
-  model->callBackFunctions.allocateMemory = calloc;
-  model->callBackFunctions.freeMemory = free;
-  model->callBackFunctions.componentEnvironment = model->fmu;
-  model->callBackFunctions.stepFinished = NULL;
+  model->callbackFunctions.logger = oms2::fmi2logger;
+  model->callbackFunctions.allocateMemory = calloc;
+  model->callbackFunctions.freeMemory = free;
+  model->callbackFunctions.componentEnvironment = model->fmu;
+  model->callbackFunctions.stepFinished = NULL;
 
   if (oms_fmi_kind_me == model->fmuInfo.getKind())
   {
     jm_status_enu_t jmstatus;
 
     // load the FMU's shared library
-    jmstatus = fmi2_import_create_dllfmu(model->fmu, fmi2_fmu_kind_me, &model->callBackFunctions);
+    jmstatus = fmi2_import_create_dllfmu(model->fmu, fmi2_fmu_kind_me, &model->callbackFunctions);
     if (jm_status_error == jmstatus)
     {
       logError("Could not create the DLL loading mechanism (C-API). Error: " + std::string(fmi2_import_get_last_error(model->fmu)));
@@ -251,7 +253,7 @@ oms2::FMUWrapper* oms2::FMUWrapper::newSubModel(const oms2::ComRef& cref, const 
     jm_status_enu_t jmstatus;
 
     // load the FMU shared library
-    jmstatus = fmi2_import_create_dllfmu(model->fmu, fmi2_fmu_kind_cs, &model->callBackFunctions);
+    jmstatus = fmi2_import_create_dllfmu(model->fmu, fmi2_fmu_kind_cs, &model->callbackFunctions);
     if (jm_status_error == jmstatus)
     {
       logError("Could not create the DLL loading mechanism (C-API). Error: " + std::string(fmi2_import_get_last_error(model->fmu)));
@@ -334,7 +336,9 @@ oms2::FMUWrapper* oms2::FMUWrapper::newSubModel(const oms2::ComRef& cref, const 
       model->booleanParameters[v.getName()] = oms2::Option<bool>();
 
     if (v.isInput())
+    {
       model->inputs.push_back(v);
+    }
     else if (v.isOutput())
     {
       model->outputs.push_back(v);
@@ -345,6 +349,8 @@ oms2::FMUWrapper* oms2::FMUWrapper::newSubModel(const oms2::ComRef& cref, const 
 
     if (v.isInitialUnknown())
       model->initialUnknownsGraph.addVariable(v);
+
+    model->exportVariables.push_back(v.isInput() || v.isOutput());
   }
 
   std::vector<oms2::Connector> connectors;
@@ -356,7 +362,7 @@ oms2::FMUWrapper* oms2::FMUWrapper::newSubModel(const oms2::ComRef& cref, const 
     connectors.push_back(c);
   }
   i = 1;
-  size = 1+ model->outputs.size();
+  size = 1 + model->outputs.size();
   for (auto const &v : model->outputs)
   {
     oms2::Connector c(oms_causality_output, v.getType(), v.getSignalRef(), i++/(double)size);
@@ -764,6 +770,20 @@ oms_status_enu_t oms2::FMUWrapper::doStep(double stopTime)
   fmi2_status_t fmistatus;
   double hdef = (stopTime-time) / 1.0;
 
+  // HACK for certain FMUs
+  if (fetchAllVars)
+  {
+    for (auto &v : allVariables)
+    {
+      if (v.isTypeReal())
+      {
+        double realValue;
+        if (oms_status_ok != getReal(v, realValue))
+          return logError("failed to fetch variable " + v.toString());
+      }
+    }
+  }
+
   if (oms_fmi_kind_me == fmuInfo.getKind())
   {
     // main simulation loop
@@ -1103,7 +1123,13 @@ oms_status_enu_t oms2::FMUWrapper::getReal(const oms2::Variable& var, double& re
 
   fmi2_value_reference_t vr = var.getValueReference();
   if (fmi2_status_ok == fmi2_import_get_real(fmu, &vr, 1, &realValue))
+  {
+    if (std::isnan(realValue))
+      return logError("getReal returned NAN");
+    if (std::isinf(realValue))
+      return logError("getReal returned +/-inf");
     return oms_status_ok;
+  }
 
   return oms_status_error;
 }
@@ -1236,12 +1262,13 @@ oms_status_enu_t oms2::FMUWrapper::setRealInputDerivatives(const oms2::SignalRef
 
 oms_status_enu_t oms2::FMUWrapper::registerSignalsForResultFile(ResultWriter& resultWriter)
 {
-  unsigned int i=0;
-  for (auto const &var : allVariables)
+  for (unsigned int i=0; i<allVariables.size(); ++i)
   {
-    oms2::ComRef cref = var.getCref();
-    cref.popFirst();
-    std::string name = cref.toString() + "." + var.getName();
+    if (!exportVariables[i])
+      continue;
+
+    auto const &var = allVariables[i];
+    std::string name = var.getCref().toString() + "." + var.getName();
     const std::string& description = var.getDescription();
     if (var.isParameter())
     {
@@ -1284,8 +1311,6 @@ oms_status_enu_t oms2::FMUWrapper::registerSignalsForResultFile(ResultWriter& re
       else
         logInfo("Variable " + name + " will not be stored in the result file, because the signal type is not supported");
     }
-
-    i++;
   }
 
   return oms_status_ok;
@@ -1300,10 +1325,57 @@ oms_status_enu_t oms2::FMUWrapper::emit(ResultWriter& resultWriter)
     SignalValue_t value;
     if (var.isTypeReal())
     {
-      getReal(var, value.realValue);
+      if (oms_status_ok != getReal(var, value.realValue))
+        return logError("failed to fetch variable " + var.toString());
+      resultWriter.updateSignal(ID, value);
+    }
+    else if (var.isTypeInteger())
+    {
+      if (oms_status_ok != getInteger(var, value.intValue))
+        return logError("failed to fetch variable " + var.toString());
+      resultWriter.updateSignal(ID, value);
+    }
+    else if (var.isTypeBoolean())
+    {
+      if (oms_status_ok != getBoolean(var, value.boolValue))
+        return logError("failed to fetch variable " + var.toString());
       resultWriter.updateSignal(ID, value);
     }
   }
 
   return oms_status_ok;
+}
+
+void oms2::FMUWrapper::addSignalsToResults(const std::string& regex)
+{
+  std::regex exp(regex);
+  for (unsigned int i=0; i<allVariables.size(); ++i)
+  {
+    if (exportVariables[i])
+      continue;
+
+    auto const &var = allVariables[i];
+    if(regex_match(var.toString(), exp))
+    {
+      logInfo("added \"" + var.toString() + "\" to results");
+      exportVariables[i] = true;
+    }
+  }
+}
+
+void oms2::FMUWrapper::removeSignalsFromResults(const std::string& regex)
+{
+  std::regex exp(regex);
+  for (unsigned int i=0; i<allVariables.size(); ++i)
+  {
+    if (!exportVariables[i])
+      continue;
+
+    auto const &var = allVariables[i];
+    if(regex_match(var.toString(), exp))
+    {
+      logInfo("removed \"" + var.toString() + "\" from results");
+      exportVariables[i] = false;
+    }
+  }
 }

@@ -58,7 +58,9 @@ namespace oms2
     static Scope& GetInstance();
 
     oms_status_enu_t newFMIModel(const ComRef& name);
+#if !defined(NO_TLM)
     oms_status_enu_t newTLMModel(const ComRef& name);
+#endif
     oms_status_enu_t unloadModel(const ComRef name);
     oms_status_enu_t initialize(const ComRef& name);
     oms_status_enu_t reset(const ComRef& name);
@@ -104,12 +106,15 @@ namespace oms2
     oms_status_enu_t setStopTime(const ComRef& cref, double stopTime);
     oms_status_enu_t setCommunicationInterval(const ComRef& cref, double communicationInterval);
     oms_status_enu_t setLoggingInterval(const ComRef& cref, double loggingInterval);
-    oms_status_enu_t setResultFile(const ComRef& cref, const std::string& filename);
+    oms_status_enu_t setResultFile(const ComRef& cref, const std::string& filename, unsigned int bufferSize);
     oms_status_enu_t setMasterAlgorithm(const ComRef& cref, const std::string& masterAlgorithm);
     oms_status_enu_t setActivationRatio(const ComRef& cref, int k);
     oms_status_enu_t exportCompositeStructure(const ComRef& cref, const std::string& filename);
     oms_status_enu_t exportDependencyGraphs(const ComRef& cref, const std::string& initialization, const std::string& simulation);
     oms_status_enu_t getCurrentTime(const ComRef& cref, double* time);
+    oms_status_enu_t addSignalsToResults(const ComRef& cref, const std::string& regex);
+    oms_status_enu_t removeSignalsFromResults(const ComRef& cref, const std::string& regex);
+    oms_status_enu_t setFlags(const ComRef& cref, const std::string& flags);
 
     const std::string& getTempDirectory() {return GetInstance().tempDir;}
     const std::string& getWorkingDirectory() {return GetInstance().workingDir;}
@@ -120,8 +125,11 @@ namespace oms2
 
     bool hasFMICompositeModel(const ComRef& name);
     FMICompositeModel* getFMICompositeModel(const ComRef& name);
+#if !defined(NO_TLM)
     TLMCompositeModel* getTLMCompositeModel(const ComRef& name);
+#endif
 
+#if !defined(NO_TLM)
     oms_status_enu_t addFMISubModel(const ComRef& cref, const ComRef& subref);
     oms_status_enu_t addExternalModel(const ComRef& cref, const ComRef& name, const std::string& modelfile, const std::string &startscript);
     oms_status_enu_t addTLMInterface(const ComRef& cref, const ComRef& subref, const ComRef& name, int dimensions, oms_causality_enu_t causality, std::string domain, oms_tlm_interpolation_t interpolation, std::vector<SignalRef> &sigrefs);
@@ -130,7 +138,8 @@ namespace oms2
     oms_status_enu_t setTLMSocketData(ComRef modelIdent, const std::string &address, int managerPort, int monitorPort);
     oms_status_enu_t setTLMInitialValues(const ComRef& cref, const SignalRef& ifc, std::vector<double> values);
     oms_status_enu_t setTLMLoggingLevel(const ComRef& cref, int level);
-    oms_status_enu_t setTLMDataSamples(const ComRef& cref, int samples);
+    oms_status_enu_t setLoggingSamples(const ComRef& cref, int samples);
+#endif
     oms_status_enu_t describeModel(const ComRef& cref);
 
   private:

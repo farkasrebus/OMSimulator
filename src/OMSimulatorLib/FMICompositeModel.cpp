@@ -40,7 +40,9 @@
 #include "SignalRef.h"
 #include "ssd/Tags.h"
 #include "Table.h"
+#if !defined(NO_TLM)
 #include "Plugin/PluginImplementer.h"
+#endif
 #include "PMRChannelMaster.h"
 
 #include <pugixml.hpp>
@@ -426,7 +428,7 @@ oms_status_enu_t oms2::FMICompositeModel::addFMU(const std::string& filename, co
   }
 
   oms2::ComRef parent = getName();
-  oms2::FMUWrapper* subModel = oms2::FMUWrapper::newSubModel(parent + cref, filename);
+  oms2::FMUWrapper* subModel = oms2::FMUWrapper::newSubModel(cref, filename);
   if (!subModel)
     return oms_status_error;
 
@@ -450,7 +452,7 @@ oms_status_enu_t oms2::FMICompositeModel::addTable(const std::string& filename, 
   }
 
   oms2::ComRef parent = getName();
-  oms2::Table* subModel = oms2::Table::newSubModel(parent + cref, filename);
+  oms2::Table* subModel = oms2::Table::newSubModel(cref, filename);
   if (!subModel)
     return oms_status_error;
 
@@ -924,11 +926,10 @@ oms_status_enu_t oms2::FMICompositeModel::doSteps(ResultWriter& resultWriter, co
 
     if (loggingInterval >= 0.0 && time - tLastEmit >= loggingInterval)
     {
-      // input := output
-      emit(resultWriter);
+      if (loggingInterval <= 0.0)
+        emit(resultWriter);
       updateInputs(outputsGraph);
       emit(resultWriter);
-      tLastEmit = time;
     }
     else
       updateInputs(outputsGraph);
@@ -970,11 +971,10 @@ oms_status_enu_t oms2::FMICompositeModel::stepUntilStandard(ResultWriter& result
     // input := output
     if (loggingInterval >= 0.0 && time - tLastEmit >= loggingInterval)
     {
-      // input := output
-      emit(resultWriter);
+      if (loggingInterval <= 0.0)
+        emit(resultWriter);
       updateInputs(outputsGraph);
       emit(resultWriter);
-      tLastEmit = time;
     }
     else
       updateInputs(outputsGraph);
@@ -1032,11 +1032,10 @@ oms_status_enu_t oms2::FMICompositeModel::stepUntilPCTPL(ResultWriter& resultWri
 
     if (loggingInterval >= 0.0 && time - tLastEmit >= loggingInterval)
     {
-      // input := output
-      emit(resultWriter);
+      if (loggingInterval <= 0.0)
+        emit(resultWriter);
       updateInputs(outputsGraph);
       emit(resultWriter);
-      tLastEmit = time;
     }
     else
       updateInputs(outputsGraph);
@@ -1067,11 +1066,10 @@ void oms2::FMICompositeModel::simulate_asynchronous(ResultWriter& resultWriter, 
 
     if (loggingInterval >= 0.0 && time - tLastEmit >= loggingInterval)
     {
-      // input := output
-      emit(resultWriter);
+      if (loggingInterval <= 0.0)
+        emit(resultWriter);
       updateInputs(outputsGraph);
       emit(resultWriter);
-      tLastEmit = time;
     }
     else
       updateInputs(outputsGraph);
@@ -1080,6 +1078,7 @@ void oms2::FMICompositeModel::simulate_asynchronous(ResultWriter& resultWriter, 
   }
 }
 
+#if !defined(NO_TLM)
 oms_status_enu_t oms2::FMICompositeModel::simulateTLM(ResultWriter* resultWriter, double stopTime, double communicationInterval, double loggingInterval, std::string server)
 {
   logTrace();
@@ -1107,11 +1106,10 @@ oms_status_enu_t oms2::FMICompositeModel::simulateTLM(ResultWriter* resultWriter
 
     if (loggingInterval >= 0.0 && time - tLastEmit >= loggingInterval)
     {
-      // input := output
-      emit(*resultWriter);
+      if (loggingInterval <= 0.0)
+        emit(*resultWriter);
       updateInputs(outputsGraph);
       emit(*resultWriter);
-      tLastEmit = time;
     }
     else
       updateInputs(outputsGraph);
@@ -1123,7 +1121,6 @@ oms_status_enu_t oms2::FMICompositeModel::simulateTLM(ResultWriter* resultWriter
 
   return oms_status_ok;
 }
-
 
 oms_status_enu_t oms2::FMICompositeModel::initializeSockets(double stopTime, double &communicationInterval, std::string server)
 {
@@ -1217,7 +1214,6 @@ oms_status_enu_t oms2::FMICompositeModel::initializeSockets(double stopTime, dou
       }
     }
   }
-
   return oms_status_ok;
 }
 
@@ -1407,7 +1403,7 @@ void oms2::FMICompositeModel::finalizeSockets()
 
   delete plugin;
 }
-
+#endif
 
 oms_status_enu_t oms2::FMICompositeModel::setReal(const oms2::SignalRef& sr, double value)
 {
@@ -1464,6 +1460,7 @@ oms_status_enu_t oms2::FMICompositeModel::setRealInputDerivatives(const oms2::Si
   return model->setRealInputDerivatives(sr, order, value);
 }
 
+#if !defined(NO_TLM)
 oms_status_enu_t oms2::FMICompositeModel::addTLMInterface(oms2::TLMInterface *ifc)
 {
   tlmInterfaces.push_back(ifc);
@@ -1502,6 +1499,7 @@ oms_status_enu_t oms2::FMICompositeModel::setTLMInitialValues(std::string ifcnam
 
   return oms_status_ok;
 }
+#endif
 
 oms_status_enu_t oms2::FMICompositeModel::updateInputs(oms2::DirectedGraph& graph)
 {
@@ -1586,9 +1584,57 @@ oms_status_enu_t oms2::FMICompositeModel::registerSignalsForResultFile(ResultWri
 oms_status_enu_t oms2::FMICompositeModel::emit(ResultWriter& resultWriter)
 {
   for (const auto& it : subModels)
-    it.second->emit(resultWriter);
+    if (oms_status_ok != it.second->emit(resultWriter))
+      return logError("Failed to log simulation results");
 
   resultWriter.emit(time);
+  tLastEmit = time;
 
   return oms_status_ok;
+}
+
+oms_status_enu_t oms2::FMICompositeModel::addSignalsToResults(const std::string& regex)
+{
+  for (const auto& it : subModels)
+    it.second->addSignalsToResults(regex);
+  return oms_status_ok;
+}
+
+oms_status_enu_t oms2::FMICompositeModel::removeSignalsFromResults(const std::string& regex)
+{
+  for (const auto& it : subModels)
+    it.second->removeSignalsFromResults(regex);
+  return oms_status_ok;
+}
+
+oms_status_enu_t oms2::FMICompositeModel::describe()
+{
+  std::cout << "# FMI composite model \"" + getName() + "\"" << std::endl;
+
+  oms2::Element** elements = getElements();
+  while(*elements)
+  {
+    oms2::Element* element = *elements;
+    std::cout << "## ";
+    element->describe();
+    elements++;
+  }
+
+  oms2::Connection** connections = getConnections();
+  std::cout << "## Connections" << std::endl;
+  while(*connections)
+  {
+    oms2::Connection* connection = *connections;
+    connection->describe();
+    connections++;
+  }
+
+  return oms_status_ok;
+}
+
+void oms2::FMICompositeModel::setName(const oms2::ComRef& name)
+{
+  for (auto& connection : connections)
+    if (connection)
+      connection->setParent(name);
 }

@@ -75,6 +75,7 @@ namespace oms2
     FMISubModel* getSubModel(const oms2::ComRef& cref);
     oms2::Connection** getConnections() {return &connections[0];}
 
+    void setName(const oms2::ComRef& name);
     oms_status_enu_t renameSubModel(const oms2::ComRef& identOld, const oms2::ComRef& identNew);
 
     oms2::Element** getElements();
@@ -87,7 +88,9 @@ namespace oms2
     oms_status_enu_t terminate();
     oms_status_enu_t doSteps(ResultWriter& resultWriter, const int numberOfSteps, double communicationInterval, double loggingInterval);
     oms_status_enu_t stepUntil(ResultWriter& resultWriter, double stopTime, double communicationInterval, double loggingInterval, MasterAlgorithm masterAlgorithm, bool realtime_sync);
+#if !defined(NO_TLM)
     oms_status_enu_t simulateTLM(ResultWriter *resultWriter, double stopTime, double communicationInterval, double loggingInterval, std::string address);
+#endif
     void simulate_asynchronous(ResultWriter& resultWriter, double stopTime, double communicationInterval, double loggingInterval, void (*cb)(const char* ident, double time, oms_status_enu_t status));
 
     oms_status_enu_t setReal(const oms2::SignalRef& sr, double value);
@@ -97,11 +100,17 @@ namespace oms2
 
     oms_status_enu_t setRealInputDerivatives(const oms2::SignalRef& sr, int order, double value);
 
+#if !defined(NO_TLM)
     oms_status_enu_t addTLMInterface(TLMInterface *ifc);
     oms_status_enu_t setTLMInitialValues(std::string ifc, std::vector<double> value);
+#endif
 
     double getCurrentTime() {return time;}
 
+    oms_status_enu_t addSignalsToResults(const std::string& regex);
+    oms_status_enu_t removeSignalsFromResults(const std::string& regex);
+
+    oms_status_enu_t describe();
 
   private:
     oms_status_enu_t loadElementGeometry(const pugi::xml_node& node);
@@ -118,11 +127,12 @@ namespace oms2
     oms_status_enu_t stepUntilStandard(ResultWriter& resultWriter, double stopTime, double communicationInterval, double loggingInterval, bool realtime_sync);
     oms_status_enu_t stepUntilPCTPL(ResultWriter& resultWriter, double stopTime, double communicationInterval, double loggingInterval, bool realtime_sync);
 
+#if !defined(NO_TLM)
     oms_status_enu_t initializeSockets(double stopTime, double &communicationInterval, std::string server);
     void readFromSockets();
     void writeToSockets();
     void finalizeSockets();
-
+#endif
   protected:
     void deleteComponents();
     void updateComponents();
@@ -139,9 +149,10 @@ namespace oms2
     std::map<oms2::ComRef, oms2::FMISubModel*> subModels;
     std::vector<oms2::Connection*> connections; ///< last element is always NULL
     oms2::Element** components;
+#if !defined(NO_TLM)
     std::vector<TLMInterface*> tlmInterfaces;
     TLMPlugin *plugin;
-
+#endif
     DirectedGraph initialUnknownsGraph;
     DirectedGraph outputsGraph;
 
@@ -151,8 +162,10 @@ namespace oms2
     double loggingInterval;
     double tLastEmit;
 
+#if !defined(NO_TLM)
     std::vector<SignalRef> tlmSigRefs;
     std::map<std::string, std::vector<double> > tlmInitialValues;
+#endif
   };
 }
 

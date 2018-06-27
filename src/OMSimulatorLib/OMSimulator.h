@@ -53,7 +53,7 @@ extern "C"
 const char* oms2_getVersion();
 
 /**
- * \brief Compares simulation results.
+ * \brief Compares a given signal of two result files within absolute and relative tolerances.
  */
 int oms2_compareSimulationResults(const char* filenameA, const char* filenameB, const char* var, double relTol, double absTol);
 
@@ -310,7 +310,7 @@ void oms2_setLoggingCallback(void (*cb)(oms_message_type_enu_t type, const char*
 void oms2_setLoggingLevel(int logLevel);
 
 /**
- * \brief Describes model by printing structure to cout.
+ * \brief Prints a summary of the given composite model to stdout.
  *
  * \param cref   [in] Full identifier of a component.
  * \return       Error status
@@ -318,7 +318,7 @@ void oms2_setLoggingLevel(int logLevel);
 oms_status_enu_t oms2_describe(const char* cref);
 
 /**
- * \brief Adds an external model to a TLM composite model
+ * \brief Adds an external model to a TLM composite model.
  *
  * \param cref          [in] Identifier of parent TLM composite model.
  * \param name          [in] Identifier of external model
@@ -329,7 +329,7 @@ oms_status_enu_t oms2_describe(const char* cref);
 oms_status_enu_t oms2_addExternalModel(const char* cref, const char* name, const char* modelfile, const char* startscript);
 
 /**
- * \brief Adds an external model to a TLM composite model
+ * \brief Adds an FMI composite model to a TLM composite model.
  *
  * \param cref     [in] Identifier of parent TLM composite model.
  * \param subref   [in] Identifier of sub FMI composite model.
@@ -411,13 +411,13 @@ oms_status_enu_t oms2_addTLMConnection(const char* cref, const char* from, const
 oms_status_enu_t oms2_setTLMLoggingLevel(const char* cref, const int level);
 
 /**
- * \brief Specifies number of data samples for OMTLMSimulator result files
+ * \brief Set the numer of logging samples to use in the simulation.
  *
- * \param cref    [in] Identifier of TLM composite model.
- * \param levle   [in] Number of samples
- * \return        Error status
+ * \param cref              [in] Name of the model instance
+ * \param loggingSamples    [in] Logging samples
+ * \return                  Error status
  */
-oms_status_enu_t oms2_setTLMDataSamples(const char* cref, const int samples);
+oms_status_enu_t oms2_setLoggingSamples(const char* cref, const int loggingSamples);
 
 /**
  * \brief Redirects logging output to file or std streams. The warning/error counters are reset.
@@ -610,9 +610,10 @@ oms_status_enu_t oms2_setLoggingInterval(const char* cref, double loggingInterva
  *
  * \param cref       [in] Name of the model instance
  * \param filename   [in] Result file
+ * \param bufferSize [in] Buffer size to speedup the logging
  * \return           Error status
  */
-oms_status_enu_t oms2_setResultFile(const char* cref, const char* filename);
+oms_status_enu_t oms2_setResultFile(const char* cref, const char* filename, int bufferSize);
 
 
 /**
@@ -680,6 +681,33 @@ oms_status_enu_t oms2_exportDependencyGraphs(const char* cref, const char* initi
  * \return Error status
  */
 oms_status_enu_t oms2_getCurrentTime(const char* model, double* time);
+
+/**
+ * \brief Add all variables that match the given regex to the result file.
+ *
+ * \param cref  [in] Name of the model instance
+ * \param regex [in] Regular expression
+ * \return Error status
+ */
+oms_status_enu_t oms2_addSignalsToResults(const char* cref, const char* regex);
+
+/**
+ * \brief Add all variables that match the given regex to the result file.
+ *
+ * \param cref  [in] Name of the model instance
+ * \param regex [in] Regular expression
+ * \return Error status
+ */
+oms_status_enu_t oms2_removeSignalsFromResults(const char* cref, const char* regex);
+
+/**
+ * \brief Sets special flags.
+ *
+ * \param cref  [in] Name of the model instance
+ * \param flags [in] flags
+ * \return Error status
+ */
+oms_status_enu_t oms2_setFlags(const char* cref, const char* flags);
 
 #ifdef __cplusplus
 }
