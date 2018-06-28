@@ -3,7 +3,6 @@ package.path = package.path .. ";../StepSizeController.lua"
 require("StepSizeController")
 --]]
 
-
 oms2_setLogFile("Thermostat.log")
 oms2_setTempDirectory("./tmp")
 oms2_newFMIModel("ThermostatExample")
@@ -65,7 +64,8 @@ oms2_setResultFile("ThermostatExample", "Thermostat.mat")
 oms2_setStopTime("ThermostatExample", 100.0)
 oms2_setCommunicationInterval("ThermostatExample", 1.0)
 oms2_initialize("ThermostatExample")
--- TODO: simulate
+-- TODO: simulate with ASSC
+oms2_simulate("ThermostatExample")
 --  terminate
 oms2_terminate("ThermostatExample")
 oms2_unloadModel("ThermostatExample")
