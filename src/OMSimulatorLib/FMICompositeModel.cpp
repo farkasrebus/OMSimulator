@@ -1537,10 +1537,11 @@ oms_status_enu_t oms2::FMICompositeModel::updateInputs(oms2::DirectedGraph& grap
          getReal(graph.nodes[output].getSignalRef(), value);
          setReal(graph.nodes[input].getSignalRef(), value);
         //std::cout << "[time " << time << "] " << graph.nodes[output].getSignalRef().toString() << " -> " << graph.nodes[input].getSignalRef().toString() << " (value: " << value << ")" << std::endl;
-      } else if (graph.nodes[output].isTypeInteger()) {
+      } else //if (graph.nodes[output].isTypeInteger()) 
+      {
         int value=0;
         getInteger(graph.nodes[output].getSignalRef(), value);
-        setInteger(graph.nodes[output].getSignalRef(), value);
+        setInteger(graph.nodes[input].getSignalRef(), value);
       }
 
     }
