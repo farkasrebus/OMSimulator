@@ -61,7 +61,7 @@ oms2_addConnection("ThermostatExample",
 -- set result file
 oms2_setResultFile("ThermostatExample", "Thermostat.mat")
 -- configure simulation
-oms2_setStopTime("ThermostatExample", 100.0)
+oms2_setStopTime("ThermostatExample", 1000.0)
 oms2_setCommunicationInterval("ThermostatExample", 1.0)
 oms2_initialize("ThermostatExample")
 -- TODO: simulate with ASSC
