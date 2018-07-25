@@ -288,14 +288,6 @@ oms_status_enu_t oms2_stepUntil(const char* ident, const double timeValue);
 oms_status_enu_t oms2_reset(const char* ident);
 
 /**
- * \brief Terminates a composite model (works for both FMI and TLM).
- *
- * \param ident   [in] Name of the model instance
- * \return        Error status
- */
-oms_status_enu_t oms2_terminate(const char* ident);
-
-/**
  * \brief Sets a callback function for the logging system.
  *
  * \param cb   [in] Function pointer that is called for all messages to the logging system
@@ -426,6 +418,15 @@ oms_status_enu_t oms2_setLoggingSamples(const char* cref, const int loggingSampl
  * \return           Error status
  */
 oms_status_enu_t oms2_setLogFile(const char* filename);
+
+/**
+ * \brief Sets maximum log file size in MB. If the file exceeds this limit, the
+ * logging will continue on stdout.
+ *
+ * \param size   [in] maximum log file size in MB
+ * \return       Error status
+ */
+void oms2_setMaxLogFileSize(const unsigned long size);
 
 /**
  * \brief Set new temp directory
@@ -692,7 +693,7 @@ oms_status_enu_t oms2_getCurrentTime(const char* model, double* time);
 oms_status_enu_t oms2_addSignalsToResults(const char* cref, const char* regex);
 
 /**
- * \brief Add all variables that match the given regex to the result file.
+ * \brief Removes all variables that match the given regex to the result file.
  *
  * \param cref  [in] Name of the model instance
  * \param regex [in] Regular expression

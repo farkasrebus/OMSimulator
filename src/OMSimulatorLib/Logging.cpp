@@ -84,22 +84,55 @@ void Log::printStringToStream(std::ostream& stream, const std::string& type, con
   }
 
   stream << type << ": " << std::string(7 - type.size(), ' ');
-  size_t start = 0, end;
-  do
+  size_t start = 0, end = 0;
+  bool firstLine = true;
+  std::string buffer;
+  unsigned int nLines = 1;
+  while(msg[end])
   {
-    end = msg.substr(start).find("\n");
-    if(std::string::npos == end)
-      stream << msg.substr(start) << endl;
-    else
+    if (msg[end] == '\n' || msg[end] == '\r')
     {
+      buffer = msg.substr(start, end-start);
       end++;
-      stream << msg.substr(start, end);
-      if (!timeStamp.empty())
-        stream << padding << "   ";
-      stream << "         ";
       start = end;
+      nLines++;
     }
-  } while (std::string::npos != end);
+    else if (msg[end+1] == '\0')
+    {
+      buffer = msg.substr(start);
+    }
+    end++;
+
+    if (!buffer.empty())
+    {
+      if (!firstLine)
+      {
+        stream << "\n";
+        if (!timeStamp.empty())
+          stream << padding << "   ";
+        stream << "         ";
+      }
+      firstLine = false;
+      stream << buffer;
+      buffer.clear();
+    }
+  }
+  stream << endl;
+
+  if (logFile.is_open())
+  {
+    size += msg.length() + nLines*(12+timeStamp.length());
+
+    if (size > limit)
+    {
+      numWarnings++;
+      stream << timeStamp << " | warning: Log file becomes too big; switching to stdout" << endl;
+      cout << "info:    Partial logging information has been saved to \"" + filename + "\"" << endl;
+      logFile.close();
+      filename = "";
+      size = 0;
+    }
+  }
 }
 
 void Log::Info(const std::string& msg)
@@ -115,7 +148,7 @@ void Log::Info(const std::string& msg)
     log.cb(oms_message_info, msg.c_str());
 }
 
-void Log::Warning(const std::string& msg)
+oms_status_enu_t Log::Warning(const std::string& msg)
 {
   Log& log = getInstance();
   std::lock_guard<std::mutex> lock(log.m);
@@ -127,6 +160,8 @@ void Log::Warning(const std::string& msg)
 
   if (log.cb)
     log.cb(oms_message_warning, msg.c_str());
+
+  return oms_status_warning;
 }
 
 oms_status_enu_t Log::Error(const std::string& msg)
@@ -188,19 +223,20 @@ oms_status_enu_t Log::setLogFile(const std::string& filename)
   {
     log.printStringToStream(log.logFile, "info", "Logging completed properly");
     log.logFile.close();
-
-    if (log.numWarnings + log.numErrors > 0)
-    {
-      log.printStringToStream(cout, "info", std::to_string(log.numWarnings) + " warnings");
-      log.printStringToStream(cout, "info", std::to_string(log.numErrors) + " errors");
-    }
     log.printStringToStream(cout, "info", "Logging information has been saved to \"" + log.filename + "\"");
+  }
+
+  if (log.numWarnings + log.numErrors > 0)
+  {
+    log.printStringToStream(cout, "info", std::to_string(log.numWarnings) + " warnings");
+    log.printStringToStream(cout, "info", std::to_string(log.numErrors) + " errors");
   }
 
   log.numWarnings = 0;
   log.numErrors = 0;
   log.numMessages = 0;
   log.filename = filename;
+  log.size = 0;
 
   if (!filename.empty())
   {

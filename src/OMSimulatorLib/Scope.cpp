@@ -59,7 +59,7 @@ oms2::Scope::~Scope()
 
   // free memory if no one else does
   for (auto it=models.begin(); it != models.end(); it++)
-    unloadModel(it->first);
+    oms2::Model::DeleteModel(it->second);
 }
 
 oms2::Scope& oms2::Scope::GetInstance()
@@ -262,17 +262,6 @@ oms_status_enu_t oms2::Scope::reset(const ComRef& name)
     return oms_status_error;
 
   return model->reset();
-}
-
-oms_status_enu_t oms2::Scope::terminate(const ComRef& name)
-{
-  logTrace();
-
-  oms2::Model* model = getModel(name);
-  if (!model)
-    return oms_status_error;
-
-  return model->terminate();
 }
 
 oms_status_enu_t oms2::Scope::simulate(const ComRef& name)
