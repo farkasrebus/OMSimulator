@@ -25,5 +25,4 @@ oms2_initialize("TrafficLight")
 
 oms2_exportDependencyGraphs("TrafficLight","x.dot","")
 
-oms2_terminate("TrafficLight")
 oms2_unloadModel("TrafficLight")

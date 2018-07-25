@@ -67,6 +67,5 @@ oms2_initialize("ThermostatExample")
 -- TODO: simulate with ASSC
 oms2_simulate("ThermostatExample")
 --  terminate
-oms2_terminate("ThermostatExample")
 oms2_unloadModel("ThermostatExample")
 

@@ -19,5 +19,4 @@ oms2_setCommunicationInterval("TrafficLight", 0.01)
 oms2_initialize("TrafficLight")
 oms2_simulate("TrafficLight")
 
-oms2_terminate("TrafficLight")
 oms2_unloadModel("TrafficLight")

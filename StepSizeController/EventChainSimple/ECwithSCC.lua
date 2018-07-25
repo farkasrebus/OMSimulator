@@ -27,5 +27,4 @@ sm.events["EventChain.Link2:eventOutput"]=true
 
 oms2_simulateWithASSC("EventChain",0.01,sm,0.001,1.0)
 
-oms2_terminate("EventChain")
 oms2_unloadModel("EventChain")

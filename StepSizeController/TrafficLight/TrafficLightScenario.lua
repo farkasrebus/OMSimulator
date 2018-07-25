@@ -64,6 +64,5 @@ end
 
 dist=oms2_getReal("TrafficLight.Car:distance")
 
-oms2_terminate("TrafficLight")
 oms2_unloadModel("TrafficLight")
 

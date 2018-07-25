@@ -18,5 +18,4 @@ oms2_initialize("EventChain")
 oms2_exportDependencyGraphs("EventChain","x.dot","dependency.dot")
 oms2_simulate("EventChain")
 
-oms2_terminate("EventChain")
 oms2_unloadModel("EventChain")

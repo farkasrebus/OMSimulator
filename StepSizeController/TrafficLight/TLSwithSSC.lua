@@ -20,6 +20,5 @@ oms2_initialize("TrafficLight")
 
 simulateWithAdaptiveStepSizeControl("TrafficLight","TrafficLight.Car:criticalSituation",0.01,0.005,5.0)
 
-oms2_terminate("TrafficLight")
 oms2_unloadModel("TrafficLight")
 
