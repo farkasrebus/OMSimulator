@@ -48,8 +48,35 @@ function SensitivityModel:create()
 	local sm = {}
 	setmetatable(sm,SensitivityModel)
 	sm.events = {} -- discrete events - set of variables, where any change is interesting
-	sm.zeroCrossings = {} -- maps from variable name to step size adjustment based on value
+	sm.zeroCrossings = {} -- maps from variable name to an object with a function getStepSize()
 	return sm
+end
+
+BandModel = {}
+BandModel.__index = BandModel
+
+function BandModel:create()
+	local bm = {}
+	setmetatable(bm,BandModel)
+	bm.bounds = {} -- maps the lower bound of the band to the upper bound
+	bm.stepSizes = {} -- maps the lower bound of the band to the step size
+ 	return bm
+end
+
+
+function BandModel:addBand(bandMinValue,bandMaxValue,stepSize)
+	self.bounds[bandMinValue]=bandMaxValue
+	self.stepSizes[bandMinValue]=stepSize
+end
+
+function BandModel:getStepSize(value)
+	for min,max in pairs(self.bounds)
+	do
+		if (value >= min and value <=max) then
+			return self.stepSizes[min]
+		end
+	end
+	return nil
 end
 
 -- step size control based on a sensitivity model
@@ -87,10 +114,10 @@ function getNextStepSize(prevValues,zeroCrossings,communicationInterval,imin)
 	else
 		-- zero crossings
 		local zc=zeroCrossings
-		for variable,bandFunc in pairs(zc)
+		for variable,bands in pairs(zc)
 		do
-			value=oms2_getReal(k)
-			step=bandFunc(value)
+			value=oms2_getReal(variable)
+			step=bands:getStepSize(value)
 			if (step ~= nil and step<minStepSize) then
 				minStepSize=step
 			end
