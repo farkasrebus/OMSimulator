@@ -3,9 +3,9 @@
 /.vscode/
 /build/
 /install/
-/StepSizeController/CaseStudy/*.log
-/StepSizeController/CaseStudy/*.mat
-/StepSizeController/CaseStudy/temp_*
+/StepSizeController/*.log
+/StepSizeController/*.mat
+/StepSizeController/*/temp_*
 
 
 # local files
