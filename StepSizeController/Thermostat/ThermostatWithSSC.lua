@@ -61,19 +61,19 @@ oms2_addConnection("ThermostatExample",
 
 oms2_setResultFile("ThermostatExample", "ThermostatSSC.mat")
 
-oms2_setStopTime("ThermostatExample", 1000.0)
 oms2_setCommunicationInterval("ThermostatExample", 10.0)
 oms2_initialize("ThermostatExample")
 
 bm=BandModel:create()
 bm:addBand(18.0,19.02,0.1)
 bm:addBand(19.02,19.1,1.0)
-bm:addBand(19.1,22.0,10.0)
+bm:addBand(19.1,24.0,10.0)
+bm:addBand(24.0,26.0,0.1)
 
 sm=SensitivityModel:create()
 sm.zeroCrossings["ThermostatExample.Room:temperatureStreamPort1.measured_temperature1.measured_temperature[1]"]=bm
 
 local x = os.clock()
-oms2_simulateWithASSC("ThermostatExample",10.0,sm,0.1,1000.0)
+oms2_simulateWithASSC("ThermostatExample",10.0,sm,0.1,3000.0)
 print(string.format("elapsed time: %.2f\n", os.clock() - x))
 oms2_unloadModel("ThermostatExample")
