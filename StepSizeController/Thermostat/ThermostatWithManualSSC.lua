@@ -1,11 +1,7 @@
-package.path = package.path .. ";../StepSizeController.lua"
-
-require("StepSizeController")
-
-oms2_setLogFile("ThermostatSSC.log")
+oms2_setLogFile("ThermostatManual.log")
 oms2_setTempDirectory("./tmp")
 oms2_newFMIModel("ThermostatExample")
-
+-- instantiate FMU
 oms2_addFMU("ThermostatExample","advancedThermostat.fmu","Thermostat")
 ---[[
 oms2_addFMU("ThermostatExample","Room.fmu","Room")
@@ -61,22 +57,39 @@ oms2_addConnection("ThermostatExample",
 oms2_addConnection("ThermostatExample",
 	"Room:heatingControlPort1.turn_heating_on1.counter",
 	"Thermostat:Thermostat_HeatingControlPort_turn_heating_on")--]]
+-- set result file
+oms2_setResultFile("ThermostatExample", "ThermostatManual.mat")
+-- configure simulation
 
-oms2_setResultFile("ThermostatExample", "ThermostatSSC.mat")
-
-oms2_setCommunicationInterval("ThermostatExample", 10.0)
 oms2_initialize("ThermostatExample")
 
-bm=BandModel:create()
-bm:addBand(18.0,19.02,0.1)
-bm:addBand(19.02,19.1,1.0)
-bm:addBand(19.1,24.0,10.0)
-bm:addBand(24.0,26.0,0.1)
-
-sm=SensitivityModel:create()
-sm.zeroCrossings["ThermostatExample.Room:temperatureStreamPort1.measured_temperature1.measured_temperature[1]"]=bm
-
 local x = os.clock()
-oms2_simulateWithASSC("ThermostatExample",10.0,sm,0.1,3000.0)
+
+oms2_setCommunicationInterval("ThermostatExample", 10.0)
+oms2_doSteps("ThermostatExample", 32)
+-- The simulation is at 320 time units, the temperature just went under 19.1 C
+oms2_setCommunicationInterval("ThermostatExample", 1.0)
+oms2_doSteps("ThermostatExample", 18)
+-- The simulation is at 339 time units, the temperature just went under 19.02 C
+oms2_setCommunicationInterval("ThermostatExample", 0.1)
+oms2_doSteps("ThermostatExample", 124)
+-- The simulation is at 350.4 time units, the temperature just went over 19.02 C
+oms2_setCommunicationInterval("ThermostatExample", 1.0)
+oms2_doSteps("ThermostatExample", 25)
+-- The simulation is at 375.4 time units, the temperature just went over 19.1 C
+oms2_setCommunicationInterval("ThermostatExample", 10.0)
+oms2_doSteps("ThermostatExample", 63)
+-- The simulation is at 1005.4 time units, simulation over
+
 print(string.format("elapsed time: %.2f\n", os.clock() - x))
+
+--[[oms2_simulate("ThermostatExample")
+temp_therm_after_step2=oms2_getReal("ThermostatExample.Thermostat:Thermostat_TemperatureStreamPort_measured_temperature_measured_temperature")
+temp_room_after_step2=oms2_getReal("ThermostatExample.Room:temperatureStreamPort1.measured_temperature1.measured_temperature[1]")
+--[[
+print("Thermostat2: "..temp_therm_after_step2)
+print("Room2: "..temp_room_after_step2)--]]
+--]]
+
+--  terminate
 oms2_unloadModel("ThermostatExample")

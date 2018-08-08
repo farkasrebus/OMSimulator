@@ -3,12 +3,16 @@ package.path = package.path .. ";../StepSizeController.lua"
 require("StepSizeController")
 --]]
 
+-- oms2_setLoggingLevel(2)
 oms2_setLogFile("ThermostatConstant.log")
 oms2_setTempDirectory("./tmp")
 oms2_newFMIModel("ThermostatExample")
 -- instantiate FMU
 oms2_addFMU("ThermostatExample","advancedThermostat.fmu","Thermostat")
 oms2_addFMU("ThermostatExample","Room.fmu","Room")
+oms2_addSolver("ThermostatExample", "solver", "internal")
+oms2_connectSolver("ThermostatExample", "Room", "solver")
+oms2_connectSolver("ThermostatExample", "Thermostat", "solver")
 -- add connections
 oms2_addConnection("ThermostatExample",
 	"Thermostat:Thermostat_HeatingControlPort_set_hysteresis_intervallum_hysteresis_intervallum",
@@ -62,9 +66,9 @@ oms2_addConnection("ThermostatExample",
 oms2_setResultFile("ThermostatExample", "ThermostatConstant.mat")
 -- configure simulation
 oms2_setStopTime("ThermostatExample", 1000.0)
-oms2_setCommunicationInterval("ThermostatExample", 0.1)
+oms2_setCommunicationInterval("ThermostatExample", 1.0)
 oms2_initialize("ThermostatExample")
--- TODO: simulate with ASSC
+
 local x = os.clock()
 oms2_simulate("ThermostatExample")
 print(string.format("elapsed time: %.2f\n", os.clock() - x))

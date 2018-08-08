@@ -5,6 +5,9 @@ status = oms2_newFMIModel("TrafficLight")
 -- instantiate FMU
 status = oms2_addFMU("TrafficLight", "TrafficLightScenario_Car.fmu", "Car")
 status = oms2_addFMU("TrafficLight", "TrafficLightScenario_DummyTrafficLight.fmu", "Light")
+oms2_addSolver("TrafficLight", "solver", "internal")
+oms2_connectSolver("TrafficLight", "Car", "solver")
+oms2_connectSolver("TrafficLight", "Light", "solver")
 
 -- add connections: connect(light.color,car.lightColorInteger);
 oms2_addConnection("TrafficLight", "Car:color", "Light:color")

@@ -5,6 +5,9 @@ oms2_newFMIModel("ThermostatExample")
 oms2_addFMU("ThermostatExample","advancedThermostat.fmu","Thermostat")
 ---[[
 oms2_addFMU("ThermostatExample","Room.fmu","Room")
+oms2_addSolver("ThermostatExample", "solver", "internal")
+oms2_connectSolver("ThermostatExample", "Room", "solver")
+oms2_connectSolver("ThermostatExample", "Thermostat", "solver")
 -- add connections
 oms2_addConnection("ThermostatExample",
 	"Thermostat:Thermostat_HeatingControlPort_set_hysteresis_intervallum_hysteresis_intervallum",

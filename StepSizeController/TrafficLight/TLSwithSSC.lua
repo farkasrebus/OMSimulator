@@ -7,6 +7,9 @@ oms2_newFMIModel("TrafficLight")
 -- instantiate FMU
 status = oms2_addFMU("TrafficLight", "TrafficLightScenario_Car.fmu", "Car")
 status = oms2_addFMU("TrafficLight", "TrafficLightScenario_DummyTrafficLight.fmu", "Light")
+oms2_addSolver("TrafficLight", "solver", "internal")
+oms2_connectSolver("TrafficLight", "Car", "solver")
+oms2_connectSolver("TrafficLight", "Light", "solver")
 -- add connections: connect(light.color,car.lightColorInteger);
 oms2_addConnection("TrafficLight", "Car:color", "Light:color")
 -- set result file
@@ -18,7 +21,15 @@ oms2_setCommunicationInterval("TrafficLight", 0.01)
 
 oms2_initialize("TrafficLight")
 
-simulateWithAdaptiveStepSizeControl("TrafficLight","TrafficLight.Car:criticalSituation",0.01,0.005,5.0)
+bm=BandModel:create()
+bm:addBand(-10.0,0.0,0.01)
+bm:addBand(0.0,10.0,0.005)
+bm:addBand(10.0,20.0,0.01)
+
+sm=SensitivityModel:create()
+sm.zeroCrossings["TrafficLight.Car:distance"]=bm
+
+oms2_simulateWithASSC("TrafficLight",0.01,sm,0.005,5.0)
 
 oms2_unloadModel("TrafficLight")
 
