@@ -1,0 +1,4 @@
+Wed Aug 08 11:49:42 2018 | info:    Initializing logging (OMSimulator v2.0.0-dev-576-g0f418cf-linux)
+Wed Aug 08 11:49:42 2018 | info:    New temp directory: "/home/farkasr/git/OMSimulator/StepSizeController/Thermostat/tmp"
+Wed Aug 08 11:49:42 2018 | warning: No solver instance is assigned to FMU "Room"; A default solver will be selected: euler
+Wed Aug 08 11:49:42 2018 | warning: No solver instance is assigned to FMU "Thermostat"; A default solver will be selected: internal

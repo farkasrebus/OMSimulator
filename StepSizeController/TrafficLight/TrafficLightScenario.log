@@ -1,5 +1,0 @@
-Wed Jul 25 14:03:13 2018 | info:    Initializing logging (OMSimulator v2.0.0-dev-559-g6c7142d-linux)
-Wed Jul 25 14:03:13 2018 | info:    New temp directory: "/home/farkasr/git/OMSimulator/StepSizeController/TrafficLight/tmp"
-Wed Jul 25 14:03:13 2018 | info:    Result file: TrafficLightScenario.mat (bufferSize=1)
-Wed Jul 25 14:03:13 2018 | info:    Removed model from scope: TrafficLight
-Wed Jul 25 14:03:13 2018 | info:    Logging completed properly

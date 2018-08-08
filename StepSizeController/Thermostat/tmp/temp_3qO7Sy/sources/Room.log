@@ -1,0 +1,558 @@
+make: Entering directory `/tmp/OpenModelica_m_krisztian/OMEdit/Room.fmutmp/sources'
+x86_64-linux-gnu-gcc -Os -flto -fno-stack-protector -Wno-parentheses-equality -Wno-unused-variable -fPIC -fdollars-in-identifiers -DOMC_MINIMAL_RUNTIME=1 -DCMINPACK_NO_DLL=1 -Iinclude/ -Iinclude/fmi2 -I.    -DOMC_MODEL_PREFIX=Room -DOMC_NUM_MIXED_SYSTEMS=0 -DOMC_NUM_LINEAR_SYSTEMS=2 -DOMC_NUM_NONLINEAR_SYSTEMS=0 -DOMC_NDELAY_EXPRESSIONS=0 -DOMC_NVAR_STRING=0  -c -o Room_FMU.o Room_FMU.c
+x86_64-linux-gnu-gcc -Os -flto -fno-stack-protector -Wno-parentheses-equality -Wno-unused-variable -fPIC -fdollars-in-identifiers -DOMC_MINIMAL_RUNTIME=1 -DCMINPACK_NO_DLL=1 -Iinclude/ -Iinclude/fmi2 -I.    -DOMC_MODEL_PREFIX=Room -DOMC_NUM_MIXED_SYSTEMS=0 -DOMC_NUM_LINEAR_SYSTEMS=2 -DOMC_NUM_NONLINEAR_SYSTEMS=0 -DOMC_NDELAY_EXPRESSIONS=0 -DOMC_NVAR_STRING=0  -c -o Room.o Room.c
+x86_64-linux-gnu-gcc -Os -flto -fno-stack-protector -Wno-parentheses-equality -Wno-unused-variable -fPIC -fdollars-in-identifiers -DOMC_MINIMAL_RUNTIME=1 -DCMINPACK_NO_DLL=1 -Iinclude/ -Iinclude/fmi2 -I.    -DOMC_MODEL_PREFIX=Room -DOMC_NUM_MIXED_SYSTEMS=0 -DOMC_NUM_LINEAR_SYSTEMS=2 -DOMC_NUM_NONLINEAR_SYSTEMS=0 -DOMC_NDELAY_EXPRESSIONS=0 -DOMC_NVAR_STRING=0  -c -o Room_functions.o Room_functions.c
+x86_64-linux-gnu-gcc -Os -flto -fno-stack-protector -Wno-parentheses-equality -Wno-unused-variable -fPIC -fdollars-in-identifiers -DOMC_MINIMAL_RUNTIME=1 -DCMINPACK_NO_DLL=1 -Iinclude/ -Iinclude/fmi2 -I.    -DOMC_MODEL_PREFIX=Room -DOMC_NUM_MIXED_SYSTEMS=0 -DOMC_NUM_LINEAR_SYSTEMS=2 -DOMC_NUM_NONLINEAR_SYSTEMS=0 -DOMC_NDELAY_EXPRESSIONS=0 -DOMC_NVAR_STRING=0  -c -o Room_records.o Room_records.c
+x86_64-linux-gnu-gcc -Os -flto -fno-stack-protector -Wno-parentheses-equality -Wno-unused-variable -fPIC -fdollars-in-identifiers -DOMC_MINIMAL_RUNTIME=1 -DCMINPACK_NO_DLL=1 -Iinclude/ -Iinclude/fmi2 -I.    -DOMC_MODEL_PREFIX=Room -DOMC_NUM_MIXED_SYSTEMS=0 -DOMC_NUM_LINEAR_SYSTEMS=2 -DOMC_NUM_NONLINEAR_SYSTEMS=0 -DOMC_NDELAY_EXPRESSIONS=0 -DOMC_NVAR_STRING=0  -c -o Room_01exo.o Room_01exo.c
+x86_64-linux-gnu-gcc -Os -flto -fno-stack-protector -Wno-parentheses-equality -Wno-unused-variable -fPIC -fdollars-in-identifiers -DOMC_MINIMAL_RUNTIME=1 -DCMINPACK_NO_DLL=1 -Iinclude/ -Iinclude/fmi2 -I.    -DOMC_MODEL_PREFIX=Room -DOMC_NUM_MIXED_SYSTEMS=0 -DOMC_NUM_LINEAR_SYSTEMS=2 -DOMC_NUM_NONLINEAR_SYSTEMS=0 -DOMC_NDELAY_EXPRESSIONS=0 -DOMC_NVAR_STRING=0  -c -o Room_02nls.o Room_02nls.c
+x86_64-linux-gnu-gcc -Os -flto -fno-stack-protector -Wno-parentheses-equality -Wno-unused-variable -fPIC -fdollars-in-identifiers -DOMC_MINIMAL_RUNTIME=1 -DCMINPACK_NO_DLL=1 -Iinclude/ -Iinclude/fmi2 -I.    -DOMC_MODEL_PREFIX=Room -DOMC_NUM_MIXED_SYSTEMS=0 -DOMC_NUM_LINEAR_SYSTEMS=2 -DOMC_NUM_NONLINEAR_SYSTEMS=0 -DOMC_NDELAY_EXPRESSIONS=0 -DOMC_NVAR_STRING=0  -c -o Room_03lsy.o Room_03lsy.c
+x86_64-linux-gnu-gcc -Os -flto -fno-stack-protector -Wno-parentheses-equality -Wno-unused-variable -fPIC -fdollars-in-identifiers -DOMC_MINIMAL_RUNTIME=1 -DCMINPACK_NO_DLL=1 -Iinclude/ -Iinclude/fmi2 -I.    -DOMC_MODEL_PREFIX=Room -DOMC_NUM_MIXED_SYSTEMS=0 -DOMC_NUM_LINEAR_SYSTEMS=2 -DOMC_NUM_NONLINEAR_SYSTEMS=0 -DOMC_NDELAY_EXPRESSIONS=0 -DOMC_NVAR_STRING=0  -c -o Room_04set.o Room_04set.c
+x86_64-linux-gnu-gcc -Os -flto -fno-stack-protector -Wno-parentheses-equality -Wno-unused-variable -fPIC -fdollars-in-identifiers -DOMC_MINIMAL_RUNTIME=1 -DCMINPACK_NO_DLL=1 -Iinclude/ -Iinclude/fmi2 -I.    -DOMC_MODEL_PREFIX=Room -DOMC_NUM_MIXED_SYSTEMS=0 -DOMC_NUM_LINEAR_SYSTEMS=2 -DOMC_NUM_NONLINEAR_SYSTEMS=0 -DOMC_NDELAY_EXPRESSIONS=0 -DOMC_NVAR_STRING=0  -c -o Room_05evt.o Room_05evt.c
+x86_64-linux-gnu-gcc -Os -flto -fno-stack-protector -Wno-parentheses-equality -Wno-unused-variable -fPIC -fdollars-in-identifiers -DOMC_MINIMAL_RUNTIME=1 -DCMINPACK_NO_DLL=1 -Iinclude/ -Iinclude/fmi2 -I.    -DOMC_MODEL_PREFIX=Room -DOMC_NUM_MIXED_SYSTEMS=0 -DOMC_NUM_LINEAR_SYSTEMS=2 -DOMC_NUM_NONLINEAR_SYSTEMS=0 -DOMC_NDELAY_EXPRESSIONS=0 -DOMC_NVAR_STRING=0  -c -o Room_06inz.o Room_06inz.c
+x86_64-linux-gnu-gcc -Os -flto -fno-stack-protector -Wno-parentheses-equality -Wno-unused-variable -fPIC -fdollars-in-identifiers -DOMC_MINIMAL_RUNTIME=1 -DCMINPACK_NO_DLL=1 -Iinclude/ -Iinclude/fmi2 -I.    -DOMC_MODEL_PREFIX=Room -DOMC_NUM_MIXED_SYSTEMS=0 -DOMC_NUM_LINEAR_SYSTEMS=2 -DOMC_NUM_NONLINEAR_SYSTEMS=0 -DOMC_NDELAY_EXPRESSIONS=0 -DOMC_NVAR_STRING=0  -c -o Room_07dly.o Room_07dly.c
+x86_64-linux-gnu-gcc -Os -flto -fno-stack-protector -Wno-parentheses-equality -Wno-unused-variable -fPIC -fdollars-in-identifiers -DOMC_MINIMAL_RUNTIME=1 -DCMINPACK_NO_DLL=1 -Iinclude/ -Iinclude/fmi2 -I.    -DOMC_MODEL_PREFIX=Room -DOMC_NUM_MIXED_SYSTEMS=0 -DOMC_NUM_LINEAR_SYSTEMS=2 -DOMC_NUM_NONLINEAR_SYSTEMS=0 -DOMC_NDELAY_EXPRESSIONS=0 -DOMC_NVAR_STRING=0  -c -o Room_08bnd.o Room_08bnd.c
+x86_64-linux-gnu-gcc -Os -flto -fno-stack-protector -Wno-parentheses-equality -Wno-unused-variable -fPIC -fdollars-in-identifiers -DOMC_MINIMAL_RUNTIME=1 -DCMINPACK_NO_DLL=1 -Iinclude/ -Iinclude/fmi2 -I.    -DOMC_MODEL_PREFIX=Room -DOMC_NUM_MIXED_SYSTEMS=0 -DOMC_NUM_LINEAR_SYSTEMS=2 -DOMC_NUM_NONLINEAR_SYSTEMS=0 -DOMC_NDELAY_EXPRESSIONS=0 -DOMC_NVAR_STRING=0  -c -o Room_09alg.o Room_09alg.c
+x86_64-linux-gnu-gcc -Os -flto -fno-stack-protector -Wno-parentheses-equality -Wno-unused-variable -fPIC -fdollars-in-identifiers -DOMC_MINIMAL_RUNTIME=1 -DCMINPACK_NO_DLL=1 -Iinclude/ -Iinclude/fmi2 -I.    -DOMC_MODEL_PREFIX=Room -DOMC_NUM_MIXED_SYSTEMS=0 -DOMC_NUM_LINEAR_SYSTEMS=2 -DOMC_NUM_NONLINEAR_SYSTEMS=0 -DOMC_NDELAY_EXPRESSIONS=0 -DOMC_NVAR_STRING=0  -c -o Room_10asr.o Room_10asr.c
+x86_64-linux-gnu-gcc -Os -flto -fno-stack-protector -Wno-parentheses-equality -Wno-unused-variable -fPIC -fdollars-in-identifiers -DOMC_MINIMAL_RUNTIME=1 -DCMINPACK_NO_DLL=1 -Iinclude/ -Iinclude/fmi2 -I.    -DOMC_MODEL_PREFIX=Room -DOMC_NUM_MIXED_SYSTEMS=0 -DOMC_NUM_LINEAR_SYSTEMS=2 -DOMC_NUM_NONLINEAR_SYSTEMS=0 -DOMC_NDELAY_EXPRESSIONS=0 -DOMC_NVAR_STRING=0  -c -o Room_11mix.o Room_11mix.c
+x86_64-linux-gnu-gcc -Os -flto -fno-stack-protector -Wno-parentheses-equality -Wno-unused-variable -fPIC -fdollars-in-identifiers -DOMC_MINIMAL_RUNTIME=1 -DCMINPACK_NO_DLL=1 -Iinclude/ -Iinclude/fmi2 -I.    -DOMC_MODEL_PREFIX=Room -DOMC_NUM_MIXED_SYSTEMS=0 -DOMC_NUM_LINEAR_SYSTEMS=2 -DOMC_NUM_NONLINEAR_SYSTEMS=0 -DOMC_NDELAY_EXPRESSIONS=0 -DOMC_NVAR_STRING=0  -c -o Room_12jac.o Room_12jac.c
+x86_64-linux-gnu-gcc -Os -flto -fno-stack-protector -Wno-parentheses-equality -Wno-unused-variable -fPIC -fdollars-in-identifiers -DOMC_MINIMAL_RUNTIME=1 -DCMINPACK_NO_DLL=1 -Iinclude/ -Iinclude/fmi2 -I.    -DOMC_MODEL_PREFIX=Room -DOMC_NUM_MIXED_SYSTEMS=0 -DOMC_NUM_LINEAR_SYSTEMS=2 -DOMC_NUM_NONLINEAR_SYSTEMS=0 -DOMC_NDELAY_EXPRESSIONS=0 -DOMC_NVAR_STRING=0  -c -o Room_13opt.o Room_13opt.c
+x86_64-linux-gnu-gcc -Os -flto -fno-stack-protector -Wno-parentheses-equality -Wno-unused-variable -fPIC -fdollars-in-identifiers -DOMC_MINIMAL_RUNTIME=1 -DCMINPACK_NO_DLL=1 -Iinclude/ -Iinclude/fmi2 -I.    -DOMC_MODEL_PREFIX=Room -DOMC_NUM_MIXED_SYSTEMS=0 -DOMC_NUM_LINEAR_SYSTEMS=2 -DOMC_NUM_NONLINEAR_SYSTEMS=0 -DOMC_NDELAY_EXPRESSIONS=0 -DOMC_NVAR_STRING=0  -c -o Room_14lnz.o Room_14lnz.c
+x86_64-linux-gnu-gcc -Os -flto -fno-stack-protector -Wno-parentheses-equality -Wno-unused-variable -fPIC -fdollars-in-identifiers -DOMC_MINIMAL_RUNTIME=1 -DCMINPACK_NO_DLL=1 -Iinclude/ -Iinclude/fmi2 -I.    -DOMC_MODEL_PREFIX=Room -DOMC_NUM_MIXED_SYSTEMS=0 -DOMC_NUM_LINEAR_SYSTEMS=2 -DOMC_NUM_NONLINEAR_SYSTEMS=0 -DOMC_NDELAY_EXPRESSIONS=0 -DOMC_NVAR_STRING=0  -c -o Room_15syn.o Room_15syn.c
+x86_64-linux-gnu-gcc -Os -flto -fno-stack-protector -Wno-parentheses-equality -Wno-unused-variable -fPIC -fdollars-in-identifiers -DOMC_MINIMAL_RUNTIME=1 -DCMINPACK_NO_DLL=1 -Iinclude/ -Iinclude/fmi2 -I.    -DOMC_MODEL_PREFIX=Room -DOMC_NUM_MIXED_SYSTEMS=0 -DOMC_NUM_LINEAR_SYSTEMS=2 -DOMC_NUM_NONLINEAR_SYSTEMS=0 -DOMC_NDELAY_EXPRESSIONS=0 -DOMC_NVAR_STRING=0  -c -o Room_16dae.o Room_16dae.c
+x86_64-linux-gnu-gcc -Os -flto -fno-stack-protector -Wno-parentheses-equality -Wno-unused-variable -fPIC -fdollars-in-identifiers -DOMC_MINIMAL_RUNTIME=1 -DCMINPACK_NO_DLL=1 -Iinclude/ -Iinclude/fmi2 -I.    -DOMC_MODEL_PREFIX=Room -DOMC_NUM_MIXED_SYSTEMS=0 -DOMC_NUM_LINEAR_SYSTEMS=2 -DOMC_NUM_NONLINEAR_SYSTEMS=0 -DOMC_NDELAY_EXPRESSIONS=0 -DOMC_NVAR_STRING=0  -c -o Room_17inl.o Room_17inl.c
+x86_64-linux-gnu-gcc -Os -flto -fno-stack-protector -Wno-parentheses-equality -Wno-unused-variable -fPIC -fdollars-in-identifiers -DOMC_MINIMAL_RUNTIME=1 -DCMINPACK_NO_DLL=1 -Iinclude/ -Iinclude/fmi2 -I.    -DOMC_MODEL_PREFIX=Room -DOMC_NUM_MIXED_SYSTEMS=0 -DOMC_NUM_LINEAR_SYSTEMS=2 -DOMC_NUM_NONLINEAR_SYSTEMS=0 -DOMC_NDELAY_EXPRESSIONS=0 -DOMC_NVAR_STRING=0  -c -o Room_init_fmu.o Room_init_fmu.c
+x86_64-linux-gnu-gcc -Os -flto -fno-stack-protector -Wno-parentheses-equality -Wno-unused-variable -fPIC -fdollars-in-identifiers -DOMC_MINIMAL_RUNTIME=1 -DCMINPACK_NO_DLL=1 -Iinclude/ -Iinclude/fmi2 -I.    -DOMC_MODEL_PREFIX=Room -DOMC_NUM_MIXED_SYSTEMS=0 -DOMC_NUM_LINEAR_SYSTEMS=2 -DOMC_NUM_NONLINEAR_SYSTEMS=0 -DOMC_NDELAY_EXPRESSIONS=0 -DOMC_NVAR_STRING=0  -c -o include/./gc/memory_pool.o include/./gc/memory_pool.c
+x86_64-linux-gnu-gcc -Os -flto -fno-stack-protector -Wno-parentheses-equality -Wno-unused-variable -fPIC -fdollars-in-identifiers -DOMC_MINIMAL_RUNTIME=1 -DCMINPACK_NO_DLL=1 -Iinclude/ -Iinclude/fmi2 -I.    -DOMC_MODEL_PREFIX=Room -DOMC_NUM_MIXED_SYSTEMS=0 -DOMC_NUM_LINEAR_SYSTEMS=2 -DOMC_NUM_NONLINEAR_SYSTEMS=0 -DOMC_NDELAY_EXPRESSIONS=0 -DOMC_NVAR_STRING=0  -c -o include/./util/base_array.o include/./util/base_array.c
+Room_init_fmu.c: In function 'Room_read_input_fmu':
+Room_init_fmu.c:1807:3: warning: overflow in implicit constant conversion [-Woverflow]
+   modelData->integerVarsData[0].attribute.min = -DBL_MAX;
+   ^
+Room_init_fmu.c:1808:3: warning: overflow in implicit constant conversion [-Woverflow]
+   modelData->integerVarsData[0].attribute.max = DBL_MAX;
+   ^
+Room_init_fmu.c:1820:3: warning: overflow in implicit constant conversion [-Woverflow]
+   modelData->integerVarsData[1].attribute.min = -DBL_MAX;
+   ^
+Room_init_fmu.c:1821:3: warning: overflow in implicit constant conversion [-Woverflow]
+   modelData->integerVarsData[1].attribute.max = DBL_MAX;
+   ^
+Room_init_fmu.c:1833:3: warning: overflow in implicit constant conversion [-Woverflow]
+   modelData->integerVarsData[2].attribute.min = -DBL_MAX;
+   ^
+Room_init_fmu.c:1834:3: warning: overflow in implicit constant conversion [-Woverflow]
+   modelData->integerVarsData[2].attribute.max = DBL_MAX;
+   ^
+Room_init_fmu.c:1846:3: warning: overflow in implicit constant conversion [-Woverflow]
+   modelData->integerVarsData[3].attribute.min = -DBL_MAX;
+   ^
+Room_init_fmu.c:1847:3: warning: overflow in implicit constant conversion [-Woverflow]
+   modelData->integerVarsData[3].attribute.max = DBL_MAX;
+   ^
+Room_init_fmu.c:1859:3: warning: overflow in implicit constant conversion [-Woverflow]
+   modelData->integerVarsData[4].attribute.min = -DBL_MAX;
+   ^
+Room_init_fmu.c:1860:3: warning: overflow in implicit constant conversion [-Woverflow]
+   modelData->integerVarsData[4].attribute.max = DBL_MAX;
+   ^
+Room_init_fmu.c:1872:3: warning: overflow in implicit constant conversion [-Woverflow]
+   modelData->integerVarsData[5].attribute.min = -DBL_MAX;
+   ^
+Room_init_fmu.c:1873:3: warning: overflow in implicit constant conversion [-Woverflow]
+   modelData->integerVarsData[5].attribute.max = DBL_MAX;
+   ^
+Room_init_fmu.c:1885:3: warning: overflow in implicit constant conversion [-Woverflow]
+   modelData->integerVarsData[6].attribute.min = -DBL_MAX;
+   ^
+Room_init_fmu.c:1886:3: warning: overflow in implicit constant conversion [-Woverflow]
+   modelData->integerVarsData[6].attribute.max = DBL_MAX;
+   ^
+Room_init_fmu.c:1898:3: warning: overflow in implicit constant conversion [-Woverflow]
+   modelData->integerVarsData[7].attribute.min = -DBL_MAX;
+   ^
+Room_init_fmu.c:1899:3: warning: overflow in implicit constant conversion [-Woverflow]
+   modelData->integerVarsData[7].attribute.max = DBL_MAX;
+   ^
+Room_init_fmu.c:1911:3: warning: overflow in implicit constant conversion [-Woverflow]
+   modelData->integerVarsData[8].attribute.min = -DBL_MAX;
+   ^
+Room_init_fmu.c:1912:3: warning: overflow in implicit constant conversion [-Woverflow]
+   modelData->integerVarsData[8].attribute.max = DBL_MAX;
+   ^
+Room_init_fmu.c:1924:3: warning: overflow in implicit constant conversion [-Woverflow]
+   modelData->integerVarsData[9].attribute.min = -DBL_MAX;
+   ^
+Room_init_fmu.c:1925:3: warning: overflow in implicit constant conversion [-Woverflow]
+   modelData->integerVarsData[9].attribute.max = DBL_MAX;
+   ^
+Room_init_fmu.c:1963:3: warning: overflow in implicit constant conversion [-Woverflow]
+   modelData->integerParameterData[2].attribute.min = -DBL_MAX;
+   ^
+Room_init_fmu.c:1964:3: warning: overflow in implicit constant conversion [-Woverflow]
+   modelData->integerParameterData[2].attribute.max = DBL_MAX;
+   ^
+Room_init_fmu.c:2028:3: warning: overflow in implicit constant conversion [-Woverflow]
+   modelData->integerParameterData[7].attribute.min = -DBL_MAX;
+   ^
+Room_init_fmu.c:2029:3: warning: overflow in implicit constant conversion [-Woverflow]
+   modelData->integerParameterData[7].attribute.max = DBL_MAX;
+   ^
+x86_64-linux-gnu-gcc -Os -flto -fno-stack-protector -Wno-parentheses-equality -Wno-unused-variable -fPIC -fdollars-in-identifiers -DOMC_MINIMAL_RUNTIME=1 -DCMINPACK_NO_DLL=1 -Iinclude/ -Iinclude/fmi2 -I.    -DOMC_MODEL_PREFIX=Room -DOMC_NUM_MIXED_SYSTEMS=0 -DOMC_NUM_LINEAR_SYSTEMS=2 -DOMC_NUM_NONLINEAR_SYSTEMS=0 -DOMC_NDELAY_EXPRESSIONS=0 -DOMC_NVAR_STRING=0  -c -o include/./util/boolean_array.o include/./util/boolean_array.c
+x86_64-linux-gnu-gcc -Os -flto -fno-stack-protector -Wno-parentheses-equality -Wno-unused-variable -fPIC -fdollars-in-identifiers -DOMC_MINIMAL_RUNTIME=1 -DCMINPACK_NO_DLL=1 -Iinclude/ -Iinclude/fmi2 -I.    -DOMC_MODEL_PREFIX=Room -DOMC_NUM_MIXED_SYSTEMS=0 -DOMC_NUM_LINEAR_SYSTEMS=2 -DOMC_NUM_NONLINEAR_SYSTEMS=0 -DOMC_NDELAY_EXPRESSIONS=0 -DOMC_NVAR_STRING=0  -c -o include/./util/omc_error.o include/./util/omc_error.c
+x86_64-linux-gnu-gcc -Os -flto -fno-stack-protector -Wno-parentheses-equality -Wno-unused-variable -fPIC -fdollars-in-identifiers -DOMC_MINIMAL_RUNTIME=1 -DCMINPACK_NO_DLL=1 -Iinclude/ -Iinclude/fmi2 -I.    -DOMC_MODEL_PREFIX=Room -DOMC_NUM_MIXED_SYSTEMS=0 -DOMC_NUM_LINEAR_SYSTEMS=2 -DOMC_NUM_NONLINEAR_SYSTEMS=0 -DOMC_NDELAY_EXPRESSIONS=0 -DOMC_NVAR_STRING=0  -c -o include/./util/division.o include/./util/division.c
+x86_64-linux-gnu-gcc -Os -flto -fno-stack-protector -Wno-parentheses-equality -Wno-unused-variable -fPIC -fdollars-in-identifiers -DOMC_MINIMAL_RUNTIME=1 -DCMINPACK_NO_DLL=1 -Iinclude/ -Iinclude/fmi2 -I.    -DOMC_MODEL_PREFIX=Room -DOMC_NUM_MIXED_SYSTEMS=0 -DOMC_NUM_LINEAR_SYSTEMS=2 -DOMC_NUM_NONLINEAR_SYSTEMS=0 -DOMC_NDELAY_EXPRESSIONS=0 -DOMC_NVAR_STRING=0  -c -o include/./util/generic_array.o include/./util/generic_array.c
+x86_64-linux-gnu-gcc -Os -flto -fno-stack-protector -Wno-parentheses-equality -Wno-unused-variable -fPIC -fdollars-in-identifiers -DOMC_MINIMAL_RUNTIME=1 -DCMINPACK_NO_DLL=1 -Iinclude/ -Iinclude/fmi2 -I.    -DOMC_MODEL_PREFIX=Room -DOMC_NUM_MIXED_SYSTEMS=0 -DOMC_NUM_LINEAR_SYSTEMS=2 -DOMC_NUM_NONLINEAR_SYSTEMS=0 -DOMC_NDELAY_EXPRESSIONS=0 -DOMC_NVAR_STRING=0  -c -o include/./util/index_spec.o include/./util/index_spec.c
+x86_64-linux-gnu-gcc -Os -flto -fno-stack-protector -Wno-parentheses-equality -Wno-unused-variable -fPIC -fdollars-in-identifiers -DOMC_MINIMAL_RUNTIME=1 -DCMINPACK_NO_DLL=1 -Iinclude/ -Iinclude/fmi2 -I.    -DOMC_MODEL_PREFIX=Room -DOMC_NUM_MIXED_SYSTEMS=0 -DOMC_NUM_LINEAR_SYSTEMS=2 -DOMC_NUM_NONLINEAR_SYSTEMS=0 -DOMC_NDELAY_EXPRESSIONS=0 -DOMC_NVAR_STRING=0  -c -o include/./util/integer_array.o include/./util/integer_array.c
+x86_64-linux-gnu-gcc -Os -flto -fno-stack-protector -Wno-parentheses-equality -Wno-unused-variable -fPIC -fdollars-in-identifiers -DOMC_MINIMAL_RUNTIME=1 -DCMINPACK_NO_DLL=1 -Iinclude/ -Iinclude/fmi2 -I.    -DOMC_MODEL_PREFIX=Room -DOMC_NUM_MIXED_SYSTEMS=0 -DOMC_NUM_LINEAR_SYSTEMS=2 -DOMC_NUM_NONLINEAR_SYSTEMS=0 -DOMC_NDELAY_EXPRESSIONS=0 -DOMC_NVAR_STRING=0  -c -o include/./util/list.o include/./util/list.c
+x86_64-linux-gnu-gcc -Os -flto -fno-stack-protector -Wno-parentheses-equality -Wno-unused-variable -fPIC -fdollars-in-identifiers -DOMC_MINIMAL_RUNTIME=1 -DCMINPACK_NO_DLL=1 -Iinclude/ -Iinclude/fmi2 -I.    -DOMC_MODEL_PREFIX=Room -DOMC_NUM_MIXED_SYSTEMS=0 -DOMC_NUM_LINEAR_SYSTEMS=2 -DOMC_NUM_NONLINEAR_SYSTEMS=0 -DOMC_NDELAY_EXPRESSIONS=0 -DOMC_NVAR_STRING=0  -c -o include/./util/modelica_string.o include/./util/modelica_string.c
+x86_64-linux-gnu-gcc -Os -flto -fno-stack-protector -Wno-parentheses-equality -Wno-unused-variable -fPIC -fdollars-in-identifiers -DOMC_MINIMAL_RUNTIME=1 -DCMINPACK_NO_DLL=1 -Iinclude/ -Iinclude/fmi2 -I.    -DOMC_MODEL_PREFIX=Room -DOMC_NUM_MIXED_SYSTEMS=0 -DOMC_NUM_LINEAR_SYSTEMS=2 -DOMC_NUM_NONLINEAR_SYSTEMS=0 -DOMC_NDELAY_EXPRESSIONS=0 -DOMC_NVAR_STRING=0  -c -o include/./util/real_array.o include/./util/real_array.c
+x86_64-linux-gnu-gcc -Os -flto -fno-stack-protector -Wno-parentheses-equality -Wno-unused-variable -fPIC -fdollars-in-identifiers -DOMC_MINIMAL_RUNTIME=1 -DCMINPACK_NO_DLL=1 -Iinclude/ -Iinclude/fmi2 -I.    -DOMC_MODEL_PREFIX=Room -DOMC_NUM_MIXED_SYSTEMS=0 -DOMC_NUM_LINEAR_SYSTEMS=2 -DOMC_NUM_NONLINEAR_SYSTEMS=0 -DOMC_NDELAY_EXPRESSIONS=0 -DOMC_NVAR_STRING=0  -c -o include/./util/ringbuffer.o include/./util/ringbuffer.c
+x86_64-linux-gnu-gcc -Os -flto -fno-stack-protector -Wno-parentheses-equality -Wno-unused-variable -fPIC -fdollars-in-identifiers -DOMC_MINIMAL_RUNTIME=1 -DCMINPACK_NO_DLL=1 -Iinclude/ -Iinclude/fmi2 -I.    -DOMC_MODEL_PREFIX=Room -DOMC_NUM_MIXED_SYSTEMS=0 -DOMC_NUM_LINEAR_SYSTEMS=2 -DOMC_NUM_NONLINEAR_SYSTEMS=0 -DOMC_NDELAY_EXPRESSIONS=0 -DOMC_NVAR_STRING=0  -c -o include/./util/string_array.o include/./util/string_array.c
+Room_init_fmu.c: At top level:
+cc1: warning: unrecognized command line option "-Wno-parentheses-equality" [enabled by default]
+x86_64-linux-gnu-gcc -Os -flto -fno-stack-protector -Wno-parentheses-equality -Wno-unused-variable -fPIC -fdollars-in-identifiers -DOMC_MINIMAL_RUNTIME=1 -DCMINPACK_NO_DLL=1 -Iinclude/ -Iinclude/fmi2 -I.    -DOMC_MODEL_PREFIX=Room -DOMC_NUM_MIXED_SYSTEMS=0 -DOMC_NUM_LINEAR_SYSTEMS=2 -DOMC_NUM_NONLINEAR_SYSTEMS=0 -DOMC_NDELAY_EXPRESSIONS=0 -DOMC_NVAR_STRING=0  -c -o include/./util/utility.o include/./util/utility.c
+x86_64-linux-gnu-gcc -Os -flto -fno-stack-protector -Wno-parentheses-equality -Wno-unused-variable -fPIC -fdollars-in-identifiers -DOMC_MINIMAL_RUNTIME=1 -DCMINPACK_NO_DLL=1 -Iinclude/ -Iinclude/fmi2 -I.    -DOMC_MODEL_PREFIX=Room -DOMC_NUM_MIXED_SYSTEMS=0 -DOMC_NUM_LINEAR_SYSTEMS=2 -DOMC_NUM_NONLINEAR_SYSTEMS=0 -DOMC_NDELAY_EXPRESSIONS=0 -DOMC_NVAR_STRING=0  -c -o include/./util/varinfo.o include/./util/varinfo.c
+x86_64-linux-gnu-gcc -Os -flto -fno-stack-protector -Wno-parentheses-equality -Wno-unused-variable -fPIC -fdollars-in-identifiers -DOMC_MINIMAL_RUNTIME=1 -DCMINPACK_NO_DLL=1 -Iinclude/ -Iinclude/fmi2 -I.    -DOMC_MODEL_PREFIX=Room -DOMC_NUM_MIXED_SYSTEMS=0 -DOMC_NUM_LINEAR_SYSTEMS=2 -DOMC_NUM_NONLINEAR_SYSTEMS=0 -DOMC_NDELAY_EXPRESSIONS=0 -DOMC_NVAR_STRING=0  -c -o include/./util/ModelicaUtilities.o include/./util/ModelicaUtilities.c
+x86_64-linux-gnu-gcc -Os -flto -fno-stack-protector -Wno-parentheses-equality -Wno-unused-variable -fPIC -fdollars-in-identifiers -DOMC_MINIMAL_RUNTIME=1 -DCMINPACK_NO_DLL=1 -Iinclude/ -Iinclude/fmi2 -I.    -DOMC_MODEL_PREFIX=Room -DOMC_NUM_MIXED_SYSTEMS=0 -DOMC_NUM_LINEAR_SYSTEMS=2 -DOMC_NUM_NONLINEAR_SYSTEMS=0 -DOMC_NDELAY_EXPRESSIONS=0 -DOMC_NVAR_STRING=0  -c -o include/./util/omc_msvc.o include/./util/omc_msvc.c
+x86_64-linux-gnu-gcc -Os -flto -fno-stack-protector -Wno-parentheses-equality -Wno-unused-variable -fPIC -fdollars-in-identifiers -DOMC_MINIMAL_RUNTIME=1 -DCMINPACK_NO_DLL=1 -Iinclude/ -Iinclude/fmi2 -I.    -DOMC_MODEL_PREFIX=Room -DOMC_NUM_MIXED_SYSTEMS=0 -DOMC_NUM_LINEAR_SYSTEMS=2 -DOMC_NUM_NONLINEAR_SYSTEMS=0 -DOMC_NDELAY_EXPRESSIONS=0 -DOMC_NVAR_STRING=0  -c -o include/./util/simulation_options.o include/./util/simulation_options.c
+x86_64-linux-gnu-gcc -Os -flto -fno-stack-protector -Wno-parentheses-equality -Wno-unused-variable -fPIC -fdollars-in-identifiers -DOMC_MINIMAL_RUNTIME=1 -DCMINPACK_NO_DLL=1 -Iinclude/ -Iinclude/fmi2 -I.    -DOMC_MODEL_PREFIX=Room -DOMC_NUM_MIXED_SYSTEMS=0 -DOMC_NUM_LINEAR_SYSTEMS=2 -DOMC_NUM_NONLINEAR_SYSTEMS=0 -DOMC_NDELAY_EXPRESSIONS=0 -DOMC_NVAR_STRING=0  -c -o include/./util/cJSON.o include/./util/cJSON.c
+x86_64-linux-gnu-gcc -Os -flto -fno-stack-protector -Wno-parentheses-equality -Wno-unused-variable -fPIC -fdollars-in-identifiers -DOMC_MINIMAL_RUNTIME=1 -DCMINPACK_NO_DLL=1 -Iinclude/ -Iinclude/fmi2 -I.    -DOMC_MODEL_PREFIX=Room -DOMC_NUM_MIXED_SYSTEMS=0 -DOMC_NUM_LINEAR_SYSTEMS=2 -DOMC_NUM_NONLINEAR_SYSTEMS=0 -DOMC_NDELAY_EXPRESSIONS=0 -DOMC_NVAR_STRING=0  -c -o include/./util/rational.o include/./util/rational.c
+x86_64-linux-gnu-gcc -Os -flto -fno-stack-protector -Wno-parentheses-equality -Wno-unused-variable -fPIC -fdollars-in-identifiers -DOMC_MINIMAL_RUNTIME=1 -DCMINPACK_NO_DLL=1 -Iinclude/ -Iinclude/fmi2 -I.    -DOMC_MODEL_PREFIX=Room -DOMC_NUM_MIXED_SYSTEMS=0 -DOMC_NUM_LINEAR_SYSTEMS=2 -DOMC_NUM_NONLINEAR_SYSTEMS=0 -DOMC_NDELAY_EXPRESSIONS=0 -DOMC_NVAR_STRING=0  -c -o include/./util/modelica_string_lit.o include/./util/modelica_string_lit.c
+x86_64-linux-gnu-gcc -Os -flto -fno-stack-protector -Wno-parentheses-equality -Wno-unused-variable -fPIC -fdollars-in-identifiers -DOMC_MINIMAL_RUNTIME=1 -DCMINPACK_NO_DLL=1 -Iinclude/ -Iinclude/fmi2 -I.    -DOMC_MODEL_PREFIX=Room -DOMC_NUM_MIXED_SYSTEMS=0 -DOMC_NUM_LINEAR_SYSTEMS=2 -DOMC_NUM_NONLINEAR_SYSTEMS=0 -DOMC_NDELAY_EXPRESSIONS=0 -DOMC_NVAR_STRING=0  -c -o include/./util/omc_init.o include/./util/omc_init.c
+x86_64-linux-gnu-gcc -Os -flto -fno-stack-protector -Wno-parentheses-equality -Wno-unused-variable -fPIC -fdollars-in-identifiers -DOMC_MINIMAL_RUNTIME=1 -DCMINPACK_NO_DLL=1 -Iinclude/ -Iinclude/fmi2 -I.    -DOMC_MODEL_PREFIX=Room -DOMC_NUM_MIXED_SYSTEMS=0 -DOMC_NUM_LINEAR_SYSTEMS=2 -DOMC_NUM_NONLINEAR_SYSTEMS=0 -DOMC_NDELAY_EXPRESSIONS=0 -DOMC_NVAR_STRING=0  -c -o include/./util/omc_mmap.o include/./util/omc_mmap.c
+x86_64-linux-gnu-gcc -Os -flto -fno-stack-protector -Wno-parentheses-equality -Wno-unused-variable -fPIC -fdollars-in-identifiers -DOMC_MINIMAL_RUNTIME=1 -DCMINPACK_NO_DLL=1 -Iinclude/ -Iinclude/fmi2 -I.    -DOMC_MODEL_PREFIX=Room -DOMC_NUM_MIXED_SYSTEMS=0 -DOMC_NUM_LINEAR_SYSTEMS=2 -DOMC_NUM_NONLINEAR_SYSTEMS=0 -DOMC_NDELAY_EXPRESSIONS=0 -DOMC_NVAR_STRING=0  -c -o include/./math-support/pivot.o include/./math-support/pivot.c
+x86_64-linux-gnu-gcc -Os -flto -fno-stack-protector -Wno-parentheses-equality -Wno-unused-variable -fPIC -fdollars-in-identifiers -DOMC_MINIMAL_RUNTIME=1 -DCMINPACK_NO_DLL=1 -Iinclude/ -Iinclude/fmi2 -I.    -DOMC_MODEL_PREFIX=Room -DOMC_NUM_MIXED_SYSTEMS=0 -DOMC_NUM_LINEAR_SYSTEMS=2 -DOMC_NUM_NONLINEAR_SYSTEMS=0 -DOMC_NDELAY_EXPRESSIONS=0 -DOMC_NVAR_STRING=0  -c -o include/./simulation/simulation_info_json.o include/./simulation/simulation_info_json.c
+x86_64-linux-gnu-gcc -Os -flto -fno-stack-protector -Wno-parentheses-equality -Wno-unused-variable -fPIC -fdollars-in-identifiers -DOMC_MINIMAL_RUNTIME=1 -DCMINPACK_NO_DLL=1 -Iinclude/ -Iinclude/fmi2 -I.    -DOMC_MODEL_PREFIX=Room -DOMC_NUM_MIXED_SYSTEMS=0 -DOMC_NUM_LINEAR_SYSTEMS=2 -DOMC_NUM_NONLINEAR_SYSTEMS=0 -DOMC_NDELAY_EXPRESSIONS=0 -DOMC_NVAR_STRING=0  -c -o include/./simulation/options.o include/./simulation/options.c
+x86_64-linux-gnu-gcc -Os -flto -fno-stack-protector -Wno-parentheses-equality -Wno-unused-variable -fPIC -fdollars-in-identifiers -DOMC_MINIMAL_RUNTIME=1 -DCMINPACK_NO_DLL=1 -Iinclude/ -Iinclude/fmi2 -I.    -DOMC_MODEL_PREFIX=Room -DOMC_NUM_MIXED_SYSTEMS=0 -DOMC_NUM_LINEAR_SYSTEMS=2 -DOMC_NUM_NONLINEAR_SYSTEMS=0 -DOMC_NDELAY_EXPRESSIONS=0 -DOMC_NVAR_STRING=0  -c -o include/./simulation/simulation_omc_assert.o include/./simulation/simulation_omc_assert.c
+x86_64-linux-gnu-gcc -Os -flto -fno-stack-protector -Wno-parentheses-equality -Wno-unused-variable -fPIC -fdollars-in-identifiers -DOMC_MINIMAL_RUNTIME=1 -DCMINPACK_NO_DLL=1 -Iinclude/ -Iinclude/fmi2 -I.    -DOMC_MODEL_PREFIX=Room -DOMC_NUM_MIXED_SYSTEMS=0 -DOMC_NUM_LINEAR_SYSTEMS=2 -DOMC_NUM_NONLINEAR_SYSTEMS=0 -DOMC_NDELAY_EXPRESSIONS=0 -DOMC_NVAR_STRING=0  -c -o include/./simulation/solver/delay.o include/./simulation/solver/delay.c
+x86_64-linux-gnu-gcc -Os -flto -fno-stack-protector -Wno-parentheses-equality -Wno-unused-variable -fPIC -fdollars-in-identifiers -DOMC_MINIMAL_RUNTIME=1 -DCMINPACK_NO_DLL=1 -Iinclude/ -Iinclude/fmi2 -I.    -DOMC_MODEL_PREFIX=Room -DOMC_NUM_MIXED_SYSTEMS=0 -DOMC_NUM_LINEAR_SYSTEMS=2 -DOMC_NUM_NONLINEAR_SYSTEMS=0 -DOMC_NDELAY_EXPRESSIONS=0 -DOMC_NVAR_STRING=0  -c -o include/./simulation/solver/linearSystem.o include/./simulation/solver/linearSystem.c
+x86_64-linux-gnu-gcc -Os -flto -fno-stack-protector -Wno-parentheses-equality -Wno-unused-variable -fPIC -fdollars-in-identifiers -DOMC_MINIMAL_RUNTIME=1 -DCMINPACK_NO_DLL=1 -Iinclude/ -Iinclude/fmi2 -I.    -DOMC_MODEL_PREFIX=Room -DOMC_NUM_MIXED_SYSTEMS=0 -DOMC_NUM_LINEAR_SYSTEMS=2 -DOMC_NUM_NONLINEAR_SYSTEMS=0 -DOMC_NDELAY_EXPRESSIONS=0 -DOMC_NVAR_STRING=0  -c -o include/./simulation/solver/linearSolverLapack.o include/./simulation/solver/linearSolverLapack.c
+x86_64-linux-gnu-gcc -Os -flto -fno-stack-protector -Wno-parentheses-equality -Wno-unused-variable -fPIC -fdollars-in-identifiers -DOMC_MINIMAL_RUNTIME=1 -DCMINPACK_NO_DLL=1 -Iinclude/ -Iinclude/fmi2 -I.    -DOMC_MODEL_PREFIX=Room -DOMC_NUM_MIXED_SYSTEMS=0 -DOMC_NUM_LINEAR_SYSTEMS=2 -DOMC_NUM_NONLINEAR_SYSTEMS=0 -DOMC_NDELAY_EXPRESSIONS=0 -DOMC_NVAR_STRING=0  -c -o include/./simulation/solver/linearSolverTotalPivot.o include/./simulation/solver/linearSolverTotalPivot.c
+x86_64-linux-gnu-gcc -Os -flto -fno-stack-protector -Wno-parentheses-equality -Wno-unused-variable -fPIC -fdollars-in-identifiers -DOMC_MINIMAL_RUNTIME=1 -DCMINPACK_NO_DLL=1 -Iinclude/ -Iinclude/fmi2 -I.    -DOMC_MODEL_PREFIX=Room -DOMC_NUM_MIXED_SYSTEMS=0 -DOMC_NUM_LINEAR_SYSTEMS=2 -DOMC_NUM_NONLINEAR_SYSTEMS=0 -DOMC_NDELAY_EXPRESSIONS=0 -DOMC_NVAR_STRING=0  -c -o include/./simulation/solver/omc_math.o include/./simulation/solver/omc_math.c
+x86_64-linux-gnu-gcc -Os -flto -fno-stack-protector -Wno-parentheses-equality -Wno-unused-variable -fPIC -fdollars-in-identifiers -DOMC_MINIMAL_RUNTIME=1 -DCMINPACK_NO_DLL=1 -Iinclude/ -Iinclude/fmi2 -I.    -DOMC_MODEL_PREFIX=Room -DOMC_NUM_MIXED_SYSTEMS=0 -DOMC_NUM_LINEAR_SYSTEMS=2 -DOMC_NUM_NONLINEAR_SYSTEMS=0 -DOMC_NDELAY_EXPRESSIONS=0 -DOMC_NVAR_STRING=0  -c -o include/./simulation/solver/model_help.o include/./simulation/solver/model_help.c
+x86_64-linux-gnu-gcc -Os -flto -fno-stack-protector -Wno-parentheses-equality -Wno-unused-variable -fPIC -fdollars-in-identifiers -DOMC_MINIMAL_RUNTIME=1 -DCMINPACK_NO_DLL=1 -Iinclude/ -Iinclude/fmi2 -I.    -DOMC_MODEL_PREFIX=Room -DOMC_NUM_MIXED_SYSTEMS=0 -DOMC_NUM_LINEAR_SYSTEMS=2 -DOMC_NUM_NONLINEAR_SYSTEMS=0 -DOMC_NDELAY_EXPRESSIONS=0 -DOMC_NVAR_STRING=0  -c -o include/./simulation/solver/stateset.o include/./simulation/solver/stateset.c
+x86_64-linux-gnu-gcc -Os -flto -fno-stack-protector -Wno-parentheses-equality -Wno-unused-variable -fPIC -fdollars-in-identifiers -DOMC_MINIMAL_RUNTIME=1 -DCMINPACK_NO_DLL=1 -Iinclude/ -Iinclude/fmi2 -I.    -DOMC_MODEL_PREFIX=Room -DOMC_NUM_MIXED_SYSTEMS=0 -DOMC_NUM_LINEAR_SYSTEMS=2 -DOMC_NUM_NONLINEAR_SYSTEMS=0 -DOMC_NDELAY_EXPRESSIONS=0 -DOMC_NVAR_STRING=0  -c -o include/./simulation/solver/synchronous.o include/./simulation/solver/synchronous.c
+x86_64-linux-gnu-gcc -Os -flto -fno-stack-protector -Wno-parentheses-equality -Wno-unused-variable -fPIC -fdollars-in-identifiers -DOMC_MINIMAL_RUNTIME=1 -DCMINPACK_NO_DLL=1 -Iinclude/ -Iinclude/fmi2 -I.    -DOMC_MODEL_PREFIX=Room -DOMC_NUM_MIXED_SYSTEMS=0 -DOMC_NUM_LINEAR_SYSTEMS=2 -DOMC_NUM_NONLINEAR_SYSTEMS=0 -DOMC_NDELAY_EXPRESSIONS=0 -DOMC_NVAR_STRING=0  -c -o include/./simulation/solver/initialization/initialization.o include/./simulation/solver/initialization/initialization.c
+x86_64-linux-gnu-gcc -Os -flto -fno-stack-protector -Wno-parentheses-equality -Wno-unused-variable -fPIC -fdollars-in-identifiers -DOMC_MINIMAL_RUNTIME=1 -DCMINPACK_NO_DLL=1 -Iinclude/ -Iinclude/fmi2 -I.    -DOMC_MODEL_PREFIX=Room -DOMC_NUM_MIXED_SYSTEMS=0 -DOMC_NUM_LINEAR_SYSTEMS=2 -DOMC_NUM_NONLINEAR_SYSTEMS=0 -DOMC_NDELAY_EXPRESSIONS=0 -DOMC_NVAR_STRING=0  -c -o include/./meta/meta_modelica_catch.o include/./meta/meta_modelica_catch.c
+x86_64-linux-gnu-gcc -Os -flto -fno-stack-protector -Wno-parentheses-equality -Wno-unused-variable -fPIC -fdollars-in-identifiers -DOMC_MINIMAL_RUNTIME=1 -DCMINPACK_NO_DLL=1 -Iinclude/ -Iinclude/fmi2 -I.    -DOMC_MODEL_PREFIX=Room -DOMC_NUM_MIXED_SYSTEMS=0 -DOMC_NUM_LINEAR_SYSTEMS=2 -DOMC_NUM_NONLINEAR_SYSTEMS=0 -DOMC_NDELAY_EXPRESSIONS=0 -DOMC_NVAR_STRING=0  -c -o include/./external_solvers/dgesv.o include/./external_solvers/dgesv.c
+x86_64-linux-gnu-gcc -Os -flto -fno-stack-protector -Wno-parentheses-equality -Wno-unused-variable -fPIC -fdollars-in-identifiers -DOMC_MINIMAL_RUNTIME=1 -DCMINPACK_NO_DLL=1 -Iinclude/ -Iinclude/fmi2 -I.    -DOMC_MODEL_PREFIX=Room -DOMC_NUM_MIXED_SYSTEMS=0 -DOMC_NUM_LINEAR_SYSTEMS=2 -DOMC_NUM_NONLINEAR_SYSTEMS=0 -DOMC_NDELAY_EXPRESSIONS=0 -DOMC_NVAR_STRING=0  -c -o include/./external_solvers/dgetrf.o include/./external_solvers/dgetrf.c
+x86_64-linux-gnu-gcc -Os -flto -fno-stack-protector -Wno-parentheses-equality -Wno-unused-variable -fPIC -fdollars-in-identifiers -DOMC_MINIMAL_RUNTIME=1 -DCMINPACK_NO_DLL=1 -Iinclude/ -Iinclude/fmi2 -I.    -DOMC_MODEL_PREFIX=Room -DOMC_NUM_MIXED_SYSTEMS=0 -DOMC_NUM_LINEAR_SYSTEMS=2 -DOMC_NUM_NONLINEAR_SYSTEMS=0 -DOMC_NDELAY_EXPRESSIONS=0 -DOMC_NVAR_STRING=0  -c -o include/./external_solvers/dlamch.o include/./external_solvers/dlamch.c
+x86_64-linux-gnu-gcc -Os -flto -fno-stack-protector -Wno-parentheses-equality -Wno-unused-variable -fPIC -fdollars-in-identifiers -DOMC_MINIMAL_RUNTIME=1 -DCMINPACK_NO_DLL=1 -Iinclude/ -Iinclude/fmi2 -I.    -DOMC_MODEL_PREFIX=Room -DOMC_NUM_MIXED_SYSTEMS=0 -DOMC_NUM_LINEAR_SYSTEMS=2 -DOMC_NUM_NONLINEAR_SYSTEMS=0 -DOMC_NDELAY_EXPRESSIONS=0 -DOMC_NVAR_STRING=0  -c -o include/./external_solvers/ilaenv.o include/./external_solvers/ilaenv.c
+x86_64-linux-gnu-gcc -Os -flto -fno-stack-protector -Wno-parentheses-equality -Wno-unused-variable -fPIC -fdollars-in-identifiers -DOMC_MINIMAL_RUNTIME=1 -DCMINPACK_NO_DLL=1 -Iinclude/ -Iinclude/fmi2 -I.    -DOMC_MODEL_PREFIX=Room -DOMC_NUM_MIXED_SYSTEMS=0 -DOMC_NUM_LINEAR_SYSTEMS=2 -DOMC_NUM_NONLINEAR_SYSTEMS=0 -DOMC_NDELAY_EXPRESSIONS=0 -DOMC_NVAR_STRING=0  -c -o include/./external_solvers/xerbla.o include/./external_solvers/xerbla.c
+x86_64-linux-gnu-gcc -Os -flto -fno-stack-protector -Wno-parentheses-equality -Wno-unused-variable -fPIC -fdollars-in-identifiers -DOMC_MINIMAL_RUNTIME=1 -DCMINPACK_NO_DLL=1 -Iinclude/ -Iinclude/fmi2 -I.    -DOMC_MODEL_PREFIX=Room -DOMC_NUM_MIXED_SYSTEMS=0 -DOMC_NUM_LINEAR_SYSTEMS=2 -DOMC_NUM_NONLINEAR_SYSTEMS=0 -DOMC_NDELAY_EXPRESSIONS=0 -DOMC_NVAR_STRING=0  -c -o include/./external_solvers/dgetf2.o include/./external_solvers/dgetf2.c
+x86_64-linux-gnu-gcc -Os -flto -fno-stack-protector -Wno-parentheses-equality -Wno-unused-variable -fPIC -fdollars-in-identifiers -DOMC_MINIMAL_RUNTIME=1 -DCMINPACK_NO_DLL=1 -Iinclude/ -Iinclude/fmi2 -I.    -DOMC_MODEL_PREFIX=Room -DOMC_NUM_MIXED_SYSTEMS=0 -DOMC_NUM_LINEAR_SYSTEMS=2 -DOMC_NUM_NONLINEAR_SYSTEMS=0 -DOMC_NDELAY_EXPRESSIONS=0 -DOMC_NVAR_STRING=0  -c -o include/./external_solvers/dgetrs.o include/./external_solvers/dgetrs.c
+x86_64-linux-gnu-gcc -Os -flto -fno-stack-protector -Wno-parentheses-equality -Wno-unused-variable -fPIC -fdollars-in-identifiers -DOMC_MINIMAL_RUNTIME=1 -DCMINPACK_NO_DLL=1 -Iinclude/ -Iinclude/fmi2 -I.    -DOMC_MODEL_PREFIX=Room -DOMC_NUM_MIXED_SYSTEMS=0 -DOMC_NUM_LINEAR_SYSTEMS=2 -DOMC_NUM_NONLINEAR_SYSTEMS=0 -DOMC_NDELAY_EXPRESSIONS=0 -DOMC_NVAR_STRING=0  -c -o include/./external_solvers/dlaswp.o include/./external_solvers/dlaswp.c
+x86_64-linux-gnu-gcc -Os -flto -fno-stack-protector -Wno-parentheses-equality -Wno-unused-variable -fPIC -fdollars-in-identifiers -DOMC_MINIMAL_RUNTIME=1 -DCMINPACK_NO_DLL=1 -Iinclude/ -Iinclude/fmi2 -I.    -DOMC_MODEL_PREFIX=Room -DOMC_NUM_MIXED_SYSTEMS=0 -DOMC_NUM_LINEAR_SYSTEMS=2 -DOMC_NUM_NONLINEAR_SYSTEMS=0 -DOMC_NDELAY_EXPRESSIONS=0 -DOMC_NVAR_STRING=0  -c -o include/./external_solvers/ieeeck.o include/./external_solvers/ieeeck.c
+x86_64-linux-gnu-gcc -Os -flto -fno-stack-protector -Wno-parentheses-equality -Wno-unused-variable -fPIC -fdollars-in-identifiers -DOMC_MINIMAL_RUNTIME=1 -DCMINPACK_NO_DLL=1 -Iinclude/ -Iinclude/fmi2 -I.    -DOMC_MODEL_PREFIX=Room -DOMC_NUM_MIXED_SYSTEMS=0 -DOMC_NUM_LINEAR_SYSTEMS=2 -DOMC_NUM_NONLINEAR_SYSTEMS=0 -DOMC_NDELAY_EXPRESSIONS=0 -DOMC_NVAR_STRING=0  -c -o include/./external_solvers/iparmq.o include/./external_solvers/iparmq.c
+x86_64-linux-gnu-gcc -Os -flto -fno-stack-protector -Wno-parentheses-equality -Wno-unused-variable -fPIC -fdollars-in-identifiers -DOMC_MINIMAL_RUNTIME=1 -DCMINPACK_NO_DLL=1 -Iinclude/ -Iinclude/fmi2 -I.    -DOMC_MODEL_PREFIX=Room -DOMC_NUM_MIXED_SYSTEMS=0 -DOMC_NUM_LINEAR_SYSTEMS=2 -DOMC_NUM_NONLINEAR_SYSTEMS=0 -DOMC_NDELAY_EXPRESSIONS=0 -DOMC_NVAR_STRING=0  -c -o include/./external_solvers/dgemm.o include/./external_solvers/dgemm.c
+x86_64-linux-gnu-gcc -Os -flto -fno-stack-protector -Wno-parentheses-equality -Wno-unused-variable -fPIC -fdollars-in-identifiers -DOMC_MINIMAL_RUNTIME=1 -DCMINPACK_NO_DLL=1 -Iinclude/ -Iinclude/fmi2 -I.    -DOMC_MODEL_PREFIX=Room -DOMC_NUM_MIXED_SYSTEMS=0 -DOMC_NUM_LINEAR_SYSTEMS=2 -DOMC_NUM_NONLINEAR_SYSTEMS=0 -DOMC_NDELAY_EXPRESSIONS=0 -DOMC_NVAR_STRING=0  -c -o include/./external_solvers/dger.o include/./external_solvers/dger.c
+x86_64-linux-gnu-gcc -Os -flto -fno-stack-protector -Wno-parentheses-equality -Wno-unused-variable -fPIC -fdollars-in-identifiers -DOMC_MINIMAL_RUNTIME=1 -DCMINPACK_NO_DLL=1 -Iinclude/ -Iinclude/fmi2 -I.    -DOMC_MODEL_PREFIX=Room -DOMC_NUM_MIXED_SYSTEMS=0 -DOMC_NUM_LINEAR_SYSTEMS=2 -DOMC_NUM_NONLINEAR_SYSTEMS=0 -DOMC_NDELAY_EXPRESSIONS=0 -DOMC_NVAR_STRING=0  -c -o include/./external_solvers/dscal.o include/./external_solvers/dscal.c
+x86_64-linux-gnu-gcc -Os -flto -fno-stack-protector -Wno-parentheses-equality -Wno-unused-variable -fPIC -fdollars-in-identifiers -DOMC_MINIMAL_RUNTIME=1 -DCMINPACK_NO_DLL=1 -Iinclude/ -Iinclude/fmi2 -I.    -DOMC_MODEL_PREFIX=Room -DOMC_NUM_MIXED_SYSTEMS=0 -DOMC_NUM_LINEAR_SYSTEMS=2 -DOMC_NUM_NONLINEAR_SYSTEMS=0 -DOMC_NDELAY_EXPRESSIONS=0 -DOMC_NVAR_STRING=0  -c -o include/./external_solvers/dswap.o include/./external_solvers/dswap.c
+x86_64-linux-gnu-gcc -Os -flto -fno-stack-protector -Wno-parentheses-equality -Wno-unused-variable -fPIC -fdollars-in-identifiers -DOMC_MINIMAL_RUNTIME=1 -DCMINPACK_NO_DLL=1 -Iinclude/ -Iinclude/fmi2 -I.    -DOMC_MODEL_PREFIX=Room -DOMC_NUM_MIXED_SYSTEMS=0 -DOMC_NUM_LINEAR_SYSTEMS=2 -DOMC_NUM_NONLINEAR_SYSTEMS=0 -DOMC_NDELAY_EXPRESSIONS=0 -DOMC_NVAR_STRING=0  -c -o include/./external_solvers/dtrsm.o include/./external_solvers/dtrsm.c
+x86_64-linux-gnu-gcc -Os -flto -fno-stack-protector -Wno-parentheses-equality -Wno-unused-variable -fPIC -fdollars-in-identifiers -DOMC_MINIMAL_RUNTIME=1 -DCMINPACK_NO_DLL=1 -Iinclude/ -Iinclude/fmi2 -I.    -DOMC_MODEL_PREFIX=Room -DOMC_NUM_MIXED_SYSTEMS=0 -DOMC_NUM_LINEAR_SYSTEMS=2 -DOMC_NUM_NONLINEAR_SYSTEMS=0 -DOMC_NDELAY_EXPRESSIONS=0 -DOMC_NVAR_STRING=0  -c -o include/./external_solvers/idamax.o include/./external_solvers/idamax.c
+x86_64-linux-gnu-gcc -Os -flto -fno-stack-protector -Wno-parentheses-equality -Wno-unused-variable -fPIC -fdollars-in-identifiers -DOMC_MINIMAL_RUNTIME=1 -DCMINPACK_NO_DLL=1 -Iinclude/ -Iinclude/fmi2 -I.    -DOMC_MODEL_PREFIX=Room -DOMC_NUM_MIXED_SYSTEMS=0 -DOMC_NUM_LINEAR_SYSTEMS=2 -DOMC_NUM_NONLINEAR_SYSTEMS=0 -DOMC_NDELAY_EXPRESSIONS=0 -DOMC_NVAR_STRING=0  -c -o include/./external_solvers/lsame.o include/./external_solvers/lsame.c
+x86_64-linux-gnu-gcc -Os -flto -fno-stack-protector -Wno-parentheses-equality -Wno-unused-variable -fPIC -fdollars-in-identifiers -DOMC_MINIMAL_RUNTIME=1 -DCMINPACK_NO_DLL=1 -Iinclude/ -Iinclude/fmi2 -I.    -DOMC_MODEL_PREFIX=Room -DOMC_NUM_MIXED_SYSTEMS=0 -DOMC_NUM_LINEAR_SYSTEMS=2 -DOMC_NUM_NONLINEAR_SYSTEMS=0 -DOMC_NDELAY_EXPRESSIONS=0 -DOMC_NVAR_STRING=0  -c -o include/./external_solvers/i_nint.o include/./external_solvers/i_nint.c
+x86_64-linux-gnu-gcc -Os -flto -fno-stack-protector -Wno-parentheses-equality -Wno-unused-variable -fPIC -fdollars-in-identifiers -DOMC_MINIMAL_RUNTIME=1 -DCMINPACK_NO_DLL=1 -Iinclude/ -Iinclude/fmi2 -I.    -DOMC_MODEL_PREFIX=Room -DOMC_NUM_MIXED_SYSTEMS=0 -DOMC_NUM_LINEAR_SYSTEMS=2 -DOMC_NUM_NONLINEAR_SYSTEMS=0 -DOMC_NDELAY_EXPRESSIONS=0 -DOMC_NVAR_STRING=0  -c -o include/./external_solvers/pow_di.o include/./external_solvers/pow_di.c
+x86_64-linux-gnu-gcc -Os -flto -fno-stack-protector -Wno-parentheses-equality -Wno-unused-variable -fPIC -fdollars-in-identifiers -DOMC_MINIMAL_RUNTIME=1 -DCMINPACK_NO_DLL=1 -Iinclude/ -Iinclude/fmi2 -I.    -DOMC_MODEL_PREFIX=Room -DOMC_NUM_MIXED_SYSTEMS=0 -DOMC_NUM_LINEAR_SYSTEMS=2 -DOMC_NUM_NONLINEAR_SYSTEMS=0 -DOMC_NDELAY_EXPRESSIONS=0 -DOMC_NVAR_STRING=0  -c -o include/./external_solvers/s_cmp.o include/./external_solvers/s_cmp.c
+x86_64-linux-gnu-gcc -Os -flto -fno-stack-protector -Wno-parentheses-equality -Wno-unused-variable -fPIC -fdollars-in-identifiers -DOMC_MINIMAL_RUNTIME=1 -DCMINPACK_NO_DLL=1 -Iinclude/ -Iinclude/fmi2 -I.    -DOMC_MODEL_PREFIX=Room -DOMC_NUM_MIXED_SYSTEMS=0 -DOMC_NUM_LINEAR_SYSTEMS=2 -DOMC_NUM_NONLINEAR_SYSTEMS=0 -DOMC_NDELAY_EXPRESSIONS=0 -DOMC_NVAR_STRING=0  -c -o include/./external_solvers/s_copy.o include/./external_solvers/s_copy.c
+mkdir -p ../binaries/linux64
+x86_64-linux-gnu-gcc -shared -o Room.so Room_FMU.o Room.o Room_functions.o Room_records.o Room_01exo.o Room_02nls.o Room_03lsy.o Room_04set.o Room_05evt.o Room_06inz.o Room_07dly.o Room_08bnd.o Room_09alg.o Room_10asr.o Room_11mix.o Room_12jac.o Room_13opt.o Room_14lnz.o Room_15syn.o Room_16dae.o Room_17inl.o Room_init_fmu.o include/./gc/memory_pool.o include/./util/base_array.o include/./util/boolean_array.o include/./util/omc_error.o include/./util/division.o include/./util/generic_array.o include/./util/index_spec.o include/./util/integer_array.o include/./util/list.o include/./util/modelica_string.o include/./util/real_array.o include/./util/ringbuffer.o include/./util/string_array.o include/./util/utility.o include/./util/varinfo.o include/./util/ModelicaUtilities.o include/./util/omc_msvc.o include/./util/simulation_options.o include/./util/cJSON.o include/./util/rational.o include/./util/modelica_string_lit.o include/./util/omc_init.o include/./util/omc_mmap.o include/./math-support/pivot.o include/./simulation/simulation_info_json.o include/./simulation/options.o include/./simulation/simulation_omc_assert.o include/./simulation/solver/delay.o include/./simulation/solver/linearSystem.o include/./simulation/solver/linearSolverLapack.o include/./simulation/solver/linearSolverTotalPivot.o include/./simulation/solver/omc_math.o include/./simulation/solver/model_help.o include/./simulation/solver/stateset.o include/./simulation/solver/synchronous.o include/./simulation/solver/initialization/initialization.o include/./meta/meta_modelica_catch.o include/./external_solvers/dgesv.o include/./external_solvers/dgetrf.o include/./external_solvers/dlamch.o include/./external_solvers/ilaenv.o include/./external_solvers/xerbla.o include/./external_solvers/dgetf2.o include/./external_solvers/dgetrs.o include/./external_solvers/dlaswp.o include/./external_solvers/ieeeck.o include/./external_solvers/iparmq.o include/./external_solvers/dgemm.o include/./external_solvers/dger.o include/./external_solvers/dscal.o include/./external_solvers/dswap.o include/./external_solvers/dtrsm.o include/./external_solvers/idamax.o include/./external_solvers/lsame.o include/./external_solvers/i_nint.o include/./external_solvers/pow_di.o include/./external_solvers/s_cmp.o include/./external_solvers/s_copy.o -L"/media/m_krisztian/Data/M_Krisztian/git/opencps-hungary/models/modelica/room_controller"   -flto -shared -static-libgcc -lm -lpthread  -shared
+/usr/include/x86_64-linux-gnu/bits/stdio2.h: In function 'omc_mmap_common':
+/usr/include/x86_64-linux-gnu/bits/stdio2.h:290:2: warning: call to '__fread_chk_warn' declared with attribute warning: fread called with bigger size * nmemb than length of destination buffer [enabled by default]
+  return __fread_chk (__ptr, __bos0 (__ptr), __size, __n, __stream);
+  ^
+/usr/include/x86_64-linux-gnu/bits/stdio2.h:293:2: warning: call to '__fread_chk_warn' declared with attribute warning: fread called with bigger size * nmemb than length of destination buffer [enabled by default]
+  return __fread_chk_warn (__ptr, __bos0 (__ptr), __size, __n, __stream);
+  ^
+cp Room.so Room_FMU.libs config.log ../binaries/linux64/
+make distclean
+make[1]: Entering directory `/tmp/OpenModelica_m_krisztian/OMEdit/Room.fmutmp/sources'
+rm -f Room.def Room.o Room.a Room.so Room_FMU.o Room.o Room_functions.o Room_records.o Room_01exo.o Room_02nls.o Room_03lsy.o Room_04set.o Room_05evt.o Room_06inz.o Room_07dly.o Room_08bnd.o Room_09alg.o Room_10asr.o Room_11mix.o Room_12jac.o Room_13opt.o Room_14lnz.o Room_15syn.o Room_16dae.o Room_17inl.o Room_init_fmu.o include/./gc/memory_pool.o include/./util/base_array.o include/./util/boolean_array.o include/./util/omc_error.o include/./util/division.o include/./util/generic_array.o include/./util/index_spec.o include/./util/integer_array.o include/./util/list.o include/./util/modelica_string.o include/./util/real_array.o include/./util/ringbuffer.o include/./util/string_array.o include/./util/utility.o include/./util/varinfo.o include/./util/ModelicaUtilities.o include/./util/omc_msvc.o include/./util/simulation_options.o include/./util/cJSON.o include/./util/rational.o include/./util/modelica_string_lit.o include/./util/omc_init.o include/./util/omc_mmap.o include/./math-support/pivot.o include/./simulation/simulation_info_json.o include/./simulation/options.o include/./simulation/simulation_omc_assert.o include/./simulation/solver/delay.o include/./simulation/solver/linearSystem.o include/./simulation/solver/linearSolverLapack.o include/./simulation/solver/linearSolverTotalPivot.o include/./simulation/solver/omc_math.o include/./simulation/solver/model_help.o include/./simulation/solver/stateset.o include/./simulation/solver/synchronous.o include/./simulation/solver/initialization/initialization.o include/./meta/meta_modelica_catch.o include/./external_solvers/dgesv.o include/./external_solvers/dgetrf.o include/./external_solvers/dlamch.o include/./external_solvers/ilaenv.o include/./external_solvers/xerbla.o include/./external_solvers/dgetf2.o include/./external_solvers/dgetrs.o include/./external_solvers/dlaswp.o include/./external_solvers/ieeeck.o include/./external_solvers/iparmq.o include/./external_solvers/dgemm.o include/./external_solvers/dger.o include/./external_solvers/dscal.o include/./external_solvers/dswap.o include/./external_solvers/dtrsm.o include/./external_solvers/idamax.o include/./external_solvers/lsame.o include/./external_solvers/i_nint.o include/./external_solvers/pow_di.o include/./external_solvers/s_cmp.o include/./external_solvers/s_copy.o
+rm -f Makefile config.status config.log
+make[1]: Leaving directory `/tmp/OpenModelica_m_krisztian/OMEdit/Room.fmutmp/sources'
+cd .. && rm -f ../Room.fmu && zip -r ../Room.fmu *
+  adding: binaries/ (stored 0%)
+  adding: binaries/linux64/ (stored 0%)
+  adding: binaries/linux64/Room.so (deflated 77%)
+  adding: binaries/linux64/Room_FMU.libs (stored 0%)
+  adding: binaries/linux64/config.log (deflated 91%)
+  adding: modelDescription.xml (deflated 91%)
+  adding: sources/ (stored 0%)
+  adding: sources/Room_14lnz.c (deflated 85%)
+  adding: sources/include/ (stored 0%)
+  adding: sources/include/external_solvers/ (stored 0%)
+  adding: sources/include/external_solvers/qrfac_.c (deflated 65%)
+  adding: sources/include/external_solvers/dgetrf.c (deflated 64%)
+  adding: sources/include/external_solvers/dscal.c (deflated 58%)
+  adding: sources/include/external_solvers/dgesv.c (deflated 62%)
+  adding: sources/include/external_solvers/blaswrap.h (deflated 78%)
+  adding: sources/include/external_solvers/iparmq.c (deflated 68%)
+  adding: sources/include/external_solvers/lsame.c (deflated 60%)
+  adding: sources/include/external_solvers/hybrj_.c (deflated 71%)
+  adding: sources/include/external_solvers/dger.c (deflated 66%)
+  adding: sources/include/external_solvers/dtrsm.c (deflated 76%)
+  adding: sources/include/external_solvers/minpack.h (deflated 85%)
+  adding: sources/include/external_solvers/ilaenv.c (deflated 80%)
+  adding: sources/include/external_solvers/enorm_.c (deflated 59%)
+  adding: sources/include/external_solvers/dpmpar_.c (deflated 73%)
+  adding: sources/include/external_solvers/i_nint.c (deflated 36%)
+  adding: sources/include/external_solvers/pow_di.c (deflated 43%)
+  adding: sources/include/external_solvers/idamax.c (deflated 58%)
+  adding: sources/include/external_solvers/dlamch.c (deflated 74%)
+  adding: sources/include/external_solvers/r1mpyq_.c (deflated 65%)
+  adding: sources/include/external_solvers/s_copy.c (deflated 52%)
+  adding: sources/include/external_solvers/cminpack.h (deflated 82%)
+  adding: sources/include/external_solvers/dgetf2.c (deflated 62%)
+  adding: sources/include/external_solvers/r1updt_.c (deflated 67%)
+  adding: sources/include/external_solvers/ieeeck.c (deflated 67%)
+  adding: sources/include/external_solvers/qform_.c (deflated 60%)
+  adding: sources/include/external_solvers/dogleg_.c (deflated 66%)
+  adding: sources/include/external_solvers/dgemm.c (deflated 75%)
+  adding: sources/include/external_solvers/xerbla.c (deflated 51%)
+  adding: sources/include/external_solvers/s_cmp.c (deflated 55%)
+  adding: sources/include/external_solvers/dlaswp.c (deflated 60%)
+  adding: sources/include/external_solvers/dgetrs.c (deflated 66%)
+  adding: sources/include/external_solvers/dswap.c (deflated 59%)
+  adding: sources/include/external_solvers/f2c.h (deflated 66%)
+  adding: sources/include/external_solvers/clapack.h (deflated 91%)
+  adding: sources/include/optimization/ (stored 0%)
+  adding: sources/include/optimization/OptimizerData.h (deflated 63%)
+  adding: sources/include/optimization/OptimizerInterface.h (deflated 45%)
+  adding: sources/include/optimization/OptimizerLocalFunction.h (deflated 56%)
+  adding: sources/include/fmi2/ (stored 0%)
+  adding: sources/include/fmi2/fmi2FunctionTypes.h (deflated 73%)
+  adding: sources/include/fmi2/fmu2_model_interface.h (deflated 54%)
+  adding: sources/include/fmi2/fmu2_model_interface.c (deflated 83%)
+  adding: sources/include/fmi2/fmi2Functions.h (deflated 74%)
+  adding: sources/include/fmi2/fmi2TypesPlatform.h (deflated 61%)
+  adding: sources/include/blaswrap.h (deflated 78%)
+  adding: sources/include/openmodelica_func.h (deflated 71%)
+  adding: sources/include/gc_config_macros.h (deflated 73%)
+  adding: sources/include/ModelicaUtilities.h (deflated 66%)
+  adding: sources/include/gc_pthread_redirects.h (deflated 63%)
+  adding: sources/include/linearization/ (stored 0%)
+  adding: sources/include/linearization/linearize.h (deflated 46%)
+  adding: sources/include/gc/ (stored 0%)
+  adding: sources/include/gc/omc_gc.h (deflated 65%)
+  adding: sources/include/gc/memory_pool.c (deflated 66%)
+  adding: sources/include/gc/memory_pool.h (deflated 49%)
+  adding: sources/include/gc.h (deflated 75%)
+  adding: sources/include/sundials/ (stored 0%)
+  adding: sources/include/sundials/cvode/ (stored 0%)
+  adding: sources/include/sundials/cvode/cvode_lapack.h (deflated 71%)
+  adding: sources/include/sundials/cvode/cvode_dense.h (deflated 60%)
+  adding: sources/include/sundials/cvode/cvode_bandpre.h (deflated 65%)
+  adding: sources/include/sundials/cvode/cvode_impl.h (deflated 73%)
+  adding: sources/include/sundials/cvode/cvode_klu.h (deflated 67%)
+  adding: sources/include/sundials/cvode/cvode.h (deflated 77%)
+  adding: sources/include/sundials/cvode/cvode_spgmr.h (deflated 60%)
+  adding: sources/include/sundials/cvode/cvode_band.h (deflated 61%)
+  adding: sources/include/sundials/cvode/cvode_spbcgs.h (deflated 60%)
+  adding: sources/include/sundials/cvode/cvode_sptfqmr.h (deflated 61%)
+  adding: sources/include/sundials/cvode/cvode_sparse.h (deflated 71%)
+  adding: sources/include/sundials/cvode/cvode_direct.h (deflated 76%)
+  adding: sources/include/sundials/cvode/cvode_diag.h (deflated 69%)
+  adding: sources/include/sundials/cvode/cvode_bbdpre.h (deflated 70%)
+  adding: sources/include/sundials/cvode/cvode_spils.h (deflated 74%)
+  adding: sources/include/sundials/nvector/ (stored 0%)
+  adding: sources/include/sundials/nvector/nvector_serial.h (deflated 77%)
+  adding: sources/include/sundials/arkode/ (stored 0%)
+  adding: sources/include/sundials/arkode/arkode_spfgmr.h (deflated 72%)
+  adding: sources/include/sundials/arkode/arkode_bandpre.h (deflated 65%)
+  adding: sources/include/sundials/arkode/arkode_dense.h (deflated 69%)
+  adding: sources/include/sundials/arkode/arkode_band.h (deflated 70%)
+  adding: sources/include/sundials/arkode/arkode_spbcgs.h (deflated 71%)
+  adding: sources/include/sundials/arkode/arkode_bbdpre.h (deflated 69%)
+  adding: sources/include/sundials/arkode/arkode_pcg.h (deflated 72%)
+  adding: sources/include/sundials/arkode/arkode_sptfqmr.h (deflated 71%)
+  adding: sources/include/sundials/arkode/arkode_lapack.h (deflated 78%)
+  adding: sources/include/sundials/arkode/arkode_spgmr.h (deflated 71%)
+  adding: sources/include/sundials/arkode/arkode_spils.h (deflated 79%)
+  adding: sources/include/sundials/arkode/arkode_klu.h (deflated 79%)
+  adding: sources/include/sundials/arkode/arkode_impl.h (deflated 76%)
+  adding: sources/include/sundials/arkode/arkode_direct.h (deflated 80%)
+  adding: sources/include/sundials/arkode/arkode.h (deflated 79%)
+  adding: sources/include/sundials/arkode/arkode_sparse.h (deflated 76%)
+  adding: sources/include/sundials/idas/ (stored 0%)
+  adding: sources/include/sundials/idas/idas_spbcgs.h (deflated 67%)
+  adding: sources/include/sundials/idas/idas_sptfqmr.h (deflated 67%)
+  adding: sources/include/sundials/idas/idas_sparse.h (deflated 76%)
+  adding: sources/include/sundials/idas/idas.h (deflated 82%)
+  adding: sources/include/sundials/idas/idas_band.h (deflated 68%)
+  adding: sources/include/sundials/idas/idas_lapack.h (deflated 75%)
+  adding: sources/include/sundials/idas/idas_bbdpre.h (deflated 73%)
+  adding: sources/include/sundials/idas/idas_spgmr.h (deflated 71%)
+  adding: sources/include/sundials/idas/idas_dense.h (deflated 68%)
+  adding: sources/include/sundials/idas/idas_direct.h (deflated 82%)
+  adding: sources/include/sundials/idas/idas_impl.h (deflated 76%)
+  adding: sources/include/sundials/idas/idas_klu.h (deflated 73%)
+  adding: sources/include/sundials/idas/idas_spils.h (deflated 80%)
+  adding: sources/include/sundials/sundials/ (stored 0%)
+  adding: sources/include/sundials/sundials/sundials_sptfqmr.h (deflated 69%)
+  adding: sources/include/sundials/sundials/sundials_lapack.h (deflated 76%)
+  adding: sources/include/sundials/sundials/sundials_iterative.h (deflated 77%)
+  adding: sources/include/sundials/sundials/sundials_nvector.h (deflated 78%)
+  adding: sources/include/sundials/sundials/sundials_types.h (deflated 65%)
+  adding: sources/include/sundials/sundials/sundials_direct.h (deflated 76%)
+  adding: sources/include/sundials/sundials/sundials_fnvector.h (deflated 57%)
+  adding: sources/include/sundials/sundials/sundials_band.h (deflated 71%)
+  adding: sources/include/sundials/sundials/sundials_pcg.h (deflated 68%)
+  adding: sources/include/sundials/sundials/sundials_sparse.h (deflated 77%)
+  adding: sources/include/sundials/sundials/sundials_spbcgs.h (deflated 70%)
+  adding: sources/include/sundials/sundials/sundials_dense.h (deflated 74%)
+  adding: sources/include/sundials/sundials/sundials_spgmr.h (deflated 69%)
+  adding: sources/include/sundials/sundials/sundials_spfgmr.h (deflated 68%)
+  adding: sources/include/sundials/sundials/sundials_config.h (deflated 67%)
+  adding: sources/include/sundials/sundials/sundials_math.h (deflated 77%)
+  adding: sources/include/sundials/kinsol/ (stored 0%)
+  adding: sources/include/sundials/kinsol/kinsol_lapack.h (deflated 71%)
+  adding: sources/include/sundials/kinsol/kinsol_bbdpre.h (deflated 68%)
+  adding: sources/include/sundials/kinsol/kinsol_sptfqmr.h (deflated 64%)
+  adding: sources/include/sundials/kinsol/kinsol_spfgmr.h (deflated 63%)
+  adding: sources/include/sundials/kinsol/kinsol_klu.h (deflated 67%)
+  adding: sources/include/sundials/kinsol/kinsol.h (deflated 78%)
+  adding: sources/include/sundials/kinsol/kinsol_impl.h (deflated 74%)
+  adding: sources/include/sundials/kinsol/kinsol_spgmr.h (deflated 63%)
+  adding: sources/include/sundials/kinsol/kinsol_band.h (deflated 60%)
+  adding: sources/include/sundials/kinsol/kinsol_direct.h (deflated 76%)
+  adding: sources/include/sundials/kinsol/kinsol_dense.h (deflated 60%)
+  adding: sources/include/sundials/kinsol/kinsol_spils.h (deflated 77%)
+  adding: sources/include/sundials/kinsol/kinsol_spbcgs.h (deflated 63%)
+  adding: sources/include/sundials/kinsol/kinsol_superlumt.h (deflated 66%)
+  adding: sources/include/sundials/kinsol/kinsol_sparse.h (deflated 72%)
+  adding: sources/include/sundials/ida/ (stored 0%)
+  adding: sources/include/sundials/ida/ida_klu.h (deflated 69%)
+  adding: sources/include/sundials/ida/ida.h (deflated 79%)
+  adding: sources/include/sundials/ida/ida_dense.h (deflated 66%)
+  adding: sources/include/sundials/ida/ida_lapack.h (deflated 70%)
+  adding: sources/include/sundials/ida/ida_spbcgs.h (deflated 59%)
+  adding: sources/include/sundials/ida/ida_spils.h (deflated 75%)
+  adding: sources/include/sundials/ida/ida_impl.h (deflated 74%)
+  adding: sources/include/sundials/ida/ida_sptfqmr.h (deflated 59%)
+  adding: sources/include/sundials/ida/ida_band.h (deflated 66%)
+  adding: sources/include/sundials/ida/ida_sparse.h (deflated 76%)
+  adding: sources/include/sundials/ida/ida_bbdpre.h (deflated 70%)
+  adding: sources/include/sundials/ida/ida_spgmr.h (deflated 67%)
+  adding: sources/include/sundials/ida/ida_direct.h (deflated 80%)
+  adding: sources/include/sundials/cvodes/ (stored 0%)
+  adding: sources/include/sundials/cvodes/cvodes_band.h (deflated 66%)
+  adding: sources/include/sundials/cvodes/cvodes_diag.h (deflated 72%)
+  adding: sources/include/sundials/cvodes/cvodes_spgmr.h (deflated 67%)
+  adding: sources/include/sundials/cvodes/cvodes_direct.h (deflated 80%)
+  adding: sources/include/sundials/cvodes/cvodes.h (deflated 82%)
+  adding: sources/include/sundials/cvodes/cvodes_lapack.h (deflated 75%)
+  adding: sources/include/sundials/cvodes/cvodes_spils.h (deflated 78%)
+  adding: sources/include/sundials/cvodes/cvodes_klu.h (deflated 72%)
+  adding: sources/include/sundials/cvodes/cvodes_bandpre.h (deflated 69%)
+  adding: sources/include/sundials/cvodes/cvodes_bbdpre.h (deflated 73%)
+  adding: sources/include/sundials/cvodes/cvodes_spbcgs.h (deflated 67%)
+  adding: sources/include/sundials/cvodes/cvodes_impl.h (deflated 77%)
+  adding: sources/include/sundials/cvodes/cvodes_sptfqmr.h (deflated 67%)
+  adding: sources/include/sundials/cvodes/cvodes_sparse.h (deflated 75%)
+  adding: sources/include/sundials/cvodes/cvodes_dense.h (deflated 65%)
+  adding: sources/include/fmi/ (stored 0%)
+  adding: sources/include/OpenModelicaBootstrappingHeader.h (deflated 91%)
+  adding: sources/include/fmi1/ (stored 0%)
+  adding: sources/include/fmi1/fmu1_model_interface.c (deflated 83%)
+  adding: sources/include/fmi1/fmiModelTypes.h (deflated 58%)
+  adding: sources/include/fmi1/fmiModelFunctions.h (deflated 75%)
+  adding: sources/include/fmi1/fmu1_model_interface.h (deflated 47%)
+  adding: sources/include/simulation/ (stored 0%)
+  adding: sources/include/simulation/solver/ (stored 0%)
+  adding: sources/include/simulation/solver/initialization/ (stored 0%)
+  adding: sources/include/simulation/solver/initialization/initialization.c (deflated 77%)
+  adding: sources/include/simulation/solver/initialization/initialization.h (deflated 49%)
+  adding: sources/include/simulation/solver/embedded_server.h (deflated 50%)
+  adding: sources/include/simulation/solver/nonlinearSolverHybrd.h (deflated 56%)
+  adding: sources/include/simulation/solver/omc_math.h (deflated 71%)
+  adding: sources/include/simulation/solver/perform_qss_simulation.c (deflated 71%)
+  adding: sources/include/simulation/solver/events.h (deflated 49%)
+  adding: sources/include/simulation/solver/nonlinearValuesList.h (deflated 52%)
+  adding: sources/include/simulation/solver/synchronous.c (deflated 67%)
+  adding: sources/include/simulation/solver/delay.c (deflated 67%)
+  adding: sources/include/simulation/solver/linearSolverTotalPivot.c (deflated 69%)
+  adding: sources/include/simulation/solver/omc_math.c (deflated 84%)
+  adding: sources/include/simulation/solver/ida_solver.h (deflated 57%)
+  adding: sources/include/simulation/solver/linearSystem.c (deflated 79%)
+  adding: sources/include/simulation/solver/linearSolverLapack.h (deflated 47%)
+  adding: sources/include/simulation/solver/solver_main.h (deflated 58%)
+  adding: sources/include/simulation/solver/linearSolverLapack.c (deflated 68%)
+  adding: sources/include/simulation/solver/linearSystem.h (deflated 51%)
+  adding: sources/include/simulation/solver/stateset.h (deflated 51%)
+  adding: sources/include/simulation/solver/nonlinearSystem.h (deflated 60%)
+  adding: sources/include/simulation/solver/mixedSearchSolver.c (deflated 67%)
+  adding: sources/include/simulation/solver/perform_simulation.c (deflated 71%)
+  adding: sources/include/simulation/solver/stateset.c (deflated 74%)
+  adding: sources/include/simulation/solver/delay.h (deflated 50%)
+  adding: sources/include/simulation/solver/external_input.h (deflated 45%)
+  adding: sources/include/simulation/solver/nonlinearSystem.c (deflated 79%)
+  adding: sources/include/simulation/solver/dassl.h (deflated 56%)
+  adding: sources/include/simulation/solver/mixedSearchSolver.h (deflated 46%)
+  adding: sources/include/simulation/solver/nonlinearSolverHybrd.c (deflated 81%)
+  adding: sources/include/simulation/solver/model_help.h (deflated 69%)
+  adding: sources/include/simulation/solver/synchronous.h (deflated 50%)
+  adding: sources/include/simulation/solver/mixedSystem.h (deflated 48%)
+  adding: sources/include/simulation/solver/nonlinearSolverHomotopy.c (deflated 81%)
+  adding: sources/include/simulation/solver/nonlinearSolverHomotopy.h (deflated 46%)
+  adding: sources/include/simulation/solver/nonlinearValuesList.c (deflated 72%)
+  adding: sources/include/simulation/solver/epsilon.h (deflated 47%)
+  adding: sources/include/simulation/solver/model_help.c (deflated 83%)
+  adding: sources/include/simulation/solver/mixedSystem.c (deflated 64%)
+  adding: sources/include/simulation/solver/real_time_sync.h (deflated 46%)
+  adding: sources/include/simulation/solver/linearSolverTotalPivot.h (deflated 47%)
+  adding: sources/include/simulation/simulation_input_xml.h (deflated 47%)
+  adding: sources/include/simulation/simulation_omc_assert.c (deflated 72%)
+  adding: sources/include/simulation/results/ (stored 0%)
+  adding: sources/include/simulation/results/simulation_result.h (deflated 52%)
+  adding: sources/include/simulation/modelinfo.h (deflated 50%)
+  adding: sources/include/simulation/simulation_runtime.h (deflated 55%)
+  adding: sources/include/simulation/options.c (deflated 70%)
+  adding: sources/include/simulation/options.h (deflated 46%)
+  adding: sources/include/simulation/simulation_info_json.c (deflated 71%)
+  adding: sources/include/simulation/simulation_info_json.h (deflated 49%)
+  adding: sources/include/suitesparse/ (stored 0%)
+  adding: sources/include/suitesparse/Include/ (stored 0%)
+  adding: sources/include/suitesparse/Include/umfpack_get_lunz.h (deflated 73%)
+  adding: sources/include/suitesparse/Include/umfpack_get_symbolic.h (deflated 74%)
+  adding: sources/include/suitesparse/Include/amd.h (deflated 68%)
+  adding: sources/include/suitesparse/Include/klu.h (deflated 80%)
+  adding: sources/include/suitesparse/Include/umfpack_symbolic.h (deflated 71%)
+  adding: sources/include/suitesparse/Include/umfpack_get_numeric.h (deflated 71%)
+  adding: sources/include/suitesparse/Include/colamd.h (deflated 71%)
+  adding: sources/include/suitesparse/Include/umfpack_report_symbolic.h (deflated 69%)
+  adding: sources/include/suitesparse/Include/umfpack_report_triplet.h (deflated 71%)
+  adding: sources/include/suitesparse/Include/umfpack_wsolve.h (deflated 75%)
+  adding: sources/include/suitesparse/Include/umfpack.h (deflated 71%)
+  adding: sources/include/suitesparse/Include/amd_internal.h (deflated 71%)
+  adding: sources/include/suitesparse/Include/umfpack_free_symbolic.h (deflated 71%)
+  adding: sources/include/suitesparse/Include/umfpack_timer.h (deflated 58%)
+  adding: sources/include/suitesparse/Include/umfpack_report_numeric.h (deflated 68%)
+  adding: sources/include/suitesparse/Include/umfpack_save_numeric.h (deflated 73%)
+  adding: sources/include/suitesparse/Include/umfpack_triplet_to_col.h (deflated 68%)
+  adding: sources/include/suitesparse/Include/umfpack_report_vector.h (deflated 68%)
+  adding: sources/include/suitesparse/Include/umfpack_solve.h (deflated 71%)
+  adding: sources/include/suitesparse/Include/umfpack_report_status.h (deflated 71%)
+  adding: sources/include/suitesparse/Include/umfpack_load_symbolic.h (deflated 69%)
+  adding: sources/include/suitesparse/Include/umfpack_save_symbolic.h (deflated 74%)
+  adding: sources/include/suitesparse/Include/umfpack_scale.h (deflated 70%)
+  adding: sources/include/suitesparse/Include/umfpack_report_info.h (deflated 72%)
+  adding: sources/include/suitesparse/Include/umfpack_load_numeric.h (deflated 69%)
+  adding: sources/include/suitesparse/Include/umfpack_defaults.h (deflated 72%)
+  adding: sources/include/suitesparse/Include/umfpack_numeric.h (deflated 71%)
+  adding: sources/include/suitesparse/Include/umfpack_report_control.h (deflated 71%)
+  adding: sources/include/suitesparse/Include/umfpack_report_matrix.h (deflated 73%)
+  adding: sources/include/suitesparse/Include/umfpack_qsymbolic.h (deflated 72%)
+  adding: sources/include/suitesparse/Include/umfpack_free_numeric.h (deflated 71%)
+  adding: sources/include/suitesparse/Include/umfpack_transpose.h (deflated 71%)
+  adding: sources/include/suitesparse/Include/umfpack_report_perm.h (deflated 69%)
+  adding: sources/include/suitesparse/Include/umfpack_global.h (deflated 67%)
+  adding: sources/include/suitesparse/Include/umfpack_get_determinant.h (deflated 71%)
+  adding: sources/include/suitesparse/Include/UFconfig.h (deflated 65%)
+  adding: sources/include/suitesparse/Include/btf.h (deflated 68%)
+  adding: sources/include/suitesparse/Include/umfpack_tictoc.h (deflated 63%)
+  adding: sources/include/suitesparse/Include/umfpack_col_to_triplet.h (deflated 65%)
+  adding: sources/include/util/ (stored 0%)
+  adding: sources/include/util/base_array.h (deflated 60%)
+  adding: sources/include/util/generic_array.h (deflated 50%)
+  adding: sources/include/util/varinfo.c (deflated 55%)
+  adding: sources/include/util/rtclock.h (deflated 64%)
+  adding: sources/include/util/modelica_string_lit.c (deflated 91%)
+  adding: sources/include/util/libcsv.h (deflated 68%)
+  adding: sources/include/util/omc_spinlock.h (deflated 41%)
+  adding: sources/include/util/generic_array.c (deflated 57%)
+  adding: sources/include/util/read_csv.h (deflated 48%)
+  adding: sources/include/util/boolean_array.h (deflated 78%)
+  adding: sources/include/util/integer_array.c (deflated 83%)
+  adding: sources/include/util/omc_msvc.h (deflated 58%)
+  adding: sources/include/util/ringbuffer.c (deflated 67%)
+  adding: sources/include/util/omc_mmap.h (deflated 65%)
+  adding: sources/include/util/omc_init.h (deflated 51%)
+  adding: sources/include/util/read_write.h (deflated 69%)
+  adding: sources/include/util/read_csv.c (deflated 71%)
+  adding: sources/include/util/omc_error.h (deflated 75%)
+  adding: sources/include/util/list.c (deflated 73%)
+  adding: sources/include/util/omc_mmap.c (deflated 66%)
+  adding: sources/include/util/index_spec.c (deflated 65%)
+  adding: sources/include/util/integer_array.h (deflated 83%)
+  adding: sources/include/util/omc_error.c (deflated 78%)
+  adding: sources/include/util/index_spec.h (deflated 49%)
+  adding: sources/include/util/utility.h (deflated 64%)
+  adding: sources/include/util/utility.c (deflated 56%)
+  adding: sources/include/util/read_matlab4.c (deflated 76%)
+  adding: sources/include/util/division.c (deflated 64%)
+  adding: sources/include/util/modelica_string_lit.h (deflated 44%)
+  adding: sources/include/util/modelica_string.h (deflated 71%)
+  adding: sources/include/util/cJSON.c (deflated 73%)
+  adding: sources/include/util/list.h (deflated 56%)
+  adding: sources/include/util/ModelicaUtilities.c (deflated 63%)
+  adding: sources/include/util/real_array.c (deflated 83%)
+  adding: sources/include/util/division.h (deflated 61%)
+  adding: sources/include/util/ringbuffer.h (deflated 49%)
+  adding: sources/include/util/omc_msvc.c (deflated 60%)
+  adding: sources/include/util/real_array.h (deflated 80%)
+  adding: sources/include/util/base_array.c (deflated 75%)
+  adding: sources/include/util/uthash.h (deflated 81%)
+  adding: sources/include/util/rational.h (deflated 53%)
+  adding: sources/include/util/libcsv.c (deflated 76%)
+  adding: sources/include/util/java_interface.h (deflated 61%)
+  adding: sources/include/util/simulation_options.c (deflated 78%)
+  adding: sources/include/util/modelica.h (deflated 52%)
+  adding: sources/include/util/string_array.c (deflated 81%)
+  adding: sources/include/util/modelica_string.c (deflated 73%)
+  adding: sources/include/util/boolean_array.c (deflated 82%)
+  adding: sources/include/util/varinfo.h (deflated 46%)
+  adding: sources/include/util/rational.c (deflated 65%)
+  adding: sources/include/util/simulation_options.h (deflated 65%)
+  adding: sources/include/util/string_array.h (deflated 78%)
+  adding: sources/include/util/cJSON.h (deflated 65%)
+  adding: sources/include/util/omc_init.c (deflated 47%)
+  adding: sources/include/util/read_matlab4.h (deflated 57%)
+  adding: sources/include/Makefile.objs (deflated 73%)
+  adding: sources/include/gc_version.h (deflated 56%)
+  adding: sources/include/open62541.h (deflated 84%)
+  adding: sources/include/omc_inline.h (deflated 47%)
+  adding: sources/include/openmodelica.h (deflated 58%)
+  adding: sources/include/simulation_data.h (deflated 73%)
+  adding: sources/include/openmodelica_types.h (deflated 56%)
+  adding: sources/include/meta/ (stored 0%)
+  adding: sources/include/meta/meta_modelica_builtin_boxptr.h (deflated 77%)
+  adding: sources/include/meta/meta_modelica_mk_box.h (deflated 95%)
+  adding: sources/include/meta/meta_modelica.h (deflated 62%)
+  adding: sources/include/meta/meta_modelica_data.h (deflated 68%)
+  adding: sources/include/meta/meta_modelica_builtin.h (deflated 74%)
+  adding: sources/include/meta/meta_modelica_builtin_boxvar.h (deflated 89%)
+  adding: sources/include/meta/meta_modelica_catch.c (deflated 44%)
+  adding: sources/include/meta/meta_modelica_segv.h (deflated 57%)
+  adding: sources/include/math-support/ (stored 0%)
+  adding: sources/include/math-support/pivot.c (deflated 65%)
+  adding: sources/Room_08bnd.c (deflated 91%)
+  adding: sources/Room_13opt.h (deflated 56%)
+  adding: sources/Room_04set.c (deflated 40%)
+  adding: sources/Room_02nls.c (deflated 33%)
+  adding: sources/Room.c (deflated 87%)
+  adding: sources/Room_01exo.c (deflated 43%)
+  adding: sources/Room_functions.c (deflated 96%)
+  adding: sources/Room_11mix.c (deflated 51%)
+  adding: sources/Room_includes.h (stored 0%)
+  adding: sources/Room_11mix.h (stored 0%)
+  adding: sources/Room_16dae.c (deflated 26%)
+  adding: sources/config.sub (deflated 71%)
+  adding: sources/Room_10asr.c (deflated 88%)
+  adding: sources/Room_FMU.libs (stored 0%)
+  adding: sources/configure (deflated 76%)
+  adding: sources/Room_info.c (deflated 93%)
+  adding: sources/Room_12jac.c (deflated 91%)
+  adding: sources/Room_17inl.c (deflated 27%)
+  adding: sources/Room_09alg.c (deflated 90%)
+  adding: sources/Room_init_fmu.c (deflated 91%)
+  adding: sources/Room.makefile (deflated 2%)
+  adding: sources/config.guess (deflated 70%)
+  adding: sources/Room_12jac.h (deflated 87%)
+  adding: sources/Room_literals.h (deflated 59%)
+  adding: sources/Room_06inz.c (deflated 90%)
+  adding: sources/Room_FMU.c (deflated 90%)
+  adding: sources/Room_05evt.c (deflated 91%)
+  adding: sources/install-sh (deflated 61%)
+  adding: sources/Room_03lsy.c (deflated 84%)
+  adding: sources/Makefile.in (deflated 56%)
+  adding: sources/Room_records.c (deflated 94%)
+  adding: sources/Room.log

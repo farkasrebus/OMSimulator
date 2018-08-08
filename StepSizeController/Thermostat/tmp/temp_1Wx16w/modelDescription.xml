@@ -1,0 +1,2421 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fmiModelDescription
+  fmiVersion="2.0"
+  modelName="Room"
+  guid="{6fd3eb57-df28-464a-834f-1522aa2e2e69}"
+  description="1st part of the system model, consisting of the room with heat transfer"
+  generationTool="OpenModelica Compiler OpenModelica 1.12.0~dev-969-g8d481c1"
+  generationDateAndTime="2018-06-28T08:58:09Z"
+  variableNamingConvention="structured"
+  numberOfEventIndicators="12">
+  <ModelExchange
+    modelIdentifier="Room">
+  </ModelExchange>
+  <CoSimulation
+    modelIdentifier="Room"
+    needsExecutionTool="false"
+    canHandleVariableCommunicationStepSize="true"
+    canInterpolateInputs="false"
+    maxOutputDerivativeOrder="1"
+    canRunAsynchronuously = "false"
+    canBeInstantiatedOnlyOncePerProcess="false"
+    canNotUseMemoryManagementFunctions="false"
+    canGetAndSetFMUstate="false"
+    canSerializeFMUstate="false"
+     />
+  <TypeDefinitions>
+    <SimpleType name="Modelica.Fluid.Types.Dynamics">
+      <Enumeration>
+        <Item name="DynamicFreeInitial" value="1"/>
+        <Item name="FixedInitial" value="2"/>
+        <Item name="SteadyStateInitial" value="3"/>
+        <Item name="SteadyState" value="4"/>
+      </Enumeration>
+    </SimpleType>
+  </TypeDefinitions>
+  <LogCategories>
+    <Category name="logEvents" />
+    <Category name="logSingularLinearSystems" />
+    <Category name="logNonlinearSystems" />
+    <Category name="logDynamicStateSelection" />
+    <Category name="logStatusWarning" />
+    <Category name="logStatusDiscard" />
+    <Category name="logStatusError" />
+    <Category name="logStatusFatal" />
+    <Category name="logStatusPending" />
+    <Category name="logAll" />
+    <Category name="logFmi2Call" />
+  </LogCategories>
+  <DefaultExperiment startTime="0.0" stopTime="20000.0" tolerance="1e-06"/>
+  <ModelVariables>
+  <!-- Index of variable = "1" -->
+  <ScalarVariable
+    name="vol.dynBal.m"
+    valueReference="0"
+    description="Mass of fluid"
+    variability="continuous"
+    causality="local"
+    initial="exact">
+    <Real start="216.0" min="0.0"/>
+  </ScalarVariable>
+  <!-- Index of variable = "2" -->
+  <ScalarVariable
+    name="vol.dynBal.medium.Xi[1]"
+    valueReference="1"
+    description="Structurally independent mass fractions"
+    variability="continuous"
+    causality="local"
+    initial="exact">
+    <Real start="0.01" min="0.0" max="1.0" nominal="0.1"/>
+  </ScalarVariable>
+  <!-- Index of variable = "3" -->
+  <ScalarVariable
+    name="vol.hOut_internal"
+    valueReference="2"
+    description="Internal connector for leaving temperature of the component"
+    variability="continuous"
+    causality="local"
+    initial="exact">
+    <Real start="0.0"/>
+  </ScalarVariable>
+  <!-- Index of variable = "4" -->
+  <ScalarVariable
+    name="der(vol.dynBal.m)"
+    valueReference="3"
+    description="der(Mass of fluid)"
+    variability="continuous"
+    causality="local"
+    initial="calculated">
+    <Real derivative="1"/>
+  </ScalarVariable>
+  <!-- Index of variable = "5" -->
+  <ScalarVariable
+    name="der(vol.dynBal.medium.Xi[1])"
+    valueReference="4"
+    description="der(Structurally independent mass fractions)"
+    variability="continuous"
+    causality="local"
+    initial="calculated">
+    <Real derivative="2"/>
+  </ScalarVariable>
+  <!-- Index of variable = "6" -->
+  <ScalarVariable
+    name="der(vol.hOut_internal)"
+    valueReference="5"
+    description="der(Internal connector for leaving temperature of the component)"
+    variability="continuous"
+    causality="local"
+    initial="calculated">
+    <Real derivative="3"/>
+  </ScalarVariable>
+  <!-- Index of variable = "7" -->
+  <ScalarVariable
+    name="der(heaCap.T)"
+    valueReference="6"
+    description="Temperature of element"
+    variability="continuous"
+    causality="local"
+    initial="exact">
+    <Real start="0.0"/>
+  </ScalarVariable>
+  <!-- Index of variable = "8" -->
+  <ScalarVariable
+    name="der(vol.dynBal.U)"
+    valueReference="7"
+    description="Internal energy of fluid"
+    variability="continuous"
+    causality="local"
+    initial="calculated">
+    <Real/>
+  </ScalarVariable>
+  <!-- Index of variable = "9" -->
+  <ScalarVariable
+    name="der(vol.dynBal.mXi[1])"
+    valueReference="8"
+    description="Masses of independent components in the fluid"
+    variability="continuous"
+    causality="local"
+    initial="exact">
+    <Real start="0.0"/>
+  </ScalarVariable>
+  <!-- Index of variable = "10" -->
+  <ScalarVariable
+    name="der(vol.dynBal.medium.u)"
+    valueReference="9"
+    description="Specific internal energy of medium"
+    variability="continuous"
+    causality="local"
+    initial="calculated">
+    <Real/>
+  </ScalarVariable>
+  <!-- Index of variable = "11" -->
+  <ScalarVariable
+    name="booleanToReal1.y"
+    valueReference="10"
+    description="Connector of Real output signal"
+    variability="continuous"
+    causality="local"
+    initial="calculated">
+    <Real/>
+  </ScalarVariable>
+  <!-- Index of variable = "12" -->
+  <ScalarVariable
+    name="heaCap.T"
+    valueReference="11"
+    description="Temperature of element"
+    variability="continuous"
+    causality="local"
+    initial="exact">
+    <Real start="293.15" min="1.0" max="10000.0" nominal="300.0"/>
+  </ScalarVariable>
+  <!-- Index of variable = "13" -->
+  <ScalarVariable
+    name="heaCap.der_T"
+    valueReference="12"
+    description="Time derivative of temperature (= der(T))"
+    variability="continuous"
+    causality="local"
+    initial="exact">
+    <Real start="0.0"/>
+  </ScalarVariable>
+  <!-- Index of variable = "14" -->
+  <ScalarVariable
+    name="heaCap.port.Q_flow"
+    valueReference="13"
+    description="Heat flow rate (positive if flowing from outside into the component)"
+    variability="continuous"
+    causality="local"
+    initial="exact">
+    <Real start="0.0"/>
+  </ScalarVariable>
+  <!-- Index of variable = "15" -->
+  <ScalarVariable
+    name="heatingControlPort1.set_hysteresis_intervallum1.hysteresis_intervallum[1]"
+    valueReference="14"
+    variability="continuous"
+    causality="output"
+    initial="calculated">
+    <Real/>
+  </ScalarVariable>
+  <!-- Index of variable = "16" -->
+  <ScalarVariable
+    name="heatingControlPort1.set_hysteresis_intervallum1.hysteresis_intervallum[2]"
+    valueReference="15"
+    variability="continuous"
+    causality="output"
+    initial="exact">
+    <Real start="1.0"/>
+  </ScalarVariable>
+  <!-- Index of variable = "17" -->
+  <ScalarVariable
+    name="heatingControlPort1.set_hysteresis_intervallum1.hysteresis_intervallum[3]"
+    valueReference="16"
+    variability="continuous"
+    causality="output"
+    initial="exact">
+    <Real start="1.0"/>
+  </ScalarVariable>
+  <!-- Index of variable = "18" -->
+  <ScalarVariable
+    name="preHea.port.Q_flow"
+    valueReference="17"
+    description="Heat flow rate (positive if flowing from outside into the component)"
+    variability="continuous"
+    causality="local"
+    initial="calculated">
+    <Real/>
+  </ScalarVariable>
+  <!-- Index of variable = "19" -->
+  <ScalarVariable
+    name="temperatureStreamPort1.measured_temperature1.measured_temperature[1]"
+    valueReference="18"
+    variability="continuous"
+    causality="output"
+    initial="exact">
+    <Real start="20.0"/>
+  </ScalarVariable>
+  <!-- Index of variable = "20" -->
+  <ScalarVariable
+    name="temperatureStreamPort1.measured_temperature1.measured_temperature[2]"
+    valueReference="19"
+    variability="continuous"
+    causality="output"
+    initial="exact">
+    <Real start="0.0"/>
+  </ScalarVariable>
+  <!-- Index of variable = "21" -->
+  <ScalarVariable
+    name="temperatureStreamPort1.measured_temperature1.measured_temperature[3]"
+    valueReference="20"
+    variability="continuous"
+    causality="output"
+    initial="exact">
+    <Real start="0.0"/>
+  </ScalarVariable>
+  <!-- Index of variable = "22" -->
+  <ScalarVariable
+    name="theCon.Q_flow"
+    valueReference="21"
+    description="Heat flow rate from port_a -&gt; port_b"
+    variability="continuous"
+    causality="local"
+    initial="exact">
+    <Real start="-2000.0"/>
+  </ScalarVariable>
+  <!-- Index of variable = "23" -->
+  <ScalarVariable
+    name="theCon.dT"
+    valueReference="22"
+    description="port_a.T - port_b.T"
+    variability="continuous"
+    causality="local"
+    initial="exact">
+    <Real start="-10.0"/>
+  </ScalarVariable>
+  <!-- Index of variable = "24" -->
+  <ScalarVariable
+    name="thermostatControlPort1.set_target_temperature1.target_temperature[1]"
+    valueReference="23"
+    variability="continuous"
+    causality="output"
+    initial="exact">
+    <Real start="22.0"/>
+  </ScalarVariable>
+  <!-- Index of variable = "25" -->
+  <ScalarVariable
+    name="thermostatControlPort1.set_target_temperature1.target_temperature[2]"
+    valueReference="24"
+    variability="continuous"
+    causality="output"
+    initial="exact">
+    <Real start="0.0"/>
+  </ScalarVariable>
+  <!-- Index of variable = "26" -->
+  <ScalarVariable
+    name="thermostatControlPort1.set_target_temperature1.target_temperature[3]"
+    valueReference="25"
+    variability="continuous"
+    causality="output"
+    initial="exact">
+    <Real start="0.0"/>
+  </ScalarVariable>
+  <!-- Index of variable = "27" -->
+  <ScalarVariable
+    name="vol.dynBal.Hb_flow"
+    valueReference="26"
+    description="Enthalpy flow across boundaries or energy source/sink"
+    variability="continuous"
+    causality="local"
+    initial="calculated">
+    <Real/>
+  </ScalarVariable>
+  <!-- Index of variable = "28" -->
+  <ScalarVariable
+    name="vol.dynBal.U"
+    valueReference="27"
+    description="Internal energy of fluid"
+    variability="continuous"
+    causality="local"
+    initial="exact">
+    <Real start="0.0" nominal="100000.0"/>
+  </ScalarVariable>
+  <!-- Index of variable = "29" -->
+  <ScalarVariable
+    name="vol.dynBal.mWat_flow_internal"
+    valueReference="28"
+    description="Needed to connect to conditional connector"
+    variability="continuous"
+    causality="local"
+    initial="calculated">
+    <Real/>
+  </ScalarVariable>
+  <!-- Index of variable = "30" -->
+  <ScalarVariable
+    name="vol.dynBal.mXi[1]"
+    valueReference="29"
+    description="Masses of independent components in the fluid"
+    variability="continuous"
+    causality="local"
+    initial="exact">
+    <Real start="2.16" min="0.0"/>
+  </ScalarVariable>
+  <!-- Index of variable = "31" -->
+  <ScalarVariable
+    name="vol.dynBal.mbXi_flow[1]"
+    valueReference="30"
+    description="Substance mass flows across boundaries"
+    variability="continuous"
+    causality="local"
+    initial="calculated">
+    <Real/>
+  </ScalarVariable>
+  <!-- Index of variable = "32" -->
+  <ScalarVariable
+    name="vol.dynBal.mb_flow"
+    valueReference="31"
+    description="Mass flows across boundaries"
+    variability="continuous"
+    causality="local"
+    initial="calculated">
+    <Real/>
+  </ScalarVariable>
+  <!-- Index of variable = "33" -->
+  <ScalarVariable
+    name="vol.dynBal.medium.MM"
+    valueReference="32"
+    description="Molar mass (of mixture or single fluid)"
+    variability="continuous"
+    causality="local"
+    initial="exact">
+    <Real start="0.02879012713067693" min="0.001" max="0.25" nominal="0.032"/>
+  </ScalarVariable>
+  <!-- Index of variable = "34" -->
+  <ScalarVariable
+    name="vol.dynBal.medium.R"
+    valueReference="33"
+    description="Gas constant (of mixture if applicable)"
+    variability="continuous"
+    causality="local"
+    initial="exact">
+    <Real start="1000.0" min="0.0" max="10000000.0" nominal="1000.0"/>
+  </ScalarVariable>
+  <!-- Index of variable = "35" -->
+  <ScalarVariable
+    name="vol.dynBal.medium.T"
+    valueReference="34"
+    description="Temperature of medium"
+    variability="continuous"
+    causality="local"
+    initial="exact">
+    <Real start="293.15" min="1.0" max="10000.0" nominal="300.0"/>
+  </ScalarVariable>
+  <!-- Index of variable = "36" -->
+  <ScalarVariable
+    name="vol.dynBal.medium.X[2]"
+    valueReference="35"
+    description="Mass fractions (= (component mass)/total mass  m_i/m)"
+    variability="continuous"
+    causality="local"
+    initial="exact">
+    <Real start="0.99" min="0.0" max="1.0" nominal="0.1"/>
+  </ScalarVariable>
+  <!-- Index of variable = "37" -->
+  <ScalarVariable
+    name="vol.dynBal.medium.d"
+    valueReference="36"
+    description="Density of medium"
+    variability="continuous"
+    causality="local"
+    initial="exact">
+    <Real start="0.0" min="0.0" max="100000.0" nominal="1.0"/>
+  </ScalarVariable>
+  <!-- Index of variable = "38" -->
+  <ScalarVariable
+    name="vol.dynBal.medium.dT"
+    valueReference="37"
+    description="Temperature difference used to compute enthalpy"
+    variability="continuous"
+    causality="local"
+    initial="exact">
+    <Real start="20.0"/>
+  </ScalarVariable>
+  <!-- Index of variable = "39" -->
+  <ScalarVariable
+    name="vol.dynBal.medium.p"
+    valueReference="38"
+    description="Absolute pressure of medium"
+    variability="continuous"
+    causality="local"
+    initial="exact">
+    <Real start="101325.0" min="0.0" max="100000000.0" nominal="100000.0"/>
+  </ScalarVariable>
+  <!-- Index of variable = "40" -->
+  <ScalarVariable
+    name="vol.dynBal.medium.p_bar"
+    valueReference="39"
+    description="Absolute pressure of medium in [bar]"
+    variability="continuous"
+    causality="local"
+    initial="exact">
+    <Real start="1.01325"/>
+  </ScalarVariable>
+  <!-- Index of variable = "41" -->
+  <ScalarVariable
+    name="vol.dynBal.medium.u"
+    valueReference="40"
+    description="Specific internal energy of medium"
+    variability="continuous"
+    causality="local"
+    initial="calculated">
+    <Real min="-100000000.0" max="100000000.0" nominal="1000000.0"/>
+  </ScalarVariable>
+  <!-- Index of variable = "42" -->
+  <ScalarVariable
+    name="vol.heatPort.Q_flow"
+    valueReference="41"
+    description="Heat flow rate (positive if flowing from outside into the component)"
+    variability="continuous"
+    causality="local"
+    initial="calculated">
+    <Real/>
+  </ScalarVariable>
+  <!-- Index of variable = "43" -->
+  <ScalarVariable
+    name="HeatingControlPortTransformer1.set_hysteresis_intervallumSignalHolder.entryTime"
+    valueReference="42"
+    variability="discrete"
+    causality="local"
+    initial="calculated">
+    <Real/>
+  </ScalarVariable>
+  <!-- Index of variable = "44" -->
+  <ScalarVariable
+    name="set_hysteresis_intervallum_tester1.y"
+    valueReference="43"
+    variability="discrete"
+    causality="local"
+    initial="calculated">
+    <Real/>
+  </ScalarVariable>
+  <!-- Index of variable = "45" -->
+  <ScalarVariable
+    name="temperatureStreamPortTransformer1.measured_temperatureSignalHolder.entryTime"
+    valueReference="44"
+    variability="discrete"
+    causality="local"
+    initial="calculated">
+    <Real/>
+  </ScalarVariable>
+  <!-- Index of variable = "46" -->
+  <ScalarVariable
+    name="thermostatControlPortTransformer1.set_target_temperatureSignalHolder.entryTime"
+    valueReference="45"
+    variability="discrete"
+    causality="local"
+    initial="calculated">
+    <Real/>
+  </ScalarVariable>
+  <!-- Index of variable = "47" -->
+  <ScalarVariable
+    name="thermostatControlPortTransformer1.turn_thermostat_offSignalHolder.entryTime"
+    valueReference="46"
+    variability="discrete"
+    causality="local"
+    initial="calculated">
+    <Real/>
+  </ScalarVariable>
+  <!-- Index of variable = "48" -->
+  <ScalarVariable
+    name="thermostatControlPortTransformer1.turn_thermostat_onSignalHolder.entryTime"
+    valueReference="47"
+    variability="discrete"
+    causality="local"
+    initial="calculated">
+    <Real/>
+  </ScalarVariable>
+  <!-- Index of variable = "49" -->
+  <ScalarVariable
+    name="HeatingControlPortTransformer1.set_hysteresis_intervallum_hysteresis_intervallum_initial"
+    valueReference="48"
+    variability="fixed"
+    causality="parameter"
+    initial="exact">
+    <Real start="1.0"/>
+  </ScalarVariable>
+  <!-- Index of variable = "50" -->
+  <ScalarVariable
+    name="QRooInt_flow"
+    valueReference="49"
+    description="Internal heat gains of the room"
+    variability="fixed"
+    causality="parameter"
+    initial="exact">
+    <Real start="4000.0"/>
+  </ScalarVariable>
+  <!-- Index of variable = "51" -->
+  <ScalarVariable
+    name="TOut.T"
+    valueReference="50"
+    description="Fixed temperature at port"
+    variability="fixed"
+    causality="parameter"
+    initial="exact">
+    <Real start="283.15" min="0.0" nominal="300.0"/>
+  </ScalarVariable>
+  <!-- Index of variable = "52" -->
+  <ScalarVariable
+    name="V"
+    valueReference="51"
+    description="Room volume"
+    variability="fixed"
+    causality="calculatedParameter"
+    initial="calculated">
+    <Real/>
+  </ScalarVariable>
+  <!-- Index of variable = "53" -->
+  <ScalarVariable
+    name="booleanToReal1.realFalse"
+    valueReference="52"
+    description="Output signal for false Boolean input"
+    variability="fixed"
+    causality="parameter"
+    initial="exact">
+    <Real start="0.0"/>
+  </ScalarVariable>
+  <!-- Index of variable = "54" -->
+  <ScalarVariable
+    name="booleanToReal1.realTrue"
+    valueReference="53"
+    description="Output signal for true Boolean input"
+    variability="fixed"
+    causality="calculatedParameter"
+    initial="calculated">
+    <Real/>
+  </ScalarVariable>
+  <!-- Index of variable = "55" -->
+  <ScalarVariable
+    name="heaCap.C"
+    valueReference="54"
+    description="Heat capacity of element (= cp*m)"
+    variability="fixed"
+    causality="calculatedParameter"
+    initial="calculated">
+    <Real/>
+  </ScalarVariable>
+  <!-- Index of variable = "56" -->
+  <ScalarVariable
+    name="heatingFactor"
+    valueReference="55"
+    variability="fixed"
+    causality="parameter"
+    initial="exact">
+    <Real start="4000.0"/>
+  </ScalarVariable>
+  <!-- Index of variable = "57" -->
+  <ScalarVariable
+    name="mA_flow_nominal"
+    valueReference="56"
+    description="Nominal mass flow rate"
+    variability="fixed"
+    causality="calculatedParameter"
+    initial="calculated">
+    <Real/>
+  </ScalarVariable>
+  <!-- Index of variable = "58" -->
+  <ScalarVariable
+    name="preHea.T_ref"
+    valueReference="57"
+    description="Reference temperature"
+    variability="fixed"
+    causality="parameter"
+    initial="exact">
+    <Real start="293.15" min="0.0" nominal="300.0"/>
+  </ScalarVariable>
+  <!-- Index of variable = "59" -->
+  <ScalarVariable
+    name="preHea.alpha"
+    valueReference="58"
+    description="Temperature coefficient of heat flow rate"
+    variability="fixed"
+    causality="parameter"
+    initial="exact">
+    <Real start="0.0"/>
+  </ScalarVariable>
+  <!-- Index of variable = "60" -->
+  <ScalarVariable
+    name="sampleTrigger1.period"
+    valueReference="59"
+    description="Sample period"
+    variability="fixed"
+    causality="parameter"
+    initial="exact">
+    <Real start="7200.0" min="1e-60"/>
+  </ScalarVariable>
+  <!-- Index of variable = "61" -->
+  <ScalarVariable
+    name="sampleTrigger1.startTime"
+    valueReference="60"
+    description="Time instant of first sample trigger"
+    variability="fixed"
+    causality="parameter"
+    initial="exact">
+    <Real start="10.0"/>
+  </ScalarVariable>
+  <!-- Index of variable = "62" -->
+  <ScalarVariable
+    name="sampleTrigger2.period"
+    valueReference="61"
+    description="Sample period"
+    variability="fixed"
+    causality="parameter"
+    initial="exact">
+    <Real start="7200.0" min="1e-60"/>
+  </ScalarVariable>
+  <!-- Index of variable = "63" -->
+  <ScalarVariable
+    name="sampleTrigger2.startTime"
+    valueReference="62"
+    description="Time instant of first sample trigger"
+    variability="fixed"
+    causality="parameter"
+    initial="exact">
+    <Real start="7020.0"/>
+  </ScalarVariable>
+  <!-- Index of variable = "64" -->
+  <ScalarVariable
+    name="set_hysteresis_intervallum_tester1.sampleTrigger1.period"
+    valueReference="63"
+    description="Sample period"
+    variability="fixed"
+    causality="parameter"
+    initial="exact">
+    <Real start="3600.0" min="1e-60"/>
+  </ScalarVariable>
+  <!-- Index of variable = "65" -->
+  <ScalarVariable
+    name="set_hysteresis_intervallum_tester1.sampleTrigger1.startTime"
+    valueReference="64"
+    description="Time instant of first sample trigger"
+    variability="fixed"
+    causality="parameter"
+    initial="exact">
+    <Real start="3600.0"/>
+  </ScalarVariable>
+  <!-- Index of variable = "66" -->
+  <ScalarVariable
+    name="step1.height"
+    valueReference="65"
+    description="Height of step"
+    variability="fixed"
+    causality="parameter"
+    initial="exact">
+    <Real start="3.0"/>
+  </ScalarVariable>
+  <!-- Index of variable = "67" -->
+  <ScalarVariable
+    name="step1.offset"
+    valueReference="66"
+    description="Offset of output signal y"
+    variability="fixed"
+    causality="parameter"
+    initial="exact">
+    <Real start="22.0"/>
+  </ScalarVariable>
+  <!-- Index of variable = "68" -->
+  <ScalarVariable
+    name="step1.startTime"
+    valueReference="67"
+    description="Output y = offset for time &lt; startTime"
+    variability="fixed"
+    causality="parameter"
+    initial="exact">
+    <Real start="6000.0"/>
+  </ScalarVariable>
+  <!-- Index of variable = "69" -->
+  <ScalarVariable
+    name="temperatureStreamPortTransformer1.measured_temperature_measured_temperature_initial"
+    valueReference="68"
+    variability="fixed"
+    causality="parameter"
+    initial="exact">
+    <Real start="0.0"/>
+  </ScalarVariable>
+  <!-- Index of variable = "70" -->
+  <ScalarVariable
+    name="theCon.G"
+    valueReference="69"
+    description="Constant thermal conductance of material"
+    variability="fixed"
+    causality="parameter"
+    initial="exact">
+    <Real start="200.0"/>
+  </ScalarVariable>
+  <!-- Index of variable = "71" -->
+  <ScalarVariable
+    name="thermostatControlPortTransformer1.set_target_temperature_target_temperature_initial"
+    valueReference="70"
+    variability="fixed"
+    causality="parameter"
+    initial="exact">
+    <Real start="0.0"/>
+  </ScalarVariable>
+  <!-- Index of variable = "72" -->
+  <ScalarVariable
+    name="vol.T_start"
+    valueReference="71"
+    description="Start value of temperature"
+    variability="fixed"
+    causality="parameter"
+    initial="exact">
+    <Real start="293.15" min="1.0" max="10000.0" nominal="300.0"/>
+  </ScalarVariable>
+  <!-- Index of variable = "73" -->
+  <ScalarVariable
+    name="vol.V"
+    valueReference="72"
+    description="Volume"
+    variability="fixed"
+    causality="calculatedParameter"
+    initial="calculated">
+    <Real/>
+  </ScalarVariable>
+  <!-- Index of variable = "74" -->
+  <ScalarVariable
+    name="vol.X_start[1]"
+    valueReference="73"
+    description="Start value of mass fractions m_i/m"
+    variability="fixed"
+    causality="parameter"
+    initial="exact">
+    <Real start="0.01" min="0.0" max="1.0" nominal="0.1"/>
+  </ScalarVariable>
+  <!-- Index of variable = "75" -->
+  <ScalarVariable
+    name="vol.X_start[2]"
+    valueReference="74"
+    description="Start value of mass fractions m_i/m"
+    variability="fixed"
+    causality="parameter"
+    initial="exact">
+    <Real start="0.99" min="0.0" max="1.0" nominal="0.1"/>
+  </ScalarVariable>
+  <!-- Index of variable = "76" -->
+  <ScalarVariable
+    name="vol.dynBal.CSen"
+    valueReference="75"
+    description="Aditional heat capacity for implementing mFactor"
+    variability="fixed"
+    causality="calculatedParameter"
+    initial="calculated">
+    <Real/>
+  </ScalarVariable>
+  <!-- Index of variable = "77" -->
+  <ScalarVariable
+    name="vol.dynBal.T_start"
+    valueReference="76"
+    description="Start value of temperature"
+    variability="fixed"
+    causality="calculatedParameter"
+    initial="calculated">
+    <Real min="1.0" max="10000.0" nominal="300.0"/>
+  </ScalarVariable>
+  <!-- Index of variable = "78" -->
+  <ScalarVariable
+    name="vol.dynBal.X_start[1]"
+    valueReference="77"
+    description="Start value of mass fractions m_i/m"
+    variability="fixed"
+    causality="calculatedParameter"
+    initial="calculated">
+    <Real min="0.0" max="1.0" nominal="0.1"/>
+  </ScalarVariable>
+  <!-- Index of variable = "79" -->
+  <ScalarVariable
+    name="vol.dynBal.X_start[2]"
+    valueReference="78"
+    description="Start value of mass fractions m_i/m"
+    variability="fixed"
+    causality="calculatedParameter"
+    initial="calculated">
+    <Real min="0.0" max="1.0" nominal="0.1"/>
+  </ScalarVariable>
+  <!-- Index of variable = "80" -->
+  <ScalarVariable
+    name="vol.dynBal.cp_default"
+    valueReference="79"
+    description="Heat capacity, to compute additional dry mass"
+    variability="fixed"
+    causality="calculatedParameter"
+    initial="calculated">
+    <Real/>
+  </ScalarVariable>
+  <!-- Index of variable = "81" -->
+  <ScalarVariable
+    name="vol.dynBal.fluidVolume"
+    valueReference="80"
+    description="Volume"
+    variability="fixed"
+    causality="calculatedParameter"
+    initial="calculated">
+    <Real/>
+  </ScalarVariable>
+  <!-- Index of variable = "82" -->
+  <ScalarVariable
+    name="vol.dynBal.hStart"
+    valueReference="81"
+    description="Start value for specific enthalpy"
+    variability="fixed"
+    causality="calculatedParameter"
+    initial="calculated">
+    <Real/>
+  </ScalarVariable>
+  <!-- Index of variable = "83" -->
+  <ScalarVariable
+    name="vol.dynBal.mSenFac"
+    valueReference="82"
+    description="Factor for scaling the sensible thermal mass of the volume"
+    variability="fixed"
+    causality="calculatedParameter"
+    initial="calculated">
+    <Real min="1.0"/>
+  </ScalarVariable>
+  <!-- Index of variable = "84" -->
+  <ScalarVariable
+    name="vol.dynBal.p_start"
+    valueReference="83"
+    description="Start value of pressure"
+    variability="fixed"
+    causality="calculatedParameter"
+    initial="calculated">
+    <Real min="0.0" max="100000000.0" nominal="100000.0"/>
+  </ScalarVariable>
+  <!-- Index of variable = "85" -->
+  <ScalarVariable
+    name="vol.dynBal.rho_default"
+    valueReference="84"
+    description="Density, used to compute fluid mass"
+    variability="fixed"
+    causality="calculatedParameter"
+    initial="calculated">
+    <Real min="0.0"/>
+  </ScalarVariable>
+  <!-- Index of variable = "86" -->
+  <ScalarVariable
+    name="vol.dynBal.rho_start"
+    valueReference="85"
+    description="Density, used to compute fluid mass"
+    variability="fixed"
+    causality="calculatedParameter"
+    initial="calculated">
+    <Real min="0.0"/>
+  </ScalarVariable>
+  <!-- Index of variable = "87" -->
+  <ScalarVariable
+    name="vol.dynBal.s[1]"
+    valueReference="86"
+    description="Vector with zero everywhere except where species is"
+    variability="fixed"
+    causality="calculatedParameter"
+    initial="calculated">
+    <Real/>
+  </ScalarVariable>
+  <!-- Index of variable = "88" -->
+  <ScalarVariable
+    name="vol.dynBal.state_default.T"
+    valueReference="87"
+    description="Temperature of medium"
+    variability="fixed"
+    causality="calculatedParameter"
+    initial="calculated">
+    <Real min="1.0" max="10000.0" nominal="300.0"/>
+  </ScalarVariable>
+  <!-- Index of variable = "89" -->
+  <ScalarVariable
+    name="vol.dynBal.state_default.X[1]"
+    valueReference="88"
+    description="Mass fractions (= (component mass)/total mass  m_i/m)"
+    variability="fixed"
+    causality="calculatedParameter"
+    initial="calculated">
+    <Real min="0.0" max="1.0" nominal="0.1"/>
+  </ScalarVariable>
+  <!-- Index of variable = "90" -->
+  <ScalarVariable
+    name="vol.dynBal.state_default.X[2]"
+    valueReference="89"
+    description="Mass fractions (= (component mass)/total mass  m_i/m)"
+    variability="fixed"
+    causality="calculatedParameter"
+    initial="calculated">
+    <Real min="0.0" max="1.0" nominal="0.1"/>
+  </ScalarVariable>
+  <!-- Index of variable = "91" -->
+  <ScalarVariable
+    name="vol.dynBal.state_default.p"
+    valueReference="90"
+    description="Absolute pressure of medium"
+    variability="fixed"
+    causality="calculatedParameter"
+    initial="calculated">
+    <Real min="0.0" max="100000000.0" nominal="100000.0"/>
+  </ScalarVariable>
+  <!-- Index of variable = "92" -->
+  <ScalarVariable
+    name="vol.mSenFac"
+    valueReference="91"
+    description="Factor for scaling the sensible thermal mass of the volume"
+    variability="fixed"
+    causality="calculatedParameter"
+    initial="calculated">
+    <Real min="1.0"/>
+  </ScalarVariable>
+  <!-- Index of variable = "93" -->
+  <ScalarVariable
+    name="vol.m_flow_nominal"
+    valueReference="92"
+    description="Nominal mass flow rate"
+    variability="fixed"
+    causality="calculatedParameter"
+    initial="calculated">
+    <Real min="0.0"/>
+  </ScalarVariable>
+  <!-- Index of variable = "94" -->
+  <ScalarVariable
+    name="vol.m_flow_small"
+    valueReference="93"
+    description="Small mass flow rate for regularization of zero flow"
+    variability="fixed"
+    causality="calculatedParameter"
+    initial="calculated">
+    <Real min="0.0"/>
+  </ScalarVariable>
+  <!-- Index of variable = "95" -->
+  <ScalarVariable
+    name="vol.p_start"
+    valueReference="94"
+    description="Start value of pressure"
+    variability="fixed"
+    causality="parameter"
+    initial="exact">
+    <Real start="101325.0" min="0.0" max="100000000.0" nominal="100000.0"/>
+  </ScalarVariable>
+  <!-- Index of variable = "96" -->
+  <ScalarVariable
+    name="vol.rho_default"
+    valueReference="95"
+    description="Density, used to compute fluid mass"
+    variability="fixed"
+    causality="calculatedParameter"
+    initial="calculated">
+    <Real min="0.0"/>
+  </ScalarVariable>
+  <!-- Index of variable = "97" -->
+  <ScalarVariable
+    name="vol.rho_start"
+    valueReference="96"
+    description="Density, used to compute start and guess values"
+    variability="fixed"
+    causality="calculatedParameter"
+    initial="calculated">
+    <Real min="0.0"/>
+  </ScalarVariable>
+  <!-- Index of variable = "98" -->
+  <ScalarVariable
+    name="vol.state_default.T"
+    valueReference="97"
+    description="Temperature of medium"
+    variability="fixed"
+    causality="calculatedParameter"
+    initial="calculated">
+    <Real min="1.0" max="10000.0" nominal="300.0"/>
+  </ScalarVariable>
+  <!-- Index of variable = "99" -->
+  <ScalarVariable
+    name="vol.state_default.X[1]"
+    valueReference="98"
+    description="Mass fractions (= (component mass)/total mass  m_i/m)"
+    variability="fixed"
+    causality="calculatedParameter"
+    initial="calculated">
+    <Real min="0.0" max="1.0" nominal="0.1"/>
+  </ScalarVariable>
+  <!-- Index of variable = "100" -->
+  <ScalarVariable
+    name="vol.state_default.X[2]"
+    valueReference="99"
+    description="Mass fractions (= (component mass)/total mass  m_i/m)"
+    variability="fixed"
+    causality="calculatedParameter"
+    initial="calculated">
+    <Real min="0.0" max="1.0" nominal="0.1"/>
+  </ScalarVariable>
+  <!-- Index of variable = "101" -->
+  <ScalarVariable
+    name="vol.state_default.p"
+    valueReference="100"
+    description="Absolute pressure of medium"
+    variability="fixed"
+    causality="calculatedParameter"
+    initial="calculated">
+    <Real min="0.0" max="100000000.0" nominal="100000.0"/>
+  </ScalarVariable>
+  <!-- Index of variable = "102" -->
+  <ScalarVariable
+    name="vol.state_start.T"
+    valueReference="101"
+    description="Temperature of medium"
+    variability="fixed"
+    causality="calculatedParameter"
+    initial="calculated">
+    <Real min="1.0" max="10000.0" nominal="300.0"/>
+  </ScalarVariable>
+  <!-- Index of variable = "103" -->
+  <ScalarVariable
+    name="vol.state_start.X[1]"
+    valueReference="102"
+    description="Mass fractions (= (component mass)/total mass  m_i/m)"
+    variability="fixed"
+    causality="calculatedParameter"
+    initial="calculated">
+    <Real min="0.0" max="1.0" nominal="0.1"/>
+  </ScalarVariable>
+  <!-- Index of variable = "104" -->
+  <ScalarVariable
+    name="vol.state_start.X[2]"
+    valueReference="103"
+    description="Mass fractions (= (component mass)/total mass  m_i/m)"
+    variability="fixed"
+    causality="calculatedParameter"
+    initial="calculated">
+    <Real min="0.0" max="1.0" nominal="0.1"/>
+  </ScalarVariable>
+  <!-- Index of variable = "105" -->
+  <ScalarVariable
+    name="vol.state_start.p"
+    valueReference="104"
+    description="Absolute pressure of medium"
+    variability="fixed"
+    causality="calculatedParameter"
+    initial="calculated">
+    <Real min="0.0" max="100000000.0" nominal="100000.0"/>
+  </ScalarVariable>
+  <!-- Index of variable = "106" -->
+  <ScalarVariable
+    name="HeatingControlPortTransformer1.HeatingControlPort1.set_hysteresis_intervallum1.hysteresis_intervallum[1]"
+    valueReference="14"
+    variability="continuous"
+    causality="local"
+    >
+    <Real/>
+  </ScalarVariable>
+  <!-- Index of variable = "107" -->
+  <ScalarVariable
+    name="HeatingControlPortTransformer1.HeatingControlPort1.set_hysteresis_intervallum1.hysteresis_intervallum[2]"
+    valueReference="48"
+    variability="continuous"
+    causality="local"
+    >
+    <Real/>
+  </ScalarVariable>
+  <!-- Index of variable = "108" -->
+  <ScalarVariable
+    name="HeatingControlPortTransformer1.HeatingControlPort1.set_hysteresis_intervallum1.hysteresis_intervallum[3]"
+    valueReference="48"
+    variability="continuous"
+    causality="local"
+    >
+    <Real/>
+  </ScalarVariable>
+  <!-- Index of variable = "109" -->
+  <ScalarVariable
+    name="HeatingControlPortTransformer1.set_hysteresis_intervallum_hysteresis_intervallum"
+    valueReference="14"
+    variability="continuous"
+    causality="local"
+    >
+    <Real/>
+  </ScalarVariable>
+  <!-- Index of variable = "110" -->
+  <ScalarVariable
+    name="TOut.port.Q_flow"
+    valueReference="109"
+    description="Heat flow rate (positive if flowing from outside into the component)"
+    variability="continuous"
+    causality="local"
+    initial="calculated">
+    <Real/>
+  </ScalarVariable>
+  <!-- Index of variable = "111" -->
+  <ScalarVariable
+    name="TOut.port.T"
+    valueReference="50"
+    description="Port temperature"
+    variability="continuous"
+    causality="local"
+    >
+    <Real min="0.0" nominal="300.0"/>
+  </ScalarVariable>
+  <!-- Index of variable = "112" -->
+  <ScalarVariable
+    name="heaCap.port.T"
+    valueReference="11"
+    description="Port temperature"
+    variability="continuous"
+    causality="local"
+    >
+    <Real min="0.0" nominal="300.0"/>
+  </ScalarVariable>
+  <!-- Index of variable = "113" -->
+  <ScalarVariable
+    name="preHea.Q_flow"
+    valueReference="10"
+    variability="continuous"
+    causality="local"
+    >
+    <Real/>
+  </ScalarVariable>
+  <!-- Index of variable = "114" -->
+  <ScalarVariable
+    name="preHea.port.T"
+    valueReference="11"
+    description="Port temperature"
+    variability="continuous"
+    causality="local"
+    >
+    <Real min="0.0" nominal="300.0"/>
+  </ScalarVariable>
+  <!-- Index of variable = "115" -->
+  <ScalarVariable
+    name="step1.y"
+    valueReference="23"
+    description="Connector of Real output signal"
+    variability="continuous"
+    causality="local"
+    >
+    <Real/>
+  </ScalarVariable>
+  <!-- Index of variable = "116" -->
+  <ScalarVariable
+    name="temperatureStreamPortTransformer1.TemperatureStreamPort1.measured_temperature1.measured_temperature[1]"
+    valueReference="18"
+    variability="continuous"
+    causality="local"
+    >
+    <Real/>
+  </ScalarVariable>
+  <!-- Index of variable = "117" -->
+  <ScalarVariable
+    name="temperatureStreamPortTransformer1.TemperatureStreamPort1.measured_temperature1.measured_temperature[2]"
+    valueReference="68"
+    variability="continuous"
+    causality="local"
+    >
+    <Real/>
+  </ScalarVariable>
+  <!-- Index of variable = "118" -->
+  <ScalarVariable
+    name="temperatureStreamPortTransformer1.TemperatureStreamPort1.measured_temperature1.measured_temperature[3]"
+    valueReference="68"
+    variability="continuous"
+    causality="local"
+    >
+    <Real/>
+  </ScalarVariable>
+  <!-- Index of variable = "119" -->
+  <ScalarVariable
+    name="temperatureStreamPortTransformer1.measured_temperature_measured_temperature"
+    valueReference="18"
+    variability="continuous"
+    causality="local"
+    >
+    <Real/>
+  </ScalarVariable>
+  <!-- Index of variable = "120" -->
+  <ScalarVariable
+    name="theCon.port_a.Q_flow"
+    valueReference="21"
+    description="Heat flow rate (positive if flowing from outside into the component)"
+    variability="continuous"
+    causality="local"
+    >
+    <Real/>
+  </ScalarVariable>
+  <!-- Index of variable = "121" -->
+  <ScalarVariable
+    name="theCon.port_a.T"
+    valueReference="50"
+    description="Port temperature"
+    variability="continuous"
+    causality="local"
+    >
+    <Real min="0.0" nominal="300.0"/>
+  </ScalarVariable>
+  <!-- Index of variable = "122" -->
+  <ScalarVariable
+    name="theCon.port_b.Q_flow"
+    valueReference="121"
+    description="Heat flow rate (positive if flowing from outside into the component)"
+    variability="continuous"
+    causality="local"
+    initial="calculated">
+    <Real/>
+  </ScalarVariable>
+  <!-- Index of variable = "123" -->
+  <ScalarVariable
+    name="theCon.port_b.T"
+    valueReference="11"
+    description="Port temperature"
+    variability="continuous"
+    causality="local"
+    >
+    <Real min="0.0" nominal="300.0"/>
+  </ScalarVariable>
+  <!-- Index of variable = "124" -->
+  <ScalarVariable
+    name="thermostatControlPortTransformer1.ThermostatControlPort1.set_target_temperature1.target_temperature[1]"
+    valueReference="23"
+    variability="continuous"
+    causality="local"
+    >
+    <Real/>
+  </ScalarVariable>
+  <!-- Index of variable = "125" -->
+  <ScalarVariable
+    name="thermostatControlPortTransformer1.ThermostatControlPort1.set_target_temperature1.target_temperature[2]"
+    valueReference="70"
+    variability="continuous"
+    causality="local"
+    >
+    <Real/>
+  </ScalarVariable>
+  <!-- Index of variable = "126" -->
+  <ScalarVariable
+    name="thermostatControlPortTransformer1.ThermostatControlPort1.set_target_temperature1.target_temperature[3]"
+    valueReference="70"
+    variability="continuous"
+    causality="local"
+    >
+    <Real/>
+  </ScalarVariable>
+  <!-- Index of variable = "127" -->
+  <ScalarVariable
+    name="thermostatControlPortTransformer1.set_target_temperature_target_temperature"
+    valueReference="23"
+    variability="continuous"
+    causality="local"
+    >
+    <Real/>
+  </ScalarVariable>
+  <!-- Index of variable = "128" -->
+  <ScalarVariable
+    name="vol.T"
+    valueReference="11"
+    description="Temperature of the fluid"
+    variability="continuous"
+    causality="local"
+    >
+    <Real min="1.0" max="10000.0" nominal="300.0"/>
+  </ScalarVariable>
+  <!-- Index of variable = "129" -->
+  <ScalarVariable
+    name="vol.U"
+    valueReference="27"
+    description="Internal energy of the component"
+    variability="continuous"
+    causality="local"
+    >
+    <Real/>
+  </ScalarVariable>
+  <!-- Index of variable = "130" -->
+  <ScalarVariable
+    name="vol.Xi[1]"
+    valueReference="1"
+    description="Species concentration of the fluid"
+    variability="continuous"
+    causality="local"
+    >
+    <Real min="0.0" max="1.0"/>
+  </ScalarVariable>
+  <!-- Index of variable = "131" -->
+  <ScalarVariable
+    name="vol.XiOut_internal[1]"
+    valueReference="1"
+    description="Internal connector for leaving species concentration of the component"
+    variability="continuous"
+    causality="local"
+    >
+    <Real/>
+  </ScalarVariable>
+  <!-- Index of variable = "132" -->
+  <ScalarVariable
+    name="vol.dynBal.Q_flow"
+    valueReference="41"
+    description="Sensible plus latent heat flow rate transferred into the medium"
+    variability="continuous"
+    causality="local"
+    >
+    <Real/>
+  </ScalarVariable>
+  <!-- Index of variable = "133" -->
+  <ScalarVariable
+    name="vol.dynBal.UOut"
+    valueReference="27"
+    description="Internal energy of the component"
+    variability="continuous"
+    causality="local"
+    >
+    <Real/>
+  </ScalarVariable>
+  <!-- Index of variable = "134" -->
+  <ScalarVariable
+    name="vol.dynBal.XiOut[1]"
+    valueReference="1"
+    description="Leaving species concentration of the component"
+    variability="continuous"
+    causality="local"
+    >
+    <Real min="0.0" max="1.0"/>
+  </ScalarVariable>
+  <!-- Index of variable = "135" -->
+  <ScalarVariable
+    name="vol.dynBal.hOut"
+    valueReference="2"
+    description="Leaving specific enthalpy of the component"
+    variability="continuous"
+    causality="local"
+    >
+    <Real/>
+  </ScalarVariable>
+  <!-- Index of variable = "136" -->
+  <ScalarVariable
+    name="vol.dynBal.mOut"
+    valueReference="0"
+    description="Mass of the component"
+    variability="continuous"
+    causality="local"
+    >
+    <Real min="0.0"/>
+  </ScalarVariable>
+  <!-- Index of variable = "137" -->
+  <ScalarVariable
+    name="vol.dynBal.mXiOut[1]"
+    valueReference="29"
+    description="Species mass of the component"
+    variability="continuous"
+    causality="local"
+    >
+    <Real min="0.0"/>
+  </ScalarVariable>
+  <!-- Index of variable = "138" -->
+  <ScalarVariable
+    name="vol.dynBal.medium.T_degC"
+    valueReference="37"
+    description="Temperature of medium in [degC]"
+    variability="continuous"
+    causality="local"
+    >
+    <Real/>
+  </ScalarVariable>
+  <!-- Index of variable = "139" -->
+  <ScalarVariable
+    name="vol.dynBal.medium.X[1]"
+    valueReference="1"
+    description="Mass fractions (= (component mass)/total mass  m_i/m)"
+    variability="continuous"
+    causality="local"
+    >
+    <Real min="0.0" max="1.0" nominal="0.1"/>
+  </ScalarVariable>
+  <!-- Index of variable = "140" -->
+  <ScalarVariable
+    name="vol.dynBal.medium.X_air"
+    valueReference="35"
+    description="Mass fraction of air"
+    variability="continuous"
+    causality="local"
+    >
+    <Real min="0.0" max="1.0" nominal="0.1"/>
+  </ScalarVariable>
+  <!-- Index of variable = "141" -->
+  <ScalarVariable
+    name="vol.dynBal.medium.X_steam"
+    valueReference="1"
+    description="Mass fraction of steam water"
+    variability="continuous"
+    causality="local"
+    >
+    <Real min="0.0" max="1.0" nominal="0.1"/>
+  </ScalarVariable>
+  <!-- Index of variable = "142" -->
+  <ScalarVariable
+    name="vol.dynBal.medium.h"
+    valueReference="2"
+    description="Specific enthalpy of medium"
+    variability="continuous"
+    causality="local"
+    >
+    <Real/>
+  </ScalarVariable>
+  <!-- Index of variable = "143" -->
+  <ScalarVariable
+    name="vol.dynBal.medium.state.T"
+    valueReference="34"
+    description="Temperature of medium"
+    variability="continuous"
+    causality="local"
+    >
+    <Real min="1.0" max="10000.0" nominal="300.0"/>
+  </ScalarVariable>
+  <!-- Index of variable = "144" -->
+  <ScalarVariable
+    name="vol.dynBal.medium.state.X[1]"
+    valueReference="1"
+    description="Mass fractions (= (component mass)/total mass  m_i/m)"
+    variability="continuous"
+    causality="local"
+    >
+    <Real min="0.0" max="1.0" nominal="0.1"/>
+  </ScalarVariable>
+  <!-- Index of variable = "145" -->
+  <ScalarVariable
+    name="vol.dynBal.medium.state.X[2]"
+    valueReference="35"
+    description="Mass fractions (= (component mass)/total mass  m_i/m)"
+    variability="continuous"
+    causality="local"
+    >
+    <Real min="0.0" max="1.0" nominal="0.1"/>
+  </ScalarVariable>
+  <!-- Index of variable = "146" -->
+  <ScalarVariable
+    name="vol.dynBal.medium.state.p"
+    valueReference="38"
+    description="Absolute pressure of medium"
+    variability="continuous"
+    causality="local"
+    >
+    <Real min="0.0" max="100000000.0" nominal="100000.0"/>
+  </ScalarVariable>
+  <!-- Index of variable = "147" -->
+  <ScalarVariable
+    name="vol.heaFloSen.Q_flow"
+    valueReference="41"
+    description="Heat flow from port_a to port_b as output signal"
+    variability="continuous"
+    causality="local"
+    >
+    <Real/>
+  </ScalarVariable>
+  <!-- Index of variable = "148" -->
+  <ScalarVariable
+    name="vol.heaFloSen.port_a.Q_flow"
+    valueReference="41"
+    description="Heat flow rate (positive if flowing from outside into the component)"
+    variability="continuous"
+    causality="local"
+    >
+    <Real/>
+  </ScalarVariable>
+  <!-- Index of variable = "149" -->
+  <ScalarVariable
+    name="vol.heaFloSen.port_a.T"
+    valueReference="11"
+    description="Port temperature"
+    variability="continuous"
+    causality="local"
+    >
+    <Real min="0.0" nominal="300.0"/>
+  </ScalarVariable>
+  <!-- Index of variable = "150" -->
+  <ScalarVariable
+    name="vol.heaFloSen.port_b.Q_flow"
+    valueReference="149"
+    description="Heat flow rate (positive if flowing from outside into the component)"
+    variability="continuous"
+    causality="local"
+    initial="calculated">
+    <Real/>
+  </ScalarVariable>
+  <!-- Index of variable = "151" -->
+  <ScalarVariable
+    name="vol.heaFloSen.port_b.T"
+    valueReference="11"
+    description="Port temperature"
+    variability="continuous"
+    causality="local"
+    >
+    <Real min="0.0" nominal="300.0"/>
+  </ScalarVariable>
+  <!-- Index of variable = "152" -->
+  <ScalarVariable
+    name="vol.heatPort.T"
+    valueReference="11"
+    description="Port temperature"
+    variability="continuous"
+    causality="local"
+    >
+    <Real min="0.0" nominal="300.0"/>
+  </ScalarVariable>
+  <!-- Index of variable = "153" -->
+  <ScalarVariable
+    name="vol.m"
+    valueReference="0"
+    description="Mass of the component"
+    variability="continuous"
+    causality="local"
+    >
+    <Real/>
+  </ScalarVariable>
+  <!-- Index of variable = "154" -->
+  <ScalarVariable
+    name="vol.mXi[1]"
+    valueReference="29"
+    description="Species mass of the component"
+    variability="continuous"
+    causality="local"
+    >
+    <Real/>
+  </ScalarVariable>
+  <!-- Index of variable = "155" -->
+  <ScalarVariable
+    name="vol.p"
+    valueReference="94"
+    description="Pressure of the fluid"
+    variability="continuous"
+    causality="local"
+    >
+    <Real/>
+  </ScalarVariable>
+  <!-- Index of variable = "156" -->
+  <ScalarVariable
+    name="vol.portT.y"
+    valueReference="11"
+    description="Value of Real output"
+    variability="continuous"
+    causality="local"
+    >
+    <Real/>
+  </ScalarVariable>
+  <!-- Index of variable = "157" -->
+  <ScalarVariable
+    name="vol.preTem.T"
+    valueReference="11"
+    variability="continuous"
+    causality="local"
+    >
+    <Real/>
+  </ScalarVariable>
+  <!-- Index of variable = "158" -->
+  <ScalarVariable
+    name="vol.preTem.port.Q_flow"
+    valueReference="41"
+    description="Heat flow rate (positive if flowing from outside into the component)"
+    variability="continuous"
+    causality="local"
+    >
+    <Real/>
+  </ScalarVariable>
+  <!-- Index of variable = "159" -->
+  <ScalarVariable
+    name="vol.preTem.port.T"
+    valueReference="11"
+    description="Port temperature"
+    variability="continuous"
+    causality="local"
+    >
+    <Real min="0.0" nominal="300.0"/>
+  </ScalarVariable>
+  <!-- Index of variable = "160" -->
+  <ScalarVariable
+    name="HeatingControlPortTransformer1.HeatingControlPort1.set_hysteresis_intervallum1.counter"
+    valueReference="0"
+    variability="discrete"
+    causality="local"
+    initial="calculated">
+    <Integer/>
+  </ScalarVariable>
+  <!-- Index of variable = "161" -->
+  <ScalarVariable
+    name="heatingControlPort1.set_hysteresis_intervallum1.counter"
+    valueReference="1"
+    variability="discrete"
+    causality="output"
+    initial="exact">
+    <Integer start="1"/>
+  </ScalarVariable>
+  <!-- Index of variable = "162" -->
+  <ScalarVariable
+    name="heatingControlPort1.turn_heating_off1.counter"
+    valueReference="2"
+    variability="discrete"
+    causality="input"
+    >
+    <Integer start="0"/>
+  </ScalarVariable>
+  <!-- Index of variable = "163" -->
+  <ScalarVariable
+    name="heatingControlPort1.turn_heating_on1.counter"
+    valueReference="3"
+    variability="discrete"
+    causality="input"
+    >
+    <Integer start="0"/>
+  </ScalarVariable>
+  <!-- Index of variable = "164" -->
+  <ScalarVariable
+    name="temperatureStreamPort1.measured_temperature1.counter"
+    valueReference="4"
+    variability="discrete"
+    causality="output"
+    initial="exact">
+    <Integer start="1"/>
+  </ScalarVariable>
+  <!-- Index of variable = "165" -->
+  <ScalarVariable
+    name="temperatureStreamPortTransformer1.TemperatureStreamPort1.measured_temperature1.counter"
+    valueReference="5"
+    variability="discrete"
+    causality="local"
+    initial="calculated">
+    <Integer/>
+  </ScalarVariable>
+  <!-- Index of variable = "166" -->
+  <ScalarVariable
+    name="thermostatControlPort1.set_target_temperature1.counter"
+    valueReference="6"
+    variability="discrete"
+    causality="output"
+    initial="exact">
+    <Integer start="1"/>
+  </ScalarVariable>
+  <!-- Index of variable = "167" -->
+  <ScalarVariable
+    name="thermostatControlPort1.turn_thermostat_off1.counter"
+    valueReference="7"
+    variability="discrete"
+    causality="output"
+    initial="calculated">
+    <Integer/>
+  </ScalarVariable>
+  <!-- Index of variable = "168" -->
+  <ScalarVariable
+    name="thermostatControlPort1.turn_thermostat_on1.counter"
+    valueReference="8"
+    variability="discrete"
+    causality="output"
+    initial="calculated">
+    <Integer/>
+  </ScalarVariable>
+  <!-- Index of variable = "169" -->
+  <ScalarVariable
+    name="thermostatControlPortTransformer1.ThermostatControlPort1.set_target_temperature1.counter"
+    valueReference="9"
+    variability="discrete"
+    causality="local"
+    initial="calculated">
+    <Integer/>
+  </ScalarVariable>
+  <!-- Index of variable = "170" -->
+  <ScalarVariable
+    name="vol.dynBal.energyDynamics"
+    valueReference="10"
+    description="Type of energy balance: dynamic (3 initialization options) or steady state"
+    variability="fixed"
+    causality="calculatedParameter"
+    initial="calculated">
+    <Enumeration declaredType="Modelica.Fluid.Types.Dynamics"/>
+  </ScalarVariable>
+  <!-- Index of variable = "171" -->
+  <ScalarVariable
+    name="vol.dynBal.massDynamics"
+    valueReference="11"
+    description="Type of mass balance: dynamic (3 initialization options) or steady state"
+    variability="fixed"
+    causality="calculatedParameter"
+    initial="calculated">
+    <Enumeration declaredType="Modelica.Fluid.Types.Dynamics"/>
+  </ScalarVariable>
+  <!-- Index of variable = "172" -->
+  <ScalarVariable
+    name="vol.dynBal.nPorts"
+    valueReference="12"
+    description="Number of ports"
+    variability="fixed"
+    causality="calculatedParameter"
+    initial="calculated">
+    <Integer/>
+  </ScalarVariable>
+  <!-- Index of variable = "173" -->
+  <ScalarVariable
+    name="vol.dynBal.substanceDynamics"
+    valueReference="13"
+    description="Type of independent mass fraction balance: dynamic (3 initialization options) or steady state"
+    variability="fixed"
+    causality="calculatedParameter"
+    initial="calculated">
+    <Enumeration declaredType="Modelica.Fluid.Types.Dynamics"/>
+  </ScalarVariable>
+  <!-- Index of variable = "174" -->
+  <ScalarVariable
+    name="vol.dynBal.traceDynamics"
+    valueReference="14"
+    description="Type of trace substance balance: dynamic (3 initialization options) or steady state"
+    variability="fixed"
+    causality="calculatedParameter"
+    initial="calculated">
+    <Enumeration declaredType="Modelica.Fluid.Types.Dynamics"/>
+  </ScalarVariable>
+  <!-- Index of variable = "175" -->
+  <ScalarVariable
+    name="vol.energyDynamics"
+    valueReference="15"
+    description="Type of energy balance: dynamic (3 initialization options) or steady state"
+    variability="fixed"
+    causality="calculatedParameter"
+    initial="calculated">
+    <Enumeration declaredType="Modelica.Fluid.Types.Dynamics"/>
+  </ScalarVariable>
+  <!-- Index of variable = "176" -->
+  <ScalarVariable
+    name="vol.massDynamics"
+    valueReference="16"
+    description="Type of mass balance: dynamic (3 initialization options) or steady state"
+    variability="fixed"
+    causality="calculatedParameter"
+    initial="calculated">
+    <Enumeration declaredType="Modelica.Fluid.Types.Dynamics"/>
+  </ScalarVariable>
+  <!-- Index of variable = "177" -->
+  <ScalarVariable
+    name="vol.nPorts"
+    valueReference="17"
+    description="Number of ports"
+    variability="fixed"
+    causality="calculatedParameter"
+    initial="calculated">
+    <Integer/>
+  </ScalarVariable>
+  <!-- Index of variable = "178" -->
+  <ScalarVariable
+    name="vol.substanceDynamics"
+    valueReference="18"
+    description="Type of independent mass fraction balance: dynamic (3 initialization options) or steady state"
+    variability="fixed"
+    causality="calculatedParameter"
+    initial="calculated">
+    <Enumeration declaredType="Modelica.Fluid.Types.Dynamics"/>
+  </ScalarVariable>
+  <!-- Index of variable = "179" -->
+  <ScalarVariable
+    name="vol.traceDynamics"
+    valueReference="19"
+    description="Type of trace substance balance: dynamic (3 initialization options) or steady state"
+    variability="fixed"
+    causality="calculatedParameter"
+    initial="calculated">
+    <Enumeration declaredType="Modelica.Fluid.Types.Dynamics"/>
+  </ScalarVariable>
+  <!-- Index of variable = "180" -->
+  <ScalarVariable
+    name="HeatingControlPortTransformer1.HeatingControlPort1.turn_heating_off1.counter"
+    valueReference="2"
+    variability="discrete"
+    causality="local"
+    >
+    <Integer/>
+  </ScalarVariable>
+  <!-- Index of variable = "181" -->
+  <ScalarVariable
+    name="HeatingControlPortTransformer1.HeatingControlPort1.turn_heating_on1.counter"
+    valueReference="3"
+    variability="discrete"
+    causality="local"
+    >
+    <Integer/>
+  </ScalarVariable>
+  <!-- Index of variable = "182" -->
+  <ScalarVariable
+    name="thermostatControlPortTransformer1.ThermostatControlPort1.turn_thermostat_off1.counter"
+    valueReference="7"
+    variability="discrete"
+    causality="local"
+    >
+    <Integer/>
+  </ScalarVariable>
+  <!-- Index of variable = "183" -->
+  <ScalarVariable
+    name="thermostatControlPortTransformer1.ThermostatControlPort1.turn_thermostat_on1.counter"
+    valueReference="8"
+    variability="discrete"
+    causality="local"
+    >
+    <Integer/>
+  </ScalarVariable>
+  <!-- Index of variable = "184" -->
+  <ScalarVariable
+    name="_D_whenCondition1"
+    valueReference="0"
+    variability="discrete"
+    causality="local"
+    initial="calculated">
+    <Boolean/>
+  </ScalarVariable>
+  <!-- Index of variable = "185" -->
+  <ScalarVariable
+    name="_D_whenCondition10"
+    valueReference="1"
+    variability="discrete"
+    causality="local"
+    initial="calculated">
+    <Boolean/>
+  </ScalarVariable>
+  <!-- Index of variable = "186" -->
+  <ScalarVariable
+    name="_D_whenCondition11"
+    valueReference="2"
+    variability="discrete"
+    causality="local"
+    initial="exact">
+    <Boolean start="false"/>
+  </ScalarVariable>
+  <!-- Index of variable = "187" -->
+  <ScalarVariable
+    name="_D_whenCondition12"
+    valueReference="3"
+    variability="discrete"
+    causality="local"
+    initial="exact">
+    <Boolean start="false"/>
+  </ScalarVariable>
+  <!-- Index of variable = "188" -->
+  <ScalarVariable
+    name="_D_whenCondition13"
+    valueReference="4"
+    variability="discrete"
+    causality="local"
+    initial="exact">
+    <Boolean start="false"/>
+  </ScalarVariable>
+  <!-- Index of variable = "189" -->
+  <ScalarVariable
+    name="_D_whenCondition14"
+    valueReference="5"
+    variability="discrete"
+    causality="local"
+    initial="exact">
+    <Boolean start="false"/>
+  </ScalarVariable>
+  <!-- Index of variable = "190" -->
+  <ScalarVariable
+    name="_D_whenCondition2"
+    valueReference="6"
+    variability="discrete"
+    causality="local"
+    initial="calculated">
+    <Boolean/>
+  </ScalarVariable>
+  <!-- Index of variable = "191" -->
+  <ScalarVariable
+    name="_D_whenCondition3"
+    valueReference="7"
+    variability="discrete"
+    causality="local"
+    initial="calculated">
+    <Boolean/>
+  </ScalarVariable>
+  <!-- Index of variable = "192" -->
+  <ScalarVariable
+    name="_D_whenCondition4"
+    valueReference="8"
+    variability="discrete"
+    causality="local"
+    initial="calculated">
+    <Boolean/>
+  </ScalarVariable>
+  <!-- Index of variable = "193" -->
+  <ScalarVariable
+    name="_D_whenCondition5"
+    valueReference="9"
+    variability="discrete"
+    causality="local"
+    initial="calculated">
+    <Boolean/>
+  </ScalarVariable>
+  <!-- Index of variable = "194" -->
+  <ScalarVariable
+    name="_D_whenCondition6"
+    valueReference="10"
+    variability="discrete"
+    causality="local"
+    initial="calculated">
+    <Boolean/>
+  </ScalarVariable>
+  <!-- Index of variable = "195" -->
+  <ScalarVariable
+    name="_D_whenCondition7"
+    valueReference="11"
+    variability="discrete"
+    causality="local"
+    initial="calculated">
+    <Boolean/>
+  </ScalarVariable>
+  <!-- Index of variable = "196" -->
+  <ScalarVariable
+    name="_D_whenCondition8"
+    valueReference="12"
+    variability="discrete"
+    causality="local"
+    initial="calculated">
+    <Boolean/>
+  </ScalarVariable>
+  <!-- Index of variable = "197" -->
+  <ScalarVariable
+    name="_D_whenCondition9"
+    valueReference="13"
+    variability="discrete"
+    causality="local"
+    initial="calculated">
+    <Boolean/>
+  </ScalarVariable>
+  <!-- Index of variable = "198" -->
+  <ScalarVariable
+    name="HeatingControlPortTransformer1.set_hysteresis_intervallumSignalHolder.u"
+    valueReference="14"
+    variability="discrete"
+    causality="local"
+    initial="calculated">
+    <Boolean/>
+  </ScalarVariable>
+  <!-- Index of variable = "199" -->
+  <ScalarVariable
+    name="HeatingControlPortTransformer1.set_hysteresis_intervallumSignalHolder.y"
+    valueReference="15"
+    variability="discrete"
+    causality="local"
+    initial="calculated">
+    <Boolean/>
+  </ScalarVariable>
+  <!-- Index of variable = "200" -->
+  <ScalarVariable
+    name="HeatingControlPortTransformer1.turn_heating_off"
+    valueReference="16"
+    variability="discrete"
+    causality="local"
+    initial="calculated">
+    <Boolean/>
+  </ScalarVariable>
+  <!-- Index of variable = "201" -->
+  <ScalarVariable
+    name="HeatingControlPortTransformer1.turn_heating_on"
+    valueReference="17"
+    variability="discrete"
+    causality="local"
+    initial="calculated">
+    <Boolean/>
+  </ScalarVariable>
+  <!-- Index of variable = "202" -->
+  <ScalarVariable
+    name="booleanToReal1.u"
+    valueReference="18"
+    description="Connector of Boolean input signal"
+    variability="discrete"
+    causality="local"
+    initial="calculated">
+    <Boolean/>
+  </ScalarVariable>
+  <!-- Index of variable = "203" -->
+  <ScalarVariable
+    name="rSFlipFlop.QI"
+    valueReference="19"
+    variability="discrete"
+    causality="local"
+    initial="calculated">
+    <Boolean/>
+  </ScalarVariable>
+  <!-- Index of variable = "204" -->
+  <ScalarVariable
+    name="rSFlipFlop.pre.u"
+    valueReference="20"
+    description="Connector of Boolean input signal"
+    variability="discrete"
+    causality="local"
+    initial="calculated">
+    <Boolean/>
+  </ScalarVariable>
+  <!-- Index of variable = "205" -->
+  <ScalarVariable
+    name="temperatureStreamPortTransformer1.measured_temperatureSignalHolder.u"
+    valueReference="21"
+    variability="discrete"
+    causality="local"
+    initial="exact">
+    <Boolean start="true"/>
+  </ScalarVariable>
+  <!-- Index of variable = "206" -->
+  <ScalarVariable
+    name="temperatureStreamPortTransformer1.measured_temperatureSignalHolder.y"
+    valueReference="22"
+    variability="discrete"
+    causality="local"
+    initial="calculated">
+    <Boolean/>
+  </ScalarVariable>
+  <!-- Index of variable = "207" -->
+  <ScalarVariable
+    name="thermostatControlPortTransformer1.set_target_temperatureSignalHolder.u"
+    valueReference="23"
+    variability="discrete"
+    causality="local"
+    initial="exact">
+    <Boolean start="true"/>
+  </ScalarVariable>
+  <!-- Index of variable = "208" -->
+  <ScalarVariable
+    name="thermostatControlPortTransformer1.set_target_temperatureSignalHolder.y"
+    valueReference="24"
+    variability="discrete"
+    causality="local"
+    initial="calculated">
+    <Boolean/>
+  </ScalarVariable>
+  <!-- Index of variable = "209" -->
+  <ScalarVariable
+    name="thermostatControlPortTransformer1.turn_thermostat_offSignalHolder.u"
+    valueReference="25"
+    variability="discrete"
+    causality="local"
+    initial="calculated">
+    <Boolean/>
+  </ScalarVariable>
+  <!-- Index of variable = "210" -->
+  <ScalarVariable
+    name="thermostatControlPortTransformer1.turn_thermostat_offSignalHolder.y"
+    valueReference="26"
+    variability="discrete"
+    causality="local"
+    initial="calculated">
+    <Boolean/>
+  </ScalarVariable>
+  <!-- Index of variable = "211" -->
+  <ScalarVariable
+    name="thermostatControlPortTransformer1.turn_thermostat_onSignalHolder.u"
+    valueReference="27"
+    variability="discrete"
+    causality="local"
+    initial="calculated">
+    <Boolean/>
+  </ScalarVariable>
+  <!-- Index of variable = "212" -->
+  <ScalarVariable
+    name="thermostatControlPortTransformer1.turn_thermostat_onSignalHolder.y"
+    valueReference="28"
+    variability="discrete"
+    causality="local"
+    initial="calculated">
+    <Boolean/>
+  </ScalarVariable>
+  <!-- Index of variable = "213" -->
+  <ScalarVariable
+    name="booleanConstant1.k"
+    valueReference="29"
+    description="Constant output value"
+    variability="fixed"
+    causality="parameter"
+    initial="exact">
+    <Boolean start="true"/>
+  </ScalarVariable>
+  <!-- Index of variable = "214" -->
+  <ScalarVariable
+    name="rSFlipFlop.Qini"
+    valueReference="30"
+    description="Start value of Q at initial time"
+    variability="fixed"
+    causality="parameter"
+    initial="exact">
+    <Boolean start="false"/>
+  </ScalarVariable>
+  <!-- Index of variable = "215" -->
+  <ScalarVariable
+    name="rSFlipFlop.pre.pre_u_start"
+    valueReference="31"
+    description="Start value of pre(u) at initial time"
+    variability="fixed"
+    causality="calculatedParameter"
+    initial="calculated">
+    <Boolean/>
+  </ScalarVariable>
+  <!-- Index of variable = "216" -->
+  <ScalarVariable
+    name="vol.allowFlowReversal"
+    valueReference="32"
+    description="= false to simplify equations, assuming, but not enforcing, no flow reversal. Used only if model has two ports."
+    variability="fixed"
+    causality="calculatedParameter"
+    initial="calculated">
+    <Boolean/>
+  </ScalarVariable>
+  <!-- Index of variable = "217" -->
+  <ScalarVariable
+    name="vol.dynBal.computeCSen"
+    valueReference="33"
+    variability="fixed"
+    causality="calculatedParameter"
+    initial="calculated">
+    <Boolean/>
+  </ScalarVariable>
+  <!-- Index of variable = "218" -->
+  <ScalarVariable
+    name="vol.dynBal.medium.preferredMediumStates"
+    valueReference="34"
+    description="= true if StateSelect.prefer shall be used for the independent property variables of the medium"
+    variability="fixed"
+    causality="calculatedParameter"
+    initial="calculated">
+    <Boolean/>
+  </ScalarVariable>
+  <!-- Index of variable = "219" -->
+  <ScalarVariable
+    name="vol.dynBal.medium.standardOrderComponents"
+    valueReference="35"
+    description="If true, and reducedX = true, the last element of X will be computed from the other ones"
+    variability="fixed"
+    causality="calculatedParameter"
+    initial="calculated">
+    <Boolean/>
+  </ScalarVariable>
+  <!-- Index of variable = "220" -->
+  <ScalarVariable
+    name="vol.dynBal.use_C_flow"
+    valueReference="36"
+    description="Set to true to enable input connector for trace substance"
+    variability="fixed"
+    causality="calculatedParameter"
+    initial="calculated">
+    <Boolean/>
+  </ScalarVariable>
+  <!-- Index of variable = "221" -->
+  <ScalarVariable
+    name="vol.dynBal.use_mWat_flow"
+    valueReference="37"
+    description="Set to true to enable input connector for moisture mass flow rate"
+    variability="fixed"
+    causality="calculatedParameter"
+    initial="calculated">
+    <Boolean/>
+  </ScalarVariable>
+  <!-- Index of variable = "222" -->
+  <ScalarVariable
+    name="vol.useSteadyStateTwoPort"
+    valueReference="38"
+    description="Flag, true if the model has two ports only and uses a steady state balance"
+    variability="fixed"
+    causality="calculatedParameter"
+    initial="calculated">
+    <Boolean/>
+  </ScalarVariable>
+  <!-- Index of variable = "223" -->
+  <ScalarVariable
+    name="vol.use_C_flow"
+    valueReference="39"
+    description="Set to true to enable input connector for trace substance"
+    variability="fixed"
+    causality="calculatedParameter"
+    initial="calculated">
+    <Boolean/>
+  </ScalarVariable>
+  <!-- Index of variable = "224" -->
+  <ScalarVariable
+    name="HeatingControlPortTransformer1.set_hysteresis_intervallum"
+    valueReference="14"
+    variability="discrete"
+    causality="local"
+    >
+    <Boolean/>
+  </ScalarVariable>
+  <!-- Index of variable = "225" -->
+  <ScalarVariable
+    name="booleanConstant1.y"
+    valueReference="29"
+    description="Connector of Boolean output signal"
+    variability="discrete"
+    causality="local"
+    >
+    <Boolean/>
+  </ScalarVariable>
+  <!-- Index of variable = "226" -->
+  <ScalarVariable
+    name="rSFlipFlop.Q"
+    valueReference="18"
+    variability="discrete"
+    causality="local"
+    >
+    <Boolean/>
+  </ScalarVariable>
+  <!-- Index of variable = "227" -->
+  <ScalarVariable
+    name="rSFlipFlop.R"
+    valueReference="16"
+    variability="discrete"
+    causality="local"
+    >
+    <Boolean/>
+  </ScalarVariable>
+  <!-- Index of variable = "228" -->
+  <ScalarVariable
+    name="rSFlipFlop.S"
+    valueReference="17"
+    variability="discrete"
+    causality="local"
+    >
+    <Boolean/>
+  </ScalarVariable>
+  <!-- Index of variable = "229" -->
+  <ScalarVariable
+    name="rSFlipFlop.nor.u1"
+    valueReference="17"
+    description="Connector of first Boolean input signal"
+    variability="discrete"
+    causality="local"
+    >
+    <Boolean/>
+  </ScalarVariable>
+  <!-- Index of variable = "230" -->
+  <ScalarVariable
+    name="rSFlipFlop.nor.u2"
+    valueReference="18"
+    description="Connector of second Boolean input signal"
+    variability="discrete"
+    causality="local"
+    >
+    <Boolean/>
+  </ScalarVariable>
+  <!-- Index of variable = "231" -->
+  <ScalarVariable
+    name="rSFlipFlop.nor.y"
+    valueReference="20"
+    description="Connector of Boolean output signal"
+    variability="discrete"
+    causality="local"
+    >
+    <Boolean/>
+  </ScalarVariable>
+  <!-- Index of variable = "232" -->
+  <ScalarVariable
+    name="rSFlipFlop.nor1.u1"
+    valueReference="19"
+    description="Connector of first Boolean input signal"
+    variability="discrete"
+    causality="local"
+    >
+    <Boolean/>
+  </ScalarVariable>
+  <!-- Index of variable = "233" -->
+  <ScalarVariable
+    name="rSFlipFlop.nor1.u2"
+    valueReference="16"
+    description="Connector of second Boolean input signal"
+    variability="discrete"
+    causality="local"
+    >
+    <Boolean/>
+  </ScalarVariable>
+  <!-- Index of variable = "234" -->
+  <ScalarVariable
+    name="rSFlipFlop.nor1.y"
+    valueReference="18"
+    description="Connector of Boolean output signal"
+    variability="discrete"
+    causality="local"
+    >
+    <Boolean/>
+  </ScalarVariable>
+  <!-- Index of variable = "235" -->
+  <ScalarVariable
+    name="rSFlipFlop.pre.y"
+    valueReference="19"
+    description="Connector of Boolean output signal"
+    variability="discrete"
+    causality="local"
+    >
+    <Boolean/>
+  </ScalarVariable>
+  <!-- Index of variable = "236" -->
+  <ScalarVariable
+    name="sampleTrigger1.y"
+    valueReference="27"
+    description="Connector of Boolean output signal"
+    variability="discrete"
+    causality="local"
+    >
+    <Boolean/>
+  </ScalarVariable>
+  <!-- Index of variable = "237" -->
+  <ScalarVariable
+    name="sampleTrigger2.y"
+    valueReference="25"
+    description="Connector of Boolean output signal"
+    variability="discrete"
+    causality="local"
+    >
+    <Boolean/>
+  </ScalarVariable>
+  <!-- Index of variable = "238" -->
+  <ScalarVariable
+    name="set_hysteresis_intervallum_tester1.sampleTrigger1.y"
+    valueReference="14"
+    description="Connector of Boolean output signal"
+    variability="discrete"
+    causality="local"
+    >
+    <Boolean/>
+  </ScalarVariable>
+  <!-- Index of variable = "239" -->
+  <ScalarVariable
+    name="set_hysteresis_intervallum_tester1.y1"
+    valueReference="14"
+    variability="discrete"
+    causality="local"
+    >
+    <Boolean/>
+  </ScalarVariable>
+  <!-- Index of variable = "240" -->
+  <ScalarVariable
+    name="temperatureStreamPortTransformer1.measured_temperature"
+    valueReference="29"
+    variability="discrete"
+    causality="local"
+    >
+    <Boolean/>
+  </ScalarVariable>
+  <!-- Index of variable = "241" -->
+  <ScalarVariable
+    name="thermostatControlPortTransformer1.set_target_temperature"
+    valueReference="29"
+    variability="discrete"
+    causality="local"
+    >
+    <Boolean/>
+  </ScalarVariable>
+  <!-- Index of variable = "242" -->
+  <ScalarVariable
+    name="thermostatControlPortTransformer1.turn_thermostat_off"
+    valueReference="25"
+    variability="discrete"
+    causality="local"
+    >
+    <Boolean/>
+  </ScalarVariable>
+  <!-- Index of variable = "243" -->
+  <ScalarVariable
+    name="thermostatControlPortTransformer1.turn_thermostat_on"
+    valueReference="27"
+    variability="discrete"
+    causality="local"
+    >
+    <Boolean/>
+  </ScalarVariable>
+  </ModelVariables>
+  <ModelStructure>
+    <Outputs>
+      <Unknown index="15" dependencies="" dependenciesKind="" />
+      <Unknown index="16" dependencies="" dependenciesKind="" />
+      <Unknown index="17" dependencies="" dependenciesKind="" />
+      <Unknown index="19" dependencies="2 3" dependenciesKind="dependent dependent" />
+      <Unknown index="20" dependencies="" dependenciesKind="" />
+      <Unknown index="21" dependencies="" dependenciesKind="" />
+      <Unknown index="24" dependencies="" dependenciesKind="" />
+      <Unknown index="25" dependencies="" dependenciesKind="" />
+      <Unknown index="26" dependencies="" dependenciesKind="" />
+      <Unknown index="161" dependencies="" dependenciesKind="" />
+      <Unknown index="164" dependencies="" dependenciesKind="" />
+      <Unknown index="166" dependencies="" dependenciesKind="" />
+      <Unknown index="167" dependencies="" dependenciesKind="" />
+      <Unknown index="168" dependencies="" dependenciesKind="" />
+    </Outputs>
+    <Derivatives>
+      <Unknown index="4" dependencies="" dependenciesKind="" />
+      <Unknown index="5" dependencies="1 2" dependenciesKind="dependent dependent" />
+      <Unknown index="6" dependencies="1 2 3 162" dependenciesKind="dependent dependent dependent dependent" />
+    </Derivatives>
+  </ModelStructure>
+</fmiModelDescription>
