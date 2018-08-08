@@ -40,6 +40,7 @@
 #include "DirectedGraph.h"
 #include "FMISubModel.h"
 #include "SignalRef.h"
+#include "Solver.h"
 #include "Variable.h"
 #include "TLMInterface.h"
 
@@ -114,6 +115,11 @@ namespace oms2
 
     oms_status_enu_t describe();
 
+    oms_status_enu_t addSolver(const oms2::ComRef& solverCref, const std::string& solver);
+    oms_status_enu_t deleteSolver(std::string name);
+    oms_status_enu_t setSolverTolerance(std::string name, double tolerance);
+    oms_status_enu_t connectSolver(const oms2::ComRef& fmuCref, const oms2::ComRef& solverCref);
+
   private:
     oms_status_enu_t loadElementGeometry(const pugi::xml_node& node);
     oms_status_enu_t loadConnections(const pugi::xml_node& node);
@@ -164,6 +170,7 @@ namespace oms2
     double communicationInterval;
     double loggingInterval;
     double tLastEmit;
+    std::vector<oms2::Solver*> solvers;
 
 #if !defined(NO_TLM)
     std::vector<SignalRef> tlmSigRefs;
