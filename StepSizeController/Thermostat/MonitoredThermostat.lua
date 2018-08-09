@@ -1,3 +1,7 @@
+package.path = package.path .. ";../StepSizeController.lua"
+
+require("StepSizeController")
+
 oms2_setLogFile("MonitoredThermostat.log")
 oms2_setTempDirectory("./tmp")
 oms2_newFMIModel("MonitoredThermostat")
@@ -107,11 +111,32 @@ oms2_addConnection("MonitoredThermostat","CentralMonitor:tempReply","Temperature
 
 oms2_setResultFile("MonitoredThermostat", "MonitoredThermostat.mat")
 
-oms2_setStopTime("MonitoredThermostat", 500.0)
-oms2_setCommunicationInterval("MonitoredThermostat", 1.0)
+--oms2_setStopTime("MonitoredThermostat", 500.0)
+--oms2_setCommunicationInterval("MonitoredThermostat", 1.0)
 oms2_initialize("MonitoredThermostat")
 
-oms2_simulate("MonitoredThermostat")
+-- band model for the first time the thermostat should be turned on
+bm=BandModel:create()
+bm:addBand(18.0,19.02,0.1)
+bm:addBand(19.02,19.1,1.0)
+bm:addBand(19.1,24.0,10.0)
+bm:addBand(24.0,26.0,0.1)
+
+sm=SensitivityModel:create()
+sm.zeroCrossings["MonitoredThermostat.Room:temperatureStreamPort1.measured_temperature1.measured_temperature[1]"]=bm
+-- events indicating messages between monitors
+sm.events["MonitoredThermostat.Thermostat:Thermostat_HeatingControlPort_turn_heating_on"]="integer"
+sm.events["MonitoredThermostat.CentralMonitor:termReq"]="real"
+sm.events["MonitoredThermostat.CentralMonitor:heatReq"]="real"
+sm.events["MonitoredThermostat.CentralMonitor:tempReq"]="real"
+sm.events["MonitoredThermostat.ThermostatMonitor:reply"]="real"
+sm.events["MonitoredThermostat.HeatingMonitor:reply"]="real"
+sm.events["MonitoredThermostat.TemperatureMonitor:reply"]="real"
+-- sm.events["CentralMonitor:heatOnGrant"]=real -- it is possible to include it but useless
+
+oms2_simulateWithASSC("MonitoredThermostat",10.0,sm,0.01,500.0)
+
+--oms2_simulate("MonitoredThermostat")
 
 oms2_unloadModel("MonitoredThermostat")
 
