@@ -54,25 +54,61 @@ end
 
 -- step size control based on a sensitivity model
 function didEventOccur(vars)
+	--print("param for didEventOccur",dump(vars))
 	local eventOccured=false
-	for v,pv in pairs(vars)
+	for v,pv in pairs(vars.reals)
 	do
 		local currVal=oms2_getReal(v)
 		--print(v .. pv .. currVal)
 		if (pv ~= currVal) then
-			vars[v]=currVal
+			vars.reals[v]=currVal
 			eventOccured=true
 		end	
 	end
+	for v,pv in pairs(vars.ints)
+	do
+		local currVal=oms2_getInteger(v)
+		--print(v .. pv .. currVal)
+		if (pv ~= currVal) then
+			vars.ints[v]=currVal
+			eventOccured=true
+		end	
+	end
+	for v,pv in pairs(vars.bools)
+	do
+		local currVal=oms2_getBoolean(v)
+		--print(v .. pv .. currVal)
+		if (pv ~= currVal) then
+			vars.bools[v]=currVal
+			eventOccured=true
+		end	
+	end
+	--print(dump(vars))
 	return eventOccured
 end
 
 function getValues(vars)
 	local values={}
-	for v,_ in pairs(vars)
+	local intvalues={}
+	local realvalues={}
+	local boolvalues={}
+	--print("Parameter for getValues",dump(vars))
+	for v,t in pairs(vars)
 	do
-		values[v]=oms2_getReal(v)	
+		if ("real"==t) then 
+			realvalues[v]=oms2_getReal(v)
+		elseif ("integer"==t) then
+			intvalues[v]=oms2_getInteger(v)
+		elseif ("boolean"==t) then
+			boolvalues[v]=oms2_getBoolean(v)
+		else
+			print("Unsupported data type: ",t," Supported data types are real, integer, boolean")
+		end	
 	end
+	values.ints=intvalues
+	values.reals=realvalues
+	values.bools=boolvalues
+	--print(dump(values))
 	return values
 end
 
@@ -81,7 +117,7 @@ function getNextStepSize(prevValues,zeroCrossings,communicationInterval,imin)
 	-- discrete event chains: if there was an event we adjust the step size to the minimal value
 	local eventOccured=didEventOccur(prevValues)
 	if (eventOccured) then
-		--print("Event")
+		-- print("Event")
 		minStepSize=imin
 		return minStepSize
 	else
@@ -101,6 +137,7 @@ end
 
 function oms2_simulateWithASSC(model,communicationInterval,sensitivityModel,imin,tmax)
 	local tcur=0.0
+	--print(dump(sensitivityModel))
 	local prevValues=getValues(sensitivityModel.events)
 	--print(dump(prevValues))
 	while (tcur<tmax)
