@@ -46,7 +46,8 @@ The simulation ended at 1005.4 time units with the following results.
 
 When comparing the results to the constant step size simulations we can see, that the reaction delay is the same as that of the smallest step size used but the runtime is of the same order of magnitude as that of the largest used step size.
 
+## Extending the example
 
-
+We extended the Thermostat example with an additional monitoring system (see _MonitoredThermostat.lua_), to demonstrate the _chains of events_ usecase. Before turning the heating on the monitoring systems runs a few checks (in the form of sending messages among each other). While the first event is caught relatively late (depending on the current step size) the reactions are performed quickly, in the matter of miliseconds.
 
 
