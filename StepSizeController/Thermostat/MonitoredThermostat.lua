@@ -115,12 +115,20 @@ oms2_setResultFile("MonitoredThermostat", "MonitoredThermostat.mat")
 --oms2_setCommunicationInterval("MonitoredThermostat", 1.0)
 oms2_initialize("MonitoredThermostat")
 
--- band model for the first time the thermostat should be turned on
-bm=BandModel:create()
+-- (static) band model for the first time the thermostat should be turned on
+--[[bm=BandModel:create()
 bm:addBand(18.0,19.02,0.1)
 bm:addBand(19.02,19.1,1.0)
 bm:addBand(19.1,24.0,10.0)
 bm:addBand(24.0,26.0,0.1)
+--]]
+
+-- dynamic band model
+bm=DynamicBandModel:create("MonitoredThermostat.TemperatureMonitor:currentTarget","MonitoredThermostat.TemperatureMonitor:currentBandWith")
+bm.levels[0.02]=0.1
+bm.levels[0.1]=1.0
+bm.levels[1.0]=10.0
+
 
 sm=SensitivityModel:create()
 sm.zeroCrossings["MonitoredThermostat.Room:temperatureStreamPort1.measured_temperature1.measured_temperature[1]"]=bm
@@ -135,7 +143,7 @@ sm.events["MonitoredThermostat.TemperatureMonitor:reply"]="real"
 -- sm.events["CentralMonitor:heatOnGrant"]=real -- it is possible to include it but useless
 sm.timeIndicators["MonitoredThermostat.CentralMonitor:nextHeartBeat"]=true;
 
-oms2_simulateWithASSC("MonitoredThermostat",10.0,sm,0.01,1000.0)
+oms2_simulateWithASSC("MonitoredThermostat",10.0,sm,0.01,3000.0)
 
 --oms2_simulate("MonitoredThermostat")
 

@@ -21,8 +21,8 @@ function SensitivityModel:create()
 	local sm = {}
 	setmetatable(sm,SensitivityModel)
 	sm.events = {} -- discrete events - set of variables, where any change is interesting
-	sm.zeroCrossings = {} -- maps from variable name to a band model
 	sm.timeIndicators = {} -- timed events - set of variables indicating the next event
+	sm.zeroCrossings = {} -- interesting threshold-crossings - maps from variable name to something with a getStepSize() function
 	return sm
 end
 
@@ -51,6 +51,39 @@ function BandModel:getStepSize(value)
 		end
 	end
 	return nil
+end
+
+DynamicBandModel = {}
+DynamicBandModel.__index = DynamicBandModel
+
+function DynamicBandModel:create(trg,relBandWith)
+	local dbm = {}
+	setmetatable(dbm,DynamicBandModel)
+	dbm.target = trg -- a variable describing the current targetValue
+	dbm.relativeBandWith = relBandWith -- a variable describing the current relative difference from the target value
+	dbm.levels = {} -- maps from fraction of bandwith to (max) step size
+	return dbm
+end
+
+function DynamicBandModel:getStepSize(value)
+	--print("Value:",value)
+	local currtrg=oms2_getReal(self.target)
+	local currhys=oms2_getReal(self.relativeBandWith)
+	local diff=math.abs(value-currtrg)
+	--print("Target:",currtrg)
+	--print("Interval:",currhys)
+	--print("Diff:",diff)
+	if (diff>currhys) then 
+		--print("Not ")
+		return nil 
+	else
+		local fracsize=diff/currhys
+		local min=self.levels[1.0]
+		for f,s in pairs(self.levels) do
+			if (fracsize<f and s<min) then min=s end
+		end
+		return min
+	end
 end
 
 -- step size control based on a sensitivity model
@@ -132,7 +165,7 @@ function getNextStepSize(prevValues,zeroCrossings,timedIndicators,communicationI
 		return imin
 	else
 		local nextTimedEvent = getNextTimedEvent(timedIndicators)
-		print("Next:",nextTimedEvent,"Current:",tcur)
+		--print("Next:",nextTimedEvent,"Current:",tcur)
 		if (nextTimedEvent<=tcur) then
 			return imin
 		else

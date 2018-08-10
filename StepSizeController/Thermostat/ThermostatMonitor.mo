@@ -56,10 +56,19 @@ class CriticalTemperatureMonitor
     Modelica.Blocks.Interfaces.RealInput request;
     Modelica.Blocks.Interfaces.RealOutput reply;
     Boolean critical;
+    Real currentTarget;
+    Real currentBandWith;
   equation
     critical = (temperature < target - hysteresis);
     reply= if (request<0.5) then -1.0 elseif (critical) then 1.0 else 0.0;
+    currentTarget = if (target<temperature) then target+hysteresis else target-hysteresis;
+    currentBandWith=1.0;
 end CriticalTemperatureMonitor;
+
+
+
+
+
 
 
 
