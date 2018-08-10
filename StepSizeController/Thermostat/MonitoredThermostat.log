@@ -1,0 +1,5 @@
+Thu Aug 09 15:23:46 2018 | info:    Initializing logging (OMSimulator v2.0.0-dev-576-g0f418cf-linux)
+Thu Aug 09 15:23:46 2018 | info:    New temp directory: "/home/farkasr/git/OMSimulator/StepSizeController/Thermostat/tmp"
+Thu Aug 09 15:23:46 2018 | info:    Result file: MonitoredThermostat.mat (bufferSize=1)
+Thu Aug 09 15:23:46 2018 | info:    Removed model from scope: MonitoredThermostat
+Thu Aug 09 15:23:46 2018 | info:    Logging completed properly
