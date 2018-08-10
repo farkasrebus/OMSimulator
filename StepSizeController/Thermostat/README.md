@@ -12,7 +12,7 @@ The room temperature begins to decrease. After 10 time units, the thermostat is 
 
 ## Adaptive step size control
 
-To demonstrate how the step size can influence the accuracy of the simulation, we simulated the Thermostat example for 1000 time units with various (but constant) step sizes. The table contains the lowest temperature measured according to the simulation, the corrsponding time stamp and the time it took to perform the simulation.
+To demonstrate how the step size can influence the efficiency and the accuracy of the simulation, we simulated the Thermostat example for 1000 time units with various (but constant) step sizes. The table contains the lowest temperature measured according to the simulation, the corresponding time stamp and the time it took to perform the simulation.
 
 
 | Step size      | Lowest temperature | Time stamp | Runtime | Total steps |
@@ -48,6 +48,8 @@ When comparing the results to the constant step size simulations we can see, tha
 
 ## Extending the example
 
-We extended the Thermostat example with an additional monitoring system (see _MonitoredThermostat.lua_), to demonstrate the _chains of events_ usecase. Before turning the heating on the monitoring systems runs a few checks (in the form of sending messages among each other). While the first event is caught relatively late (depending on the current step size) the reactions are performed quickly, in the matter of miliseconds.
+We extended the Thermostat example with an additional monitoring system (see _MonitoredThermostat.lua_), to demonstrate the _chains of events_ and the _timed events_ usecases. Before turning the heating on the monitoring systems runs a few checks (in the form of FMUs sending messages among each other). While the first event is caught relatively late (depending on the current step size) the reactions are performed quickly, in the matter of miliseconds. The monitoring system also runs these checks every 180 seconds, to make sure the thermostat is operating properly - since this is a timed event, it is caught precisely.
+
+We also added indicator variables for dynamic treshold-crossing.
 
 

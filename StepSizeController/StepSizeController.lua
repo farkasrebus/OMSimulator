@@ -66,15 +66,10 @@ function DynamicBandModel:create(trg,relBandWith)
 end
 
 function DynamicBandModel:getStepSize(value)
-	--print("Value:",value)
 	local currtrg=oms2_getReal(self.target)
 	local currhys=oms2_getReal(self.relativeBandWith)
 	local diff=math.abs(value-currtrg)
-	--print("Target:",currtrg)
-	--print("Interval:",currhys)
-	--print("Diff:",diff)
 	if (diff>currhys) then 
-		--print("Not ")
 		return nil 
 	else
 		local fracsize=diff/currhys
