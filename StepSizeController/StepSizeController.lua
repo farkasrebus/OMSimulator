@@ -21,7 +21,8 @@ function SensitivityModel:create()
 	local sm = {}
 	setmetatable(sm,SensitivityModel)
 	sm.events = {} -- discrete events - set of variables, where any change is interesting
-	sm.zeroCrossings = {} -- maps from variable name to an object with a function getStepSize()
+	sm.zeroCrossings = {} -- maps from variable name to a band model
+	sm.timeIndicators = {} -- timed events - set of variables indicating the next event
 	return sm
 end
 
@@ -112,26 +113,42 @@ function getValues(vars)
 	return values
 end
 
-function getNextStepSize(prevValues,zeroCrossings,communicationInterval,imin)
+function getNextTimedEvent(vars)
+	local min=math.huge;
+	for v,_ in pairs(vars)
+	do
+		local value=oms2_getReal(v)
+		if (value > 0 and value<min) then min=value end
+	end
+	return min
+end
+
+function getNextStepSize(prevValues,zeroCrossings,timedIndicators,communicationInterval,imin,tcur)
 	local minStepSize=communicationInterval
 	-- discrete event chains: if there was an event we adjust the step size to the minimal value
 	local eventOccured=didEventOccur(prevValues)
 	if (eventOccured) then
 		-- print("Event")
-		minStepSize=imin
-		return minStepSize
+		return imin
 	else
-		-- zero crossings
-		local zc=zeroCrossings
-		for variable,bands in pairs(zc)
-		do
-			value=oms2_getReal(variable)
-			step=bands:getStepSize(value)
-			if (step ~= nil and step<minStepSize) then
-				minStepSize=step
+		local nextTimedEvent = getNextTimedEvent(timedIndicators)
+		print("Next:",nextTimedEvent,"Current:",tcur)
+		if (nextTimedEvent<=tcur) then
+			return imin
+		else
+			if (nextTimedEvent-tcur < minStepSize) then minStepSize=nextTimedEvent-tcur end
+			-- zero crossings
+			local zc=zeroCrossings
+			for variable,bands in pairs(zc)
+			do
+				value=oms2_getReal(variable)
+				step=bands:getStepSize(value)
+				if (step ~= nil and step<minStepSize) then
+					minStepSize=step
+				end
 			end
+			if (minStepSize<imin) then return imin else return minStepSize end
 		end
-		return minStepSize
 	end
 end
 
@@ -142,7 +159,7 @@ function oms2_simulateWithASSC(model,communicationInterval,sensitivityModel,imin
 	--print(dump(prevValues))
 	while (tcur<tmax)
 	do
-		local nextStepSize = getNextStepSize(prevValues,sensitivityModel.zeroCrossings,communicationInterval,imin)
+		local nextStepSize = getNextStepSize(prevValues,sensitivityModel.zeroCrossings,sensitivityModel.timeIndicators,communicationInterval,imin,tcur)
 		oms2_setCommunicationInterval(model, nextStepSize)
 		oms2_doSteps(model,1)
 		tcur=tcur+nextStepSize

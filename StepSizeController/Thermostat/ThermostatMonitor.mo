@@ -102,7 +102,7 @@ class CentralMonitor
     der(lastTempReply)=0;
     
     when (heatOnPermission > 0.5) then reinit(state,2); end when;
-    when (time>nextHeartBeat) then reinit(state,2); end when;
+    when (time>=nextHeartBeat) then reinit(state,2); end when;
     when (termReply>-0.5) then reinit(state,3); end when;
     when (heatReply>-0.5) then reinit(state,4); end when;
     when (tempReply>-0.5) then reinit(state,5); end when;
@@ -121,6 +121,7 @@ class CentralMonitor
     
     
 end CentralMonitor;
+
 
 
 

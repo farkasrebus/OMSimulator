@@ -133,8 +133,9 @@ sm.events["MonitoredThermostat.ThermostatMonitor:reply"]="real"
 sm.events["MonitoredThermostat.HeatingMonitor:reply"]="real"
 sm.events["MonitoredThermostat.TemperatureMonitor:reply"]="real"
 -- sm.events["CentralMonitor:heatOnGrant"]=real -- it is possible to include it but useless
+sm.timeIndicators["MonitoredThermostat.CentralMonitor:nextHeartBeat"]=true;
 
-oms2_simulateWithASSC("MonitoredThermostat",10.0,sm,0.01,500.0)
+oms2_simulateWithASSC("MonitoredThermostat",10.0,sm,0.01,1000.0)
 
 --oms2_simulate("MonitoredThermostat")
 
