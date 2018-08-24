@@ -242,6 +242,17 @@ oms_status_enu_t oms2::Scope::saveModel(const std::string& filename, const oms2:
   return model->save(filename);
 }
 
+oms_status_enu_t oms2::Scope::listModel(const oms2::ComRef& name, char** contents)
+{
+  logTrace();
+
+  oms2::Model* model = getModel(name);
+  if (!model)
+    return oms_status_error;
+
+  return model->list(contents);
+}
+
 oms_status_enu_t oms2::Scope::initialize(const ComRef& name)
 {
   logTrace();
@@ -335,7 +346,15 @@ oms_status_enu_t oms2::Scope::setTempDirectory(const std::string& newTempDir)
   }
 
   boost::filesystem::path path(newTempDir.c_str());
-  path = boost::filesystem::canonical(path);
+  try
+  {
+    path = boost::filesystem::canonical(path);
+  }
+  catch(std::exception e)
+  {
+    // do nothing, canonical fails if the directory contains a junction or a symlink!
+    // https://svn.boost.org/trac10/ticket/11138
+  }
   tempDir = path.string();
 
   logInfo("New temp directory: \"" + std::string(tempDir) + "\"");
@@ -436,7 +455,7 @@ oms_status_enu_t oms2::Scope::getElements(const oms2::ComRef& cref, oms2::Elemen
   return oms_status_error;
 }
 
-oms_status_enu_t oms2::Scope::getFMUPath(const oms2::ComRef& cref, char** path)
+oms_status_enu_t oms2::Scope::getSubModelPath(const oms2::ComRef& cref, char** path)
 {
   logTrace();
 
@@ -447,7 +466,7 @@ oms_status_enu_t oms2::Scope::getFMUPath(const oms2::ComRef& cref, char** path)
     Model* model = getModel(modelCref);
     if (!model)
     {
-      logError("[oms2::Scope::getFMUPath] failed");
+      logError("[oms2::Scope::getSubModelPath] failed");
       return oms_status_error;
     }
 
@@ -458,16 +477,15 @@ oms_status_enu_t oms2::Scope::getFMUPath(const oms2::ComRef& cref, char** path)
       FMISubModel* subModel = fmiModel->getSubModel(cref);
       if (!subModel)
       {
-        logError("[oms2::Scope::getFMUPath] failed");
+        logError("[oms2::Scope::getSubModelPath] failed");
         return oms_status_error;
       }
-      oms2::FMUWrapper* fmuWrapper = dynamic_cast<oms2::FMUWrapper*>(subModel);
-      *path = const_cast<char*>(fmuWrapper->getFMUPath().c_str());
+      *path = const_cast<char*>(subModel->getPath().c_str());
       return oms_status_ok;
     }
     else
     {
-      logError("[oms2::Scope::getFMUPath] is only implemented for FMI models yet");
+      logError("[oms2::Scope::getSubModelPath] is only implemented for FMI models yet");
       return oms_status_error;
     }
   }
@@ -789,14 +807,15 @@ oms_status_enu_t oms2::Scope::renameModel(const oms2::ComRef& identOld, const om
   return oms_status_ok;
 }
 
-oms2::Model* oms2::Scope::getModel(const oms2::ComRef& name)
+oms2::Model* oms2::Scope::getModel(const oms2::ComRef& name, bool showWarning)
 {
   logTrace();
 
   auto it = models.find(name);
   if (it == models.end())
   {
-    logWarning("There is no model called \"" + name + "\" in scope.");
+    if (showWarning)
+      logWarning("There is no model called \"" + name + "\" in scope.");
     return NULL;
   }
 
@@ -1889,6 +1908,34 @@ oms_status_enu_t oms2::Scope::connectSolver(const ComRef& modelCref, const ComRe
   else
   {
     logError("[oms2::Scope::connectSolver] is only implemented for FMI models yet");
+    return oms_status_error;
+  }
+}
+
+oms_status_enu_t oms2::Scope::unconnectSolver(const ComRef& modelCref, const ComRef& name, const ComRef& fmu)
+{
+  // Sub-model
+  Model* model = getModel(modelCref);
+  if (!model)
+  {
+    logError("[oms2::Scope::unconnectSolver] failed");
+    return oms_status_error;
+  }
+
+  // FMI model?
+  if (oms_component_fmi == model->getType())
+  {
+    FMICompositeModel* fmiModel = model->getFMICompositeModel();
+    if (!fmiModel)
+    {
+      logError("[oms2::Scope::unconnectSolver] failed");
+      return oms_status_error;
+    }
+    return fmiModel->unconnectSolver(name, fmu);
+  }
+  else
+  {
+    logError("[oms2::Scope::unconnectSolver] is only implemented for FMI models yet");
     return oms_status_error;
   }
 }

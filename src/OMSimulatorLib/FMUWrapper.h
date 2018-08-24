@@ -58,7 +58,7 @@ namespace oms2
   class FMUWrapper : public FMISubModel
   {
   public:
-    static FMUWrapper* newSubModel(const ComRef& cref, const std::string& filename);
+    static FMUWrapper* newSubModel(const ComRef& cref, const std::string& filename, const ComRef &parent);
 
     oms_status_enu_t enterInitialization(const double time);
     oms_status_enu_t exitInitialization();
@@ -69,6 +69,9 @@ namespace oms2
 
     oms_element_type_enu_t getType() const { return oms_component_fmu; }
 
+    void readFromTLMSockets(double time);
+    void writeToTLMSockets(double time);
+
     oms_status_enu_t setRealParameter(const std::string& var, double value);
     oms_status_enu_t getRealParameter(const std::string& var, double& value);
     oms_status_enu_t getReal(const std::string& var, double& value);
@@ -77,6 +80,7 @@ namespace oms2
     oms_status_enu_t setBooleanParameter(const std::string& var, bool value);
     oms_status_enu_t getBooleanParameter(const std::string& var, bool& value);
     const std::string getFMUPath() const {return fmuInfo.getPath();}
+    const std::string getPath() const {return getFMUPath();}
     const oms2::FMUInfo* getFMUInfo() const {return &(this->fmuInfo);}
     const std::map<std::string, oms2::Option<double>>& getRealParameters() const {return realParameters;}
     const std::map<std::string, oms2::Option<int>>& getIntegerParameters() const {return integerParameters;}
@@ -117,8 +121,10 @@ namespace oms2
     oms2::Variable* getVariable(const std::string& var);
 
   private:
-    FMUWrapper(const ComRef& cref, const std::string& filename);
+    FMUWrapper(const ComRef& cref, const std::string& filename, const ComRef& parent);
     ~FMUWrapper();
+
+    ComRef parent;
 
     oms2::FMUInfo fmuInfo;
     std::vector<oms2::Variable> inputs;

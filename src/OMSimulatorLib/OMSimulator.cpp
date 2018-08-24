@@ -150,10 +150,30 @@ oms_status_enu_t oms2_loadModel(const char* filename, char** ident)
   return oms_status_ok;
 }
 
+oms_status_enu_t oms2_loadModelFromString(const char* contents, char** ident)
+{
+  logTrace();
+  oms2::Model* model = oms2::Scope::GetInstance().loadModel(contents);
+
+  if (!model) {
+    return oms_status_error;
+  }
+
+  oms_element_t* element = reinterpret_cast<oms_element_t*>(model->getElement());
+  *ident = element->name;
+  return oms_status_ok;
+}
+
 oms_status_enu_t oms2_saveModel(const char* filename, const char* ident)
 {
   logTrace();
   return oms2::Scope::GetInstance().saveModel(filename, oms2::ComRef(ident));
+}
+
+oms_status_enu_t oms2_listModel(const char* ident, char** contents)
+{
+  logTrace();
+  return oms2::Scope::GetInstance().listModel(oms2::ComRef(ident), contents);
 }
 
 oms_status_enu_t oms2_getElement(const char* cref, oms_element_t** element)
@@ -174,10 +194,10 @@ oms_status_enu_t oms2_getElements(const char* cref, oms_element_t*** elements)
   return oms2::Scope::GetInstance().getElements(oms2::ComRef(cref), reinterpret_cast<oms2::Element***>(elements));
 }
 
-oms_status_enu_t oms2_getFMUPath(const char* cref, char** path)
+oms_status_enu_t oms2_getSubModelPath(const char* cref, char** path)
 {
   logTrace();
-  return oms2::Scope::GetInstance().getFMUPath(oms2::ComRef(cref), path);
+  return oms2::Scope::GetInstance().getSubModelPath(oms2::ComRef(cref), path);
 }
 
 oms_status_enu_t oms2_getFMUInfo(const char* cref, const oms_fmu_info_t** fmuInfo)
@@ -201,13 +221,37 @@ oms_status_enu_t oms2_getConnections(const char* cref, oms_connection_t*** conne
 oms_status_enu_t oms2_addConnection(const char* cref, const char* conA, const char* conB)
 {
   logTrace();
-  return oms2::Scope::GetInstance().addConnection(oms2::ComRef(cref), oms2::SignalRef(conA), oms2::SignalRef(conB));
+
+  if(oms2::SignalRef::isValid(conA) && oms2::SignalRef::isValid(conB))
+  {
+    // case 1: FMU:signal1 -> FMU:signal2
+    return oms2::Scope::GetInstance().addConnection(oms2::ComRef(cref), oms2::SignalRef(conA), oms2::SignalRef(conB));
+  }
+  else if(oms2::ComRef::isValidIdent(conA) && oms2::ComRef::isValidIdent(conB))
+  {
+    // case 2: FMU -> solver
+    return oms2::Scope::GetInstance().connectSolver(oms2::ComRef(cref), oms2::ComRef(conA), oms2::ComRef(conB));
+  }
+  else
+    return logWarning("[oms2_addConnection] invalid arguments");
 }
 
 oms_status_enu_t oms2_deleteConnection(const char* cref, const char* conA, const char* conB)
 {
   logTrace();
-  return oms2::Scope::GetInstance().deleteConnection(oms2::ComRef(cref), oms2::SignalRef(conA), oms2::SignalRef(conB));
+
+  if(oms2::SignalRef::isValid(conA) && oms2::SignalRef::isValid(conB))
+  {
+    // case 1: FMU:signal1 -> FMU:signal2
+    return oms2::Scope::GetInstance().deleteConnection(oms2::ComRef(cref), oms2::SignalRef(conA), oms2::SignalRef(conB));
+  }
+  else if(oms2::ComRef::isValidIdent(conA) && oms2::ComRef::isValidIdent(conB))
+  {
+    // case 2: FMU -> solver
+    return oms2::Scope::GetInstance().unconnectSolver(oms2::ComRef(cref), oms2::ComRef(conA), oms2::ComRef(conB));
+  }
+  else
+    return logWarning("[oms2_deleteConnection] invalid arguments");
 }
 
 oms_status_enu_t oms2_updateConnection(const char* cref, const char* conA, const char* conB, const oms_connection_t* connection)
@@ -568,8 +612,12 @@ oms_status_enu_t oms2_addSolver(const char* model, const char* name, const char*
   return oms2::Scope::GetInstance().addSolver(oms2::ComRef(model), oms2::ComRef(name), std::string(solver));
 }
 
-oms_status_enu_t oms2_connectSolver(const char* model, const char* name, const char* fmu)
+oms_status_enu_t oms2_freeMemory(void* obj)
 {
-  return oms2::Scope::GetInstance().connectSolver(oms2::ComRef(model), oms2::ComRef(name), oms2::ComRef(fmu));
+  logTrace();
+  if (obj)
+  {
+    free(obj);
+  }
+  return oms_status_ok;
 }
-

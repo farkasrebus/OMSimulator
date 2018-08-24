@@ -122,9 +122,9 @@ oms_status_enu_t oms2_deleteSubModel(const char* modelIdent, const char* subMode
 oms_status_enu_t oms2_rename(const char* identOld, const char* identNew);
 
 /**
- * \brief Loads a FMI composite model from xml representation.
+ * \brief Loads a FMI composite model from xml file.
  *
- * \param filename   [in] Path to the composite model xml representation
+ * \param filename   [in] Path to the composite model xml file
  * \param ident      [out] Name of the imported model
  * \return           Error status
  */
@@ -133,11 +133,30 @@ oms_status_enu_t oms2_loadModel(const char* filename, char** ident);
 /**
  * \brief Loads a FMI composite model from xml representation.
  *
- * \param filename   [in] Path to the xml file; An exisiting file will be overwritten
+ * \param contents   [in] Composite model xml contents
+ * \param ident      [out] Name of the imported model
+ * \return           Error status
+ */
+oms_status_enu_t oms2_loadModelFromString(const char* contents, char** ident);
+
+/**
+ * \brief Loads a FMI composite model from xml representation.
+ *
+ * \param filename   [in] Path to the xml file; An existing file will be overwritten
  * \param ident      [in] Name of the model to export
  * \return           Error status
  */
 oms_status_enu_t oms2_saveModel(const char* filename, const char* ident);
+
+/**
+ * \brief Lists the contents of a composite model.
+ * Memory is allocated for contents. The caller is responsible to call free on it.
+ *
+ * \param ident      [in] Name of the model
+ * \param contents   [out] Contents of the model
+ * \return           Error status
+ */
+oms_status_enu_t oms2_listModel(const char* ident, char** contents);
 
 /**
  * \brief Get element information of a model or sub-model.
@@ -167,13 +186,13 @@ oms_status_enu_t oms2_setElementGeometry(const char* cref, const ssd_element_geo
 oms_status_enu_t oms2_getElements(const char* cref, oms_element_t*** elements);
 
 /**
- * \brief Returns the FMU path of a given component.
+ * \brief Returns the path of a given component.
  *
  * \param cref         [in] Full identifier of a component
- * \param path         [out] FMU path
+ * \param path         [out] path
  * \return             Error status
  */
-oms_status_enu_t oms2_getFMUPath(const char* cref, char** path);
+oms_status_enu_t oms2_getSubModelPath(const char* cref, char** path);
 
 /**
  * \brief Returns FMU specific information.
@@ -203,16 +222,21 @@ oms_status_enu_t oms2_setConnectorGeometry(const char* connector, const ssd_conn
 oms_status_enu_t oms2_getConnections(const char* cref, oms_connection_t*** connections);
 
 /**
- * \brief Adds a new connection to a given parent component.
+ * \brief Adds a new connection between connectors A and B to a given parent
+ * component.
+ * This command can be used to connects submodels with each other or to attach
+ * a solver to a submodel.
  *
- * \param cref         [in] Full identifier of a component
- * \param connection   [in] New connection
+ * \param cref         [in] Full identifier of a component, e.g. FMI composite model
+ * \param conA         [in] Name of connector A
+ * \param conB         [in] Name of connector B
  * \return             Error status
  */
 oms_status_enu_t oms2_addConnection(const char* cref, const char* conA, const char* conB);
 
 /**
  * \brief Deletes the connection between connectors A and B.
+ * This can also be used to unconnect a solver from a given FMU.
  *
  * \param cref   [in] Full identifier of a component
  * \param conA   [in] Name of connector A
@@ -659,7 +683,7 @@ oms_status_enu_t experimental_simulate_realtime(const char* ident);
  * \brief Export the composite structure of a given model to a dot file.
  *
  * \param cref       [in] Name of the model instance
- * \param filename   [in] Path to the dot file; An exisiting file will be overwritten
+ * \param filename   [in] Path to the dot file; An existing file will be overwritten
  * \return           Error status
  */
 oms_status_enu_t oms2_exportCompositeStructure(const char* cref, const char* filename);
@@ -667,9 +691,8 @@ oms_status_enu_t oms2_exportCompositeStructure(const char* cref, const char* fil
 /**
  * \brief Export the dependency graphs of a given model to a dot file.
  *
- * \param cref             [in] Name of the model instance
- * \param initialization   [in] Path to the dot file; An exisiting file will be overwritten
- * \param simulation       [in] Path to the dot file; An exisiting file will be overwritten
+ * \param initialization   [in] Path to the dot file; An existing file will be overwritten
+ * \param simulation       [in] Path to the dot file; An existing file will be overwritten
  * \return                 Error status
  */
 oms_status_enu_t oms2_exportDependencyGraphs(const char* cref, const char* initialization, const char* simulation);
@@ -711,7 +734,14 @@ oms_status_enu_t oms2_removeSignalsFromResults(const char* cref, const char* reg
 oms_status_enu_t oms2_setFlags(const char* cref, const char* flags);
 
 oms_status_enu_t oms2_addSolver(const char* model, const char* name, const char* solver);
-oms_status_enu_t oms2_connectSolver(const char* model, const char* name, const char* fmu);
+
+/**
+ * \brief Free the memory.
+ *
+ * \param obj  [in] Pointer to the object.
+ * \return Error status
+ */
+oms_status_enu_t oms2_freeMemory(void* obj);
 
 #ifdef __cplusplus
 }

@@ -61,9 +61,16 @@ endif
 ifeq ($(OMBUILDDIR),)
 	TOP_INSTALL_DIR=$(INSTALL_DIR)
 	CMAKE_INSTALL_PREFIX=
+	HOST_SHORT=
 else
 	TOP_INSTALL_DIR=$(OMBUILDDIR)
 	CMAKE_INSTALL_PREFIX=-DCMAKE_INSTALL_PREFIX=$(OMBUILDDIR)
+ifeq ($(host_short),)
+	HOST_SHORT=
+else
+	HOST_SHORT_OMC=$(host_short)/omc
+	HOST_SHORT=-DHOST_SHORT=$(HOST_SHORT_OMC)
+endif
 endif
 
 ifeq ($(CROSS_TRIPLE),)
@@ -98,7 +105,7 @@ OMSimulatorCore:
 	@echo "# make OMSimulatorCore"
 	@echo
 	@$(MAKE) -C $(BUILD_DIR) install
-	test ! "$(detected_OS)" = Darwin || ($(CROSS_TRIPLE_DASH)install_name_tool -change MAC64/libomtlmsimulator.dylib "@loader_path/../lib/libomtlmsimulator.dylib" $(TOP_INSTALL_DIR)/bin/OMSimulator)
+	test ! "$(detected_OS)" = Darwin || ($(CROSS_TRIPLE_DASH)install_name_tool -change MAC64/libomtlmsimulator.dylib "@loader_path/../lib/$(HOST_SHORT_OMC)/libomtlmsimulator.dylib" $(TOP_INSTALL_DIR)/bin/OMSimulator)
 
 ifeq ($(OMTLM),ON)
 OMTLMSimulator:
@@ -108,9 +115,9 @@ OMTLMSimulator:
 	@echo $(ABI)
 	@$(MAKE) -C OMTLMSimulator omtlmlib
 	test ! `uname` != Darwin || $(MAKE) -C OMTLMSimulator/FMIWrapper install
-	@$(MKDIR) $(TOP_INSTALL_DIR)/lib
+	@$(MKDIR) $(TOP_INSTALL_DIR)/lib/$(HOST_SHORT_OMC)
 	@$(MKDIR) $(TOP_INSTALL_DIR)/bin
-	cp OMTLMSimulator/bin/libomtlmsimulator$(FEXT) $(TOP_INSTALL_DIR)/lib/
+	cp OMTLMSimulator/bin/libomtlmsimulator$(FEXT) $(TOP_INSTALL_DIR)/lib/$(HOST_SHORT_OMC)
 	test ! "$(FEXT)" = ".dll" || cp OMTLMSimulator/bin/libomtlmsimulator$(FEXT) $(TOP_INSTALL_DIR)/bin/
 	test ! `uname` != Darwin || cp OMTLMSimulator/bin/FMIWrapper $(TOP_INSTALL_DIR)/bin/
 	test ! `uname` != Darwin || cp OMTLMSimulator/bin/StartTLMFmiWrapper $(TOP_INSTALL_DIR)/bin/
@@ -132,7 +139,7 @@ OMTLMSimulatorClean:
 	@echo
 	@$(MAKE) -C OMTLMSimulator clean
 
-config-3rdParty: config-fmil config-lua config-cvode config-kinsol config-gflags config-glog config-ceres-solver config-libxml2
+config-3rdParty: config-fmil config-lua config-cvode config-kinsol config-ceres-solver config-libxml2
 
 config-OMSimulator:
 	@echo
@@ -140,7 +147,7 @@ config-OMSimulator:
 	@echo
 	$(RM) $(BUILD_DIR)
 	$(MKDIR) $(BUILD_DIR)
-	cd $(BUILD_DIR) && cmake $(CMAKE_TARGET) ../.. -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON -DOMSYSIDENT:BOOL=$(OMSYSIDENT) -DOMTLM:BOOL=$(OMTLM) -DASAN:BOOL=$(ASAN) -DCMAKE_BUILD_TYPE=$(BUILD_TYPE) $(CMAKE_BOOST_ROOT) $(CMAKE_INSTALL_PREFIX)
+	cd $(BUILD_DIR) && cmake $(CMAKE_TARGET) ../.. -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON -DOMSYSIDENT:BOOL=$(OMSYSIDENT) -DOMTLM:BOOL=$(OMTLM) -DASAN:BOOL=$(ASAN) -DCMAKE_BUILD_TYPE=$(BUILD_TYPE) $(CMAKE_BOOST_ROOT) $(CMAKE_INSTALL_PREFIX) $(HOST_SHORT)
 
 config-fmil:
 	@echo

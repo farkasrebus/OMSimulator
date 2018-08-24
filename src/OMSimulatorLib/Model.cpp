@@ -32,16 +32,18 @@
 #include "Model.h"
 
 #include "CSVWriter.h"
-#include "MATWriter.h"
 #include "FMICompositeModel.h"
-#include "TLMCompositeModel.h"
 #include "Logging.h"
+#include "MATWriter.h"
+#include "Scope.h"
 #include "ssd/Tags.h"
+#include "TLMCompositeModel.h"
 
 #include <regex>
 #include <thread>
 
 #include <pugixml.hpp>
+#include <boost/filesystem.hpp>
 
 oms2::Model::Model(const oms2::ComRef& cref)
   : systemGeometry(), resultFilename(cref.toString() + "_res.mat"), resultFile(NULL)
@@ -86,11 +88,26 @@ oms2::Model* oms2::Model::LoadModel(const std::string& filename)
   bool defaultExperiment = false;
 
   pugi::xml_document doc;
-  pugi::xml_parse_result result = doc.load_file(filename.c_str());
-  if (!result)
+  /* If the filename is a valid file then we reached via oms2_loadModel
+   * Otherwise oms2_loadModelFromString is called.
+   */
+  if (boost::filesystem::exists(filename))
   {
-    logError("loading \"" + std::string(filename) + "\" failed (" + std::string(result.description()) + ")");
-    return NULL;
+    pugi::xml_parse_result result = doc.load_file(filename.c_str());
+    if (!result)
+    {
+      logError("loading \"" + std::string(filename) + "\" failed (" + std::string(result.description()) + ")");
+      return NULL;
+    }
+  }
+  else
+  {
+    pugi::xml_parse_result result = doc.load_buffer(filename.c_str(), strlen(filename.c_str()));
+    if (!result)
+    {
+      logError("loadModel failed (" + std::string(result.description()) + ")");
+      return NULL;
+    }
   }
 
   const pugi::xml_node root = doc.document_element();
@@ -124,7 +141,15 @@ oms2::Model* oms2::Model::LoadModel(const std::string& filename)
   if (!compositeModel)
     return NULL;
 
-  oms2::Model* model = new oms2::Model(compositeModel->getName());
+  // check if model already exists
+  oms2::Model* model = oms2::Scope::GetInstance().getModel(compositeModel->getName(), false);
+  if (model)
+  {
+    logInfo("Updating existing model \"" + model->getName() + "\"");
+    oms2::Model::DeleteModel(model);
+  }
+
+  model = new oms2::Model(compositeModel->getName());
   model->compositeModel = compositeModel;
 
   if (defaultExperiment)
@@ -149,9 +174,17 @@ oms2::Model* oms2::Model::LoadModel(const std::string& filename)
   return model;
 }
 
-oms_status_enu_t oms2::Model::save(const std::string& filename)
+struct xmlStringWriter : pugi::xml_writer
 {
-  logTrace();
+  std::string result;
+  virtual void write(const void* data, size_t size)
+  {
+    result += std::string(static_cast<const char*>(data), size);
+  }
+};
+
+oms_status_enu_t oms2::Model::saveOrList(const std::string& filename, char** contents)
+{
   pugi::xml_document doc;
 
   // generate XML declaration
@@ -173,14 +206,14 @@ oms_status_enu_t oms2::Model::save(const std::string& filename)
   oms_status_enu_t status;
   switch (getType())
   {
-  case oms_component_fmi:
-    status = getFMICompositeModel()->save(ssd_System);
-    break;
+    case oms_component_fmi:
+      status = getFMICompositeModel()->save(ssd_System);
+      break;
 
-  case oms_component_tlm:
-    logError("xml export isn't implemented yet for TLM composite models");
-    status = oms_status_error;
-    break;
+    case oms_component_tlm:
+      logError("xml export isn't implemented yet for TLM composite models");
+      status = oms_status_error;
+      break;
   }
 
   if (oms_status_ok != status)
@@ -191,12 +224,35 @@ oms_status_enu_t oms2::Model::save(const std::string& filename)
   ssd_DefaultExperiment.append_attribute("startTime") = std::to_string(startTime).c_str();
   ssd_DefaultExperiment.append_attribute("stopTime") = std::to_string(stopTime).c_str();
 
-  if (!doc.save_file(filename.c_str()))
+  if (!filename.empty())
   {
-    logError("xml export failed for \"" + filename + "\" (model \"" + getName() + "\")");
-    return oms_status_error;
+    if (!doc.save_file(filename.c_str()))
+    {
+      logError("xml export failed for \"" + filename + "\" (model \"" + getName() + "\")");
+      return oms_status_error;
+    }
+  }
+  else
+  {
+    xmlStringWriter writer;
+
+    doc.save(writer);
+    *contents = (char*) malloc(strlen(writer.result.c_str()) + 1);
+    strcpy(*contents, writer.result.c_str());
   }
   return oms_status_ok;
+}
+
+oms_status_enu_t oms2::Model::save(const std::string& filename)
+{
+  logTrace();
+  return saveOrList(filename, NULL);
+}
+
+oms_status_enu_t oms2::Model::list(char** contents)
+{
+  logTrace();
+  return saveOrList("", contents);
 }
 
 void oms2::Model::setLoggingSamples(int value)

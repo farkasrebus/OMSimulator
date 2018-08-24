@@ -2,20 +2,20 @@
 loadModel
 ---------
 
-Loads a FMI composite model from xml representation.
+Loads a FMI composite model from xml file. If a model already exists with the same identifier, it will be updated.
 #END#
 
 #LUA#
 .. code-block:: lua
 
-  ident, status = oms2_loadModel(filename)
+  status, ident = oms2_loadModel(filename)
 
 #END#
 
 #PYTHON#
 .. code-block:: python
 
-  ident, status = session.loadModel(filename)
+  status, ident = session.loadModel(filename)
 
 #END#
 

@@ -75,10 +75,11 @@ namespace oms2
     oms_status_enu_t rename(const ComRef& identOld, const ComRef& identNew);
     Model* loadModel(const std::string& filename);
     oms_status_enu_t saveModel(const std::string& filename, const ComRef& name);
+    oms_status_enu_t listModel(const ComRef& name, char** contents);
     oms_status_enu_t getElement(const ComRef& cref, oms2::Element** element);
     oms_status_enu_t setElementGeometry(const ComRef& cref, const oms2::ssd::ElementGeometry* geometry);
     oms_status_enu_t getElements(const ComRef& cref, oms2::Element*** elements);
-    oms_status_enu_t getFMUPath(const ComRef& cref, char** path);
+    oms_status_enu_t getSubModelPath(const ComRef& cref, char** path);
     oms_status_enu_t getFMUInfo(const ComRef& cref, const oms2::FMUInfo** fmuInfo);
     oms_status_enu_t setConnectorGeometry(const SignalRef& connector, const oms2::ssd::ConnectorGeometry* geometry);
     oms_status_enu_t getConnections(const ComRef& cref, oms2::Connection*** connections);
@@ -116,12 +117,13 @@ namespace oms2
     oms_status_enu_t setFlags(const ComRef& cref, const std::string& flags);
     oms_status_enu_t addSolver(const ComRef& model, const ComRef& name, const std::string& solver);
     oms_status_enu_t connectSolver(const ComRef& model, const ComRef& name, const ComRef& fmu);
+    oms_status_enu_t unconnectSolver(const ComRef& model, const ComRef& name, const ComRef& fmu);
 
     const std::string& getTempDirectory() {return GetInstance().tempDir;}
     const std::string& getWorkingDirectory() {return GetInstance().workingDir;}
 
     oms_status_enu_t renameModel(const ComRef& identOld, const ComRef& identNew);
-    Model* getModel(const ComRef& name);
+    Model* getModel(const ComRef& name, bool showWarning=true);
     oms2::Connection* getConnection(const ComRef& cref, const SignalRef& conA, const SignalRef& conB);
 
     bool hasFMICompositeModel(const ComRef& name);

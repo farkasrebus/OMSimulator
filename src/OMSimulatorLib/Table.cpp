@@ -87,6 +87,17 @@ oms2::Table* oms2::Table::newSubModel(const oms2::ComRef& cref, const std::strin
     oms2::Variable var(oms2::SignalRef(model->getName(), v), fmi2_causality_enu_output, fmi2_initial_enu_exact, false, oms_signal_type_real);
     model->outputs.push_back(var);
   }
+
+  std::vector<oms2::Connector> connectors;
+  int i = 1;
+  int size = 1 + model->outputs.size();
+  for (auto const &v : model->outputs)
+  {
+    oms2::Connector c(oms_causality_output, v.getType(), v.getSignalRef(), i++/(double)size);
+    connectors.push_back(c);
+  }
+  model->element.setConnectors(connectors);
+
   return model;
 }
 
@@ -109,8 +120,35 @@ oms_status_enu_t oms2::Table::doStep(double stopTime)
 
 oms_status_enu_t oms2::Table::exportToSSD(pugi::xml_node& root) const
 {
-  logError("[oms2::Table::exportToSSD] not implemented yet");
-  return oms_status_error;
+  oms_status_enu_t status = oms_status_ok;
+
+  oms2::ComRef cref = element.getName();
+  pugi::xml_node subModel = root.append_child(oms2::ssd::ssd_component);
+  subModel.append_attribute("name") = cref.last().toString().c_str();
+
+  subModel.append_attribute("type") = "application/x-table";
+
+  const std::string& path = getPath();
+  subModel.append_attribute("source") = path.c_str();
+
+  // export ssd:ElementGeometry
+  status = element.getGeometry()->exportToSSD(subModel);
+  if (oms_status_ok != status)
+    return status;
+
+  // export ssd:Connectors
+  oms2::Connector** connectors = element.getConnectors();
+  if (connectors)
+  {
+    pugi::xml_node connectorsNode = subModel.append_child(oms2::ssd::ssd_connectors);
+    for (int i=0; connectors[i]; ++i)
+    {
+      status = connectors[i]->exportToSSD(connectorsNode);
+      if (oms_status_ok != status)
+        return status;
+    }
+  }
+  return status;
 }
 
 oms2::Variable* oms2::Table::getVariable(const std::string& var)

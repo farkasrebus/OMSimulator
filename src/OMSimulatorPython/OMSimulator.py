@@ -17,9 +17,6 @@ class OMSimulator:
     self.obj.oms2_addSolver.argtypes = [ctypes.c_char_p, ctypes.c_char_p, ctypes.c_char_p]
     self.obj.oms2_addSolver.restype = ctypes.c_int
 
-    self.obj.oms2_connectSolver.argtypes = [ctypes.c_char_p, ctypes.c_char_p, ctypes.c_char_p]
-    self.obj.oms2_connectSolver.restype = ctypes.c_int
-
     self.obj.oms2_addTable.argtypes = [ctypes.c_char_p, ctypes.c_char_p, ctypes.c_char_p]
     self.obj.oms2_addTable.restype = ctypes.c_int
 
@@ -56,8 +53,8 @@ class OMSimulator:
     self.obj.oms2_getCurrentTime.argtypes = [ctypes.c_char_p]
     self.obj.oms2_getCurrentTime.restype = ctypes.c_int
 
-    self.obj.oms2_getFMUPath.argtypes = [ctypes.c_char_p]
-    self.obj.oms2_getFMUPath.restype = ctypes.c_int
+    self.obj.oms2_getSubModelPath.argtypes = [ctypes.c_char_p]
+    self.obj.oms2_getSubModelPath.restype = ctypes.c_int
 
     self.obj.oms2_getInteger.argtypes = [ctypes.c_char_p, ctypes.c_int]
     self.obj.oms2_getInteger.restype = ctypes.c_int
@@ -80,6 +77,9 @@ class OMSimulator:
     self.obj.oms2_loadModel.argtypes = [ctypes.c_char_p]
     self.obj.oms2_loadModel.restype = ctypes.c_int
 
+    self.obj.oms2_loadModelFromString.argtypes = [ctypes.c_char_p]
+    self.obj.oms2_loadModelFromString.restype = ctypes.c_int
+
     self.obj.oms2_newFMIModel.argtypes = [ctypes.c_char_p]
     self.obj.oms2_newFMIModel.restype = ctypes.c_int
 
@@ -94,6 +94,9 @@ class OMSimulator:
 
     self.obj.oms2_saveModel.argtypes = [ctypes.c_char_p, ctypes.c_char_p]
     self.obj.oms2_saveModel.restype = ctypes.c_int
+    
+    self.obj.oms2_listModel.argtypes = [ctypes.c_char_p]
+    self.obj.oms2_listModel.restype = ctypes.c_int
 
     self.obj.oms2_setBoolean.argtypes = [ctypes.c_char_p, ctypes.c_bool]
     self.obj.oms2_setBoolean.restype = ctypes.c_int
@@ -158,14 +161,15 @@ class OMSimulator:
     self.obj.oms2_unloadModel.argtypes = [ctypes.c_char_p]
     self.obj.oms2_unloadModel.restype = ctypes.c_int
 
+    self.obj.oms2_freeMemory.argtypes = [ctypes.c_void_p]
+    self.obj.oms2_freeMemory.restype = ctypes.c_int
+
   def addConnection(self, cref, conA, conB):
     return self.obj.oms2_addConnection(str.encode(cref), str.encode(conA), str.encode(conB))
   def addFMU(self, modelIdent, fmuPath, fmuIdent):
     return self.obj.oms2_addFMU(str.encode(modelIdent), str.encode(fmuPath), str.encode(fmuIdent))
   def addSolver(self, modelIdent, solverIdent, method):
     return self.obj.oms2_addSolver(str.encode(modelIdent), str.encode(solverIdent), str.encode(method))
-  def connectSolver(self, modelIdent, fmuIdent, solverIdent):
-    return self.obj.oms2_connectSolver(str.encode(modelIdent), str.encode(fmuIdent), str.encode(solverIdent))
   def addTable(self, modelIdent, tablePath, tableIdent):
     return self.obj.oms2_addTable(str.encode(modelIdent), str.encode(tablePath), str.encode(tableIdent))
   def addSignalsToResults(self, cref, regex):
@@ -196,9 +200,9 @@ class OMSimulator:
     time = ctypes.c_double()
     status = self.obj.oms2_getCurrentTime(str.encode(ident), ctypes.byref(time))
     return [status, time.value]
-  def getFMUPath(self, cref):
+  def getSubModelPath(self, cref):
     path = ctypes.c_char_p()
-    status = self.obj.oms2_getFMUPath(str.encode(cref), ctypes.byref(path))
+    status = self.obj.oms2_getSubModelPath(str.encode(cref), ctypes.byref(path))
     return [status, path.value]
   def getInteger(self, signal):
     value = ctypes.c_int()
@@ -224,6 +228,10 @@ class OMSimulator:
     ident = ctypes.c_char_p()
     status = self.obj.oms2_loadModel(str.encode(filename), ctypes.byref(ident))
     return [status, ident.value]
+  def loadModelFromString(self, contents):
+    ident = ctypes.c_char_p()
+    status = self.obj.oms2_loadModelFromString(str.encode(contents), ctypes.byref(ident))
+    return [status, ident.value]
   def newFMIModel(self, ident):
     return self.obj.oms2_newFMIModel(str.encode(ident))
   def rename(self, identOld, identNew):
@@ -234,6 +242,11 @@ class OMSimulator:
     return self.obj.oms2_reset(str.encode(ident))
   def saveModel(self, filename, ident):
     return self.obj.oms2_saveModel(str.encode(filename), str.encode(ident))
+  def listModel(self, ident):
+    contents = ctypes.c_char_p()
+    status = self.obj.oms2_listModel(str.encode(ident), ctypes.byref(contents))
+    self.obj.oms2_freeMemory(contents)
+    return [status, contents.value]
   def setBoolean(self, signal, value):
     return self.obj.oms2_setBoolean(str.encode(signal), value)
   def setBooleanParameter(self, signal, value):
