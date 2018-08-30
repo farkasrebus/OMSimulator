@@ -32,7 +32,7 @@
 #ifndef _OMS_OPTIONS_H_
 #define _OMS_OPTIONS_H_
 
-#include <regex>
+#include <RegEx.h>
 #include <string>
 
 class ProgramOptions
@@ -44,8 +44,8 @@ public:
 private:
   bool isOption(const std::string& name);
   bool isOption(const std::string& name1, const std::string& name2);
-  bool isOptionAndValue(const std::string& name, std::string& value, std::regex re);
-  bool isOptionAndValue(const std::string& name1, const std::string& name2, std::string& value, std::regex re);
+  bool isOptionAndValue(const std::string& name, std::string& value, oms_regex re);
+  bool isOptionAndValue(const std::string& name1, const std::string& name2, std::string& value, oms_regex re);
 
 public:
   bool validOptions;

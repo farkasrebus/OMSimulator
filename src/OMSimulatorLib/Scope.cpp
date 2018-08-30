@@ -218,6 +218,12 @@ oms_status_enu_t oms2::Scope::rename(const oms2::ComRef& identOld, const oms2::C
   return oms_status_error;
 }
 
+oms_status_enu_t oms2::Scope::parseString(const std::string& contents, char** ident)
+{
+  logTrace();
+  return oms2::Model::ParseString(contents, ident);
+}
+
 oms2::Model* oms2::Scope::loadModel(const std::string& filename)
 {
   logTrace();
@@ -231,7 +237,7 @@ oms2::Model* oms2::Scope::loadModel(const std::string& filename)
   return model;
 }
 
-oms_status_enu_t oms2::Scope::saveModel(const std::string& filename, const oms2::ComRef& name)
+oms_status_enu_t oms2::Scope::saveModel(const oms2::ComRef& name, const std::string& filename)
 {
   logTrace();
 
@@ -1940,3 +1946,40 @@ oms_status_enu_t oms2::Scope::unconnectSolver(const ComRef& modelCref, const Com
   }
 }
 
+bool oms2::Scope::exists(const ComRef& cref)
+{
+  Model* model = getModel(cref.first());
+  if (NULL == model)
+    return 0;
+
+  if (cref.isIdent())
+  {
+    // case 1: composite model
+    return (NULL != model);
+  }
+  else
+  {
+    if (oms_component_fmi == model->getType())
+    {
+      // case 2a: sub-model (FMI composite model)
+      FMICompositeModel* fmiModel = model->getFMICompositeModel();
+      if (NULL != fmiModel->getSubModel(cref, false))
+        return true;
+
+      // case 3: solver
+      return (NULL != fmiModel->getSolver(cref, false));
+    }
+    else
+    {
+#if !defined(NO_TLM)
+      // case 2b: sub-model (TLM composite model)
+      TLMCompositeModel* tlmModel = model->getTLMCompositeModel();
+      ComRef tempRef = cref;
+      tempRef.popFirst();
+      return tlmModel->exists(tempRef);
+#endif
+      logError("[oms2::Scope::exists] not implemented for TLM composite models");
+      return 0;
+    }
+  }
+}

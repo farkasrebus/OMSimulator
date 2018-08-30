@@ -41,7 +41,7 @@
 #include "FMICompositeModel.h"
 
 #include <cmath>
-#include <regex>
+#include <RegEx.h>
 #include <fmilib.h>
 #include <JM/jm_portability.h>
 
@@ -591,14 +591,22 @@ oms_status_enu_t oms2::FMUWrapper::exportToSSD(pugi::xml_node& root) const
 
 void oms2::FMUWrapper::readFromTLMSockets(double time)
 {
+#if !defined(NO_TLM)
   FMICompositeModel *model = oms2::Scope::GetInstance().getFMICompositeModel(parent);
   model->readFromSockets(time, element.getName().toString());
+#else
+  throw std::runtime_error("[oms2::FMUWrapper::readFromTLMSockets] Compiled without TLM support");
+#endif
 }
 
 void oms2::FMUWrapper::writeToTLMSockets(double time)
 {
+#if !defined(NO_TLM)
   FMICompositeModel *model = oms2::Scope::GetInstance().getFMICompositeModel(parent);
   model->writeToSockets(time, element.getName().toString());
+#else
+  throw std::runtime_error("[oms2::FMUWrapper::writeToTLMSockets] Compiled without TLM support");
+#endif
 }
 
 oms2::Variable* oms2::FMUWrapper::getVariable(const std::string& var)
@@ -969,7 +977,7 @@ oms_status_enu_t oms2::FMUWrapper::emit(ResultWriter& resultWriter)
 
 void oms2::FMUWrapper::addSignalsToResults(const std::string& regex)
 {
-  std::regex exp(regex);
+  oms_regex exp(regex);
   for (unsigned int i=0; i<allVariables.size(); ++i)
   {
     if (exportVariables[i])
@@ -986,7 +994,7 @@ void oms2::FMUWrapper::addSignalsToResults(const std::string& regex)
 
 void oms2::FMUWrapper::removeSignalsFromResults(const std::string& regex)
 {
-  std::regex exp(regex);
+  oms_regex exp(regex);
   for (unsigned int i=0; i<allVariables.size(); ++i)
   {
     if (!exportVariables[i])

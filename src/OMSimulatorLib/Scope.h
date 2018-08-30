@@ -72,9 +72,11 @@ namespace oms2
     oms_status_enu_t addFMU(const ComRef& modelIdent, const std::string& fmuPath, const ComRef& fmuIdent);
     oms_status_enu_t addTable(const ComRef& modelIdent, const std::string& tablePath, const ComRef& tableIdent);
     oms_status_enu_t deleteSubModel(const ComRef& modelIdent, const ComRef& subModelIdent);
+    bool exists(const ComRef& cref);
     oms_status_enu_t rename(const ComRef& identOld, const ComRef& identNew);
+    oms_status_enu_t parseString(const std::string& contents, char** ident);
     Model* loadModel(const std::string& filename);
-    oms_status_enu_t saveModel(const std::string& filename, const ComRef& name);
+    oms_status_enu_t saveModel(const ComRef& name, const std::string& filename);
     oms_status_enu_t listModel(const ComRef& name, char** contents);
     oms_status_enu_t getElement(const ComRef& cref, oms2::Element** element);
     oms_status_enu_t setElementGeometry(const ComRef& cref, const oms2::ssd::ElementGeometry* geometry);

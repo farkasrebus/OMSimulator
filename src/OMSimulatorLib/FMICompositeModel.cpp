@@ -903,10 +903,12 @@ oms_status_enu_t oms2::FMICompositeModel::initialize(double startTime, double to
       return logError("[oms2::FMICompositeModel::initialize] failed");
   }
 
+#if !defined(NO_TLM)
   if(!tlmServer.empty()) {
     setupSockets();
     readFromSockets(time);
   }
+#endif
   updateInputs(initialUnknownsGraph);
 
   // Exit initialization
@@ -1159,16 +1161,16 @@ void oms2::FMICompositeModel::simulate_asynchronous(ResultWriter& resultWriter, 
 }
 
 #if !defined(NO_TLM)
-oms_status_enu_t oms2::FMICompositeModel::simulateTLM(double startTime, double stopTime, double tolerance, double commInterval, double loggingInterval, std::string server)
+oms_status_enu_t oms2::FMICompositeModel::simulateTLM(double startTime, double stopTime, double tolerance, double loggingInterval, std::string server)
 {
   logTrace();
 
   this->tlmServer = server;
-  this->communicationInterval = commInterval;
 
   Model *model = oms2::Scope::GetInstance().getModel(getName());
   model->setStartTime(startTime);
   model->setTolerance(tolerance);
+  communicationInterval = model->getCommunicationInterval();
   model->initialize();
   ResultWriter *resultWriter = model->getResultWriter();
 

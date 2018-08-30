@@ -77,8 +77,11 @@ class OMSimulator:
     self.obj.oms2_loadModel.argtypes = [ctypes.c_char_p]
     self.obj.oms2_loadModel.restype = ctypes.c_int
 
-    self.obj.oms2_loadModelFromString.argtypes = [ctypes.c_char_p]
-    self.obj.oms2_loadModelFromString.restype = ctypes.c_int
+    self.obj.oms2_parseString.argtypes = [ctypes.c_char_p]
+    self.obj.oms2_parseString.restype = ctypes.c_int
+
+    self.obj.oms2_loadString.argtypes = [ctypes.c_char_p]
+    self.obj.oms2_loadString.restype = ctypes.c_int
 
     self.obj.oms2_newFMIModel.argtypes = [ctypes.c_char_p]
     self.obj.oms2_newFMIModel.restype = ctypes.c_int
@@ -94,7 +97,7 @@ class OMSimulator:
 
     self.obj.oms2_saveModel.argtypes = [ctypes.c_char_p, ctypes.c_char_p]
     self.obj.oms2_saveModel.restype = ctypes.c_int
-    
+
     self.obj.oms2_listModel.argtypes = [ctypes.c_char_p]
     self.obj.oms2_listModel.restype = ctypes.c_int
 
@@ -164,6 +167,9 @@ class OMSimulator:
     self.obj.oms2_freeMemory.argtypes = [ctypes.c_void_p]
     self.obj.oms2_freeMemory.restype = ctypes.c_int
 
+    self.obj.oms2_exists.argtypes = [ctypes.c_char_p]
+    self.obj.oms2_exists.restype = ctypes.c_int
+
   def addConnection(self, cref, conA, conB):
     return self.obj.oms2_addConnection(str.encode(cref), str.encode(conA), str.encode(conB))
   def addFMU(self, modelIdent, fmuPath, fmuIdent):
@@ -184,6 +190,8 @@ class OMSimulator:
     return self.obj.oms2_describe(str.encode(cref))
   def doSteps(self, ident, numberOfSteps):
     return self.obj.oms2_doSteps(str.encode(ident), numberOfSteps)
+  def exists(self, cref):
+    return self.obj.oms2_exists(str.encode(cref))
   def exportCompositeStructure(self, cref, filename):
     return self.obj.oms2_exportCompositeStructure(str.encode(cref), str.encode(filename))
   def exportDependencyGraphs(self, cref, initialization, simulation):
@@ -228,9 +236,14 @@ class OMSimulator:
     ident = ctypes.c_char_p()
     status = self.obj.oms2_loadModel(str.encode(filename), ctypes.byref(ident))
     return [status, ident.value]
-  def loadModelFromString(self, contents):
+  def parseString(self, contents):
     ident = ctypes.c_char_p()
-    status = self.obj.oms2_loadModelFromString(str.encode(contents), ctypes.byref(ident))
+    status = self.obj.oms2_parseString(str.encode(contents), ctypes.byref(ident))
+    self.obj.oms2_freeMemory(ident)
+    return [status, ident.value]
+  def loadString(self, contents):
+    ident = ctypes.c_char_p()
+    status = self.obj.oms2_loadString(str.encode(contents), ctypes.byref(ident))
     return [status, ident.value]
   def newFMIModel(self, ident):
     return self.obj.oms2_newFMIModel(str.encode(ident))
@@ -240,8 +253,8 @@ class OMSimulator:
     return self.obj.oms2_removeSignalsFromResults(str.encode(cref), str.encode(regex))
   def reset(self, ident):
     return self.obj.oms2_reset(str.encode(ident))
-  def saveModel(self, filename, ident):
-    return self.obj.oms2_saveModel(str.encode(filename), str.encode(ident))
+  def saveModel(self, ident, filename):
+    return self.obj.oms2_saveModel(str.encode(ident), str.encode(filename))
   def listModel(self, ident):
     contents = ctypes.c_char_p()
     status = self.obj.oms2_listModel(str.encode(ident), ctypes.byref(contents))

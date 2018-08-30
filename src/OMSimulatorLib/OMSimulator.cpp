@@ -150,7 +150,13 @@ oms_status_enu_t oms2_loadModel(const char* filename, char** ident)
   return oms_status_ok;
 }
 
-oms_status_enu_t oms2_loadModelFromString(const char* contents, char** ident)
+oms_status_enu_t oms2_parseString(const char* contents, char** ident)
+{
+  logTrace();
+  return oms2::Scope::GetInstance().parseString(contents, ident);
+}
+
+oms_status_enu_t oms2_loadString(const char* contents, char** ident)
 {
   logTrace();
   oms2::Model* model = oms2::Scope::GetInstance().loadModel(contents);
@@ -164,10 +170,10 @@ oms_status_enu_t oms2_loadModelFromString(const char* contents, char** ident)
   return oms_status_ok;
 }
 
-oms_status_enu_t oms2_saveModel(const char* filename, const char* ident)
+oms_status_enu_t oms2_saveModel(const char* ident, const char* filename)
 {
   logTrace();
-  return oms2::Scope::GetInstance().saveModel(filename, oms2::ComRef(ident));
+  return oms2::Scope::GetInstance().saveModel(oms2::ComRef(ident), filename);
 }
 
 oms_status_enu_t oms2_listModel(const char* ident, char** contents)
@@ -609,6 +615,7 @@ oms_status_enu_t oms2_setFlags(const char* cref, const char* flags)
 
 oms_status_enu_t oms2_addSolver(const char* model, const char* name, const char* solver)
 {
+  logTrace();
   return oms2::Scope::GetInstance().addSolver(oms2::ComRef(model), oms2::ComRef(name), std::string(solver));
 }
 
@@ -620,4 +627,10 @@ oms_status_enu_t oms2_freeMemory(void* obj)
     free(obj);
   }
   return oms_status_ok;
+}
+
+int oms2_exists(const char* cref)
+{
+  logTrace();
+  return oms2::Scope::GetInstance().exists(oms2::ComRef(cref)) ? 1 : 0;
 }

@@ -98,6 +98,7 @@ ENDIF(OMTLM)
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/Version.cpp.in" "${CMAKE_CURRENT_BINARY_DIR}/Version.cpp" @ONLY)
 list(APPEND OMSIMULATORLIB_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/Version.cpp")
 
+include_directories("../../3rdParty/RegEx/")
 include_directories(${FMILibrary_INCLUDEDIR})
 include_directories(${CVODELibrary_INCLUDEDIR})
 include_directories(${KINSOLLibrary_INCLUDEDIR})
@@ -147,5 +148,8 @@ add_library(OMSimulatorLib STATIC ${OMSIMULATORLIB_SOURCES})
 set_target_properties(OMSimulatorLib PROPERTIES OUTPUT_NAME OMSimulatorLib)
 set_target_properties(OMSimulatorLib PROPERTIES POSITION_INDEPENDENT_CODE ON)
 install(TARGETS OMSimulatorLib DESTINATION lib/${HOST_SHORT})
-
 install(FILES OMSimulator.h Types.h DESTINATION include)
+
+IF(APPLE)
+  install(CODE "execute_process(COMMAND install_name_tool -id \"@rpath/libOMSimulatorLib.dylib\" \"${CMAKE_INSTALL_PREFIX}/lib/${HOST_SHORT}/libOMSimulatorLib.dylib\")")
+ENDIF()

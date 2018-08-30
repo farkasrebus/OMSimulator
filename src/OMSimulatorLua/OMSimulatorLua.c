@@ -81,6 +81,19 @@ static int OMSimulatorLua_oms2_compareSimulationResults(lua_State *L)
   return 1;
 }
 
+//int oms2_exists(const char* cref);
+static int OMSimulatorLua_oms2_exists(lua_State *L)
+{
+  if (lua_gettop(L) != 1)
+    return luaL_error(L, "expecting exactly 1 argument");
+  luaL_checktype(L, 1, LUA_TSTRING);
+
+  const char *cref = lua_tostring(L, 1);
+  int rc = oms2_exists(cref);
+  lua_pushinteger(L, rc);
+  return 1;
+}
+
 //oms_status_enu_t oms2_newFMIModel(const char* ident);
 static int OMSimulatorLua_oms2_newFMIModel(lua_State *L)
 {
@@ -205,8 +218,8 @@ static int OMSimulatorLua_oms2_loadModel(lua_State *L)
   return 2;
 }
 
-//oms_status_enu_t oms2_loadModelFromString(const char* contents, char** ident);
-static int OMSimulatorLua_oms2_loadModelFromString(lua_State *L)
+//oms_status_enu_t oms2_parseString(const char* contents, char** ident);
+static int OMSimulatorLua_oms2_parseString(lua_State *L)
 {
   if (lua_gettop(L) != 1)
     return luaL_error(L, "expecting exactly 1 argument");
@@ -214,7 +227,29 @@ static int OMSimulatorLua_oms2_loadModelFromString(lua_State *L)
 
   const char* contents = lua_tostring(L, 1);
   char* ident = NULL;
-  oms_status_enu_t status = oms2_loadModelFromString(contents, &ident);
+  oms_status_enu_t status = oms2_parseString(contents, &ident);
+
+  lua_pushinteger(L, status);
+  if (ident)
+  {
+    lua_pushstring(L, ident);
+    oms2_freeMemory(ident);
+  }
+  else
+    lua_pushstring(L, "");
+  return 2;
+}
+
+//oms_status_enu_t oms2_loadString(const char* contents, char** ident);
+static int OMSimulatorLua_oms2_loadString(lua_State *L)
+{
+  if (lua_gettop(L) != 1)
+    return luaL_error(L, "expecting exactly 1 argument");
+  luaL_checktype(L, 1, LUA_TSTRING);
+
+  const char* contents = lua_tostring(L, 1);
+  char* ident = NULL;
+  oms_status_enu_t status = oms2_loadString(contents, &ident);
 
   lua_pushinteger(L, status);
   if (ident)
@@ -224,7 +259,7 @@ static int OMSimulatorLua_oms2_loadModelFromString(lua_State *L)
   return 2;
 }
 
-//oms_status_enu_t oms2_saveModel(const char* filename, const char* ident);
+//oms_status_enu_t oms2_saveModel(const char* ident, const char* filename);
 static int OMSimulatorLua_oms2_saveModel(lua_State *L)
 {
   if (lua_gettop(L) != 2)
@@ -232,9 +267,9 @@ static int OMSimulatorLua_oms2_saveModel(lua_State *L)
   luaL_checktype(L, 1, LUA_TSTRING);
   luaL_checktype(L, 2, LUA_TSTRING);
 
-  const char* filename = lua_tostring(L, 1);
-  const char* ident = lua_tostring(L, 2);
-  oms_status_enu_t status = oms2_saveModel(filename, ident);
+  const char* ident = lua_tostring(L, 1);
+  const char* filename = lua_tostring(L, 2);
+  oms_status_enu_t status = oms2_saveModel(ident, filename);
 
   lua_pushinteger(L, status);
   return 1;
@@ -1474,6 +1509,7 @@ DLLEXPORT int luaopen_OMSimulatorLua(lua_State *L)
   REGISTER_LUA_CALL(oms2_deleteSubModel);
   REGISTER_LUA_CALL(oms2_describe);
   REGISTER_LUA_CALL(oms2_doSteps);
+  REGISTER_LUA_CALL(oms2_exists);
   REGISTER_LUA_CALL(oms2_exportCompositeStructure);
   REGISTER_LUA_CALL(oms2_exportDependencyGraphs);
   REGISTER_LUA_CALL(oms2_getBoolean);
@@ -1489,7 +1525,8 @@ DLLEXPORT int luaopen_OMSimulatorLua(lua_State *L)
   REGISTER_LUA_CALL(oms2_getVersion);
   REGISTER_LUA_CALL(oms2_initialize);
   REGISTER_LUA_CALL(oms2_loadModel);
-  REGISTER_LUA_CALL(oms2_loadModelFromString);
+  REGISTER_LUA_CALL(oms2_parseString);
+  REGISTER_LUA_CALL(oms2_loadString);
   REGISTER_LUA_CALL(oms2_newFMIModel);
   REGISTER_LUA_CALL(oms2_newTLMModel);
   REGISTER_LUA_CALL(oms2_removeSignalsFromResults);

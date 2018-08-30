@@ -131,22 +131,32 @@ oms_status_enu_t oms2_rename(const char* identOld, const char* identNew);
 oms_status_enu_t oms2_loadModel(const char* filename, char** ident);
 
 /**
- * \brief Loads a FMI composite model from xml representation.
+ * \brief Parses a composite model from xml representation.
+ * Memory is allocated for ident. The caller is responsible to call free on it.
+ *
+ * \param contents   [in] Composite model xml contents
+ * \param ident      [out] Name of the parsed model
+ * \return           Error status
+ */
+oms_status_enu_t oms2_parseString(const char* contents, char** ident);
+
+/**
+ * \brief Loads a composite model from xml representation.
  *
  * \param contents   [in] Composite model xml contents
  * \param ident      [out] Name of the imported model
  * \return           Error status
  */
-oms_status_enu_t oms2_loadModelFromString(const char* contents, char** ident);
+oms_status_enu_t oms2_loadString(const char* contents, char** ident);
 
 /**
  * \brief Loads a FMI composite model from xml representation.
  *
- * \param filename   [in] Path to the xml file; An existing file will be overwritten
  * \param ident      [in] Name of the model to export
+ * \param filename   [in] Path to the xml file; An existing file will be overwritten
  * \return           Error status
  */
-oms_status_enu_t oms2_saveModel(const char* filename, const char* ident);
+oms_status_enu_t oms2_saveModel(const char* ident, const char* filename);
 
 /**
  * \brief Lists the contents of a composite model.
@@ -742,6 +752,13 @@ oms_status_enu_t oms2_addSolver(const char* model, const char* name, const char*
  * \return Error status
  */
 oms_status_enu_t oms2_freeMemory(void* obj);
+
+/**
+ * \brief This function returns 1 if a given cref exists in the scope,
+ * otherwise 0. It can be used to check for composite models, sub-models such
+ * as FMUs, and solver instances.
+ */
+int oms2_exists(const char* cref);
 
 #ifdef __cplusplus
 }

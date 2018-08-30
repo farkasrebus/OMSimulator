@@ -70,11 +70,11 @@ int oms2::cvode_rhs(realtype t, N_Vector y, N_Vector ydot, void *user_data)
     if (fmi2_status_ok != fmistatus) logError("fmi2_import_set_continuous_states failed");
   }
 
+#if !defined(NO_TLM)
   // update TLM interpolated effort variables
   for (int j=0; j < solver->fmus.size(); ++j)
-  {
     solver->fmus[j]->readFromTLMSockets(t);
-  }
+#endif
 
   // get state derivatives
   for (int j=0, k=0; j < solver->fmus.size(); ++j)
@@ -95,12 +95,18 @@ int oms2::cvode_rhs(realtype t, N_Vector y, N_Vector ydot, void *user_data)
 oms2::Solver::Solver(const oms2::ComRef& name, oms_solver_enu_t solverMethod)
   : name(name), solverMethod(solverMethod)
 {
+  if (oms_solver_explicit_euler == solverMethod)
+    ;
+  else if (oms_solver_cvode == solverMethod)
+    solverData.cvode.mem = NULL;
 }
 
 oms2::Solver::~Solver()
 {
   for (auto& fmu : fmus)
     fmu->setSolver(NULL);
+
+  freeSolver();
 }
 
 oms_status_enu_t oms2::Solver::addFMU(oms2::FMUWrapper* fmu)
@@ -331,14 +337,17 @@ oms_status_enu_t oms2::Solver::doStep(double stopTime)
     {
       while (fmuTime[i] < stopTime)
       {
+#if !defined(NO_TLM)
         // read interpolated TLM effort variables
         fmus[i]->readFromTLMSockets(fmuTime[i]);
-
+#endif
         fmistatus = fmi2_import_do_step(fmus[i]->getFMU(), fmuTime[i], hdef, fmi2_true);
         fmuTime[i] += hdef;
 
+#if !defined(NO_TLM)
         // read interpolated TLM effort variables
         fmus[i]->writeToTLMSockets(fmuTime[i]);
+#endif
       }
     }
     time = stopTime;
@@ -353,11 +362,11 @@ oms_status_enu_t oms2::Solver::doStep(double stopTime)
       fmi2_real_t tlast = time;
       fmi2_real_t tnext = time + hdef;
 
+#if !defined(NO_TLM)
       // read interpolated TLM effort variables
       for (int j=0; j < fmus.size(); ++j)
-      {
         fmus[j]->readFromTLMSockets(time);
-      }
+#endif
 
       // event handling
       for (int i=0; i < fmus.size(); ++i)
@@ -485,11 +494,11 @@ oms_status_enu_t oms2::Solver::doStep(double stopTime)
         if (fmi2_status_ok != fmistatus) logError("fmi2_import_completed_integrator_step failed");
       }
 
+#if !defined(NO_TLM)
       // write TLM flow variables
       for (int j=0; j < fmus.size(); ++j)
-      {
         fmus[j]->writeToTLMSockets(time);
-      }
+#endif
     }
     time = stopTime;
   }
@@ -499,7 +508,7 @@ oms_status_enu_t oms2::Solver::doStep(double stopTime)
 
 oms_status_enu_t oms2::Solver::freeSolver()
 {
-  if (0 == fmus.size())
+  if (0 == fmus.size() || 0 == states.size())
     return oms_status_ok;
 
   if (oms_solver_internal == solverMethod)
@@ -512,7 +521,7 @@ oms_status_enu_t oms2::Solver::freeSolver()
     if (oms_solver_explicit_euler == solverMethod)
     {
     }
-    else if (oms_solver_cvode == solverMethod)
+    else if (oms_solver_cvode == solverMethod && solverData.cvode.mem)
     {
       long int nst, nfe, nsetups, nni, ncfn, netf;
       int flag;
