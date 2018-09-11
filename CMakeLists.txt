@@ -1,3 +1,5 @@
+message("cmake version is: ${CMAKE_VERSION}")
+
 IF(WIN32 AND MSVC)
   # VS 2017 requires Boost 1.64 or newer
   # Boost 1.64 requires CMake 3.8 or newer
@@ -43,8 +45,8 @@ endif()
 # adrpo: for some strange reson we need -latomic on 32bit Linux
 IF("${ABI}" STREQUAL "LINUX32")
     message(WARNING, "Using -latomic -lboost_atomic for ${ABI}")
-	set(LIB_ATOMIC atomic)
-	set(LIB_BOOST_ATOMIC atomic)
+    set(LIB_ATOMIC atomic)
+    set(LIB_BOOST_ATOMIC atomic)
 ELSE()
     message(STATUS, "ABI is: ${ABI}")
 ENDIF("${ABI}" STREQUAL "LINUX32")
@@ -53,8 +55,16 @@ ENDIF("${ABI}" STREQUAL "LINUX32")
 set(CMAKE_VERBOSE_MAKEFILE ON)
 
 # Use C++ 11 for the whole project
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+# cmake < 3.1 doesn't know or respect CMAKE_CXX_STANDARD*
+IF (CMAKE_VERSION VERSION_LESS 3.1.0)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+  message(WARNING, "Using CMAKE_CXX_FLAGS: ${CMAKE_CXX_FLAGS} for setting -std=c++11")
+ELSE() # use the freaking CMAKE_CXX_STANDARD*
+  set(CMAKE_CXX_STANDARD 11)
+  set(CMAKE_CXX_STANDARD_REQUIRED ON)
+  message(WARNING, "Using CMAKE_CXX_STANDARD: ${CMAKE_CXX_STANDARD} and CMAKE_CXX_STANDARD_REQUIRED: ${CMAKE_CXX_STANDARD_REQUIRED} for setting -std=c++11")
+ENDIF()
+
 
 ##########################
 # Configuring for Boost
@@ -63,7 +73,7 @@ IF(WIN32)
   set(Boost_USE_STATIC_RUNTIME OFF)
 ENDIF()
 
-find_package(Boost 1.54.0 COMPONENTS system filesystem REQUIRED)
+find_package(Boost 1.41.0 COMPONENTS filesystem system REQUIRED)
 IF(Boost_FOUND)
   message(STATUS "Found Boost")
   message(STATUS "  Boost_LIBRARIES:    " ${Boost_LIBRARIES})
@@ -170,3 +180,5 @@ IF (Ceres_FOUND AND OMSYSIDENT)
   enable_testing()
   add_subdirectory(src/OMSysIdentLib)
 ENDIF()
+
+ADD_DEPENDENCIES(OMSimulator OMSimulatorLib)

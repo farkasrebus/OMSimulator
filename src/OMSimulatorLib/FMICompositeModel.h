@@ -46,6 +46,7 @@
 
 #include <map>
 #include <vector>
+#include <atomic>
 
 #include <pugixml.hpp>
 
@@ -90,7 +91,8 @@ namespace oms2
     oms_status_enu_t doSteps(ResultWriter& resultWriter, const int numberOfSteps, double communicationInterval, double loggingInterval);
     oms_status_enu_t stepUntil(ResultWriter& resultWriter, double stopTime, double communicationInterval, double loggingInterval, MasterAlgorithm masterAlgorithm, bool realtime_sync);
 #if !defined(NO_TLM)
-    oms_status_enu_t simulateTLM(double startTime, double stopTime, double tolerance, double loggingInterval, std::string address);
+    oms_status_enu_t initializeTLM(double startTime, double tolerance, std::string address);
+    oms_status_enu_t simulateTLM(double stopTime, double loggingInterval);
 #endif
     void simulate_asynchronous(ResultWriter& resultWriter, double stopTime, double communicationInterval, double loggingInterval, void (*cb)(const char* ident, double time, oms_status_enu_t status));
 
@@ -106,6 +108,7 @@ namespace oms2
 
 #if !defined(NO_TLM)
     oms_status_enu_t addTLMInterface(TLMInterface *ifc);
+    std::vector<TLMInterface*> getTLMInterfaces() const { return tlmInterfaces; }
     oms_status_enu_t setTLMInitialValues(std::string ifc, std::vector<double> value);
 #endif
 
@@ -134,16 +137,20 @@ namespace oms2
     oms_status_enu_t emit(ResultWriter& resultWriter);
 
     oms_status_enu_t stepUntilStandard(ResultWriter& resultWriter, double stopTime, double communicationInterval, double loggingInterval, bool realtime_sync);
+#if !defined(__arm__)
     oms_status_enu_t stepUntilPCTPL(ResultWriter& resultWriter, double stopTime, double communicationInterval, double loggingInterval, bool realtime_sync);
+#endif // if !defined(__arm__)
     oms_status_enu_t updateDependencyGraphs();
 
 #if !defined(NO_TLM)
-    oms_status_enu_t setupSockets();
-    oms_status_enu_t initializeSockets();
-    void finalizeSockets();
+    oms_status_enu_t updateInitialTLMValues();
+    void finalizeTLMSockets();
   public:
-    void readFromSockets(double time, std::string fmu = "");
-    void writeToSockets(double time, std::string fmu = "");
+    oms_status_enu_t setupTLMSockets(double startTime, std::string server);
+    void readFromTLMSockets(double time, std::string fmu = "");
+    void writeToTLMSockets(double time, std::string fmu = "");
+    bool isTLMConnected() { return tlmConnected; }
+    bool isTLMInitialized() { return tlmInitialized; }
 #endif
   protected:
     void deleteComponents();
@@ -165,7 +172,7 @@ namespace oms2
     oms2::Element** components;
 #if !defined(NO_TLM)
     std::vector<TLMInterface*> tlmInterfaces;
-    TLMPlugin *plugin;
+    TLMPlugin *plugin=0;
 #endif
     DirectedGraph initialUnknownsGraph;
     DirectedGraph outputsGraph;
@@ -177,9 +184,10 @@ namespace oms2
     double tLastEmit;
 
 #if !defined(NO_TLM)
-    std::string tlmServer = "";
     std::vector<SignalRef> tlmSigRefs;
     std::map<std::string, std::vector<double> > tlmInitialValues;
+    bool tlmConnected = false;
+    bool tlmInitialized = false;
 #endif
   };
 }

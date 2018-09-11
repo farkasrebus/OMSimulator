@@ -38,17 +38,20 @@
 #include "FMUWrapper.h"
 #include "Logging.h"
 #include "SignalRef.h"
+#include "Scope.h"
 #include "ssd/Tags.h"
 #include "Table.h"
 #if !defined(NO_TLM)
 #include "Plugin/PluginImplementer.h"
 #endif
+
+#if !defined(__arm__) // @adrpo: parallel stuff doesn't work on arm yet
 #include "PMRChannelMaster.h"
+#endif // #if !defined(__arm__)
 
 #include <pugixml.hpp>
 #include <thread>
-#include <ctpl.h>
-
+#include <OMSBoost.h>
 #include <sstream>
 #include <thread>
 
@@ -870,6 +873,11 @@ oms_status_enu_t oms2::FMICompositeModel::initialize(double startTime, double to
   if (oms_status_error == updateDependencyGraphs())
     return oms_status_error;
 
+#if !defined (NO_TLM)
+  if(plugin)
+    plugin->CheckModel();
+#endif
+
   this->time = startTime;
   this->tolerance = tolerance;
   this->tLastEmit = startTime;
@@ -904,10 +912,8 @@ oms_status_enu_t oms2::FMICompositeModel::initialize(double startTime, double to
   }
 
 #if !defined(NO_TLM)
-  if(!tlmServer.empty()) {
-    setupSockets();
-    readFromSockets(time);
-  }
+    //Update initial values from TLM sockets
+    readFromTLMSockets(time);
 #endif
   updateInputs(initialUnknownsGraph);
 
@@ -947,6 +953,7 @@ oms_status_enu_t oms2::FMICompositeModel::stepUntil(ResultWriter& resultWriter, 
     case MasterAlgorithm::STANDARD :
       logDebug("oms2::FMICompositeModel::stepUntil: Using master algorithm 'standard'");
       return stepUntilStandard(resultWriter, stopTime, communicationInterval, loggingInterval, realtime_sync);
+#if !defined(__arm__)
     case MasterAlgorithm::PCTPL :
       logDebug("oms2::FMICompositeModel::stepUntil: Using master algorithm 'pctpl'");
       return stepUntilPCTPL(resultWriter, stopTime, communicationInterval, loggingInterval, realtime_sync);
@@ -959,6 +966,7 @@ oms_status_enu_t oms2::FMICompositeModel::stepUntil(ResultWriter& resultWriter, 
     case MasterAlgorithm::PMRCHANNELM :
       logDebug("oms2::FMICompositeModel::stepUntil: Using master algorithm 'pmrchannelm'");
       return oms2::stepUntilPMRChannel<oms2::PMRChannelM>(resultWriter, stopTime, communicationInterval, loggingInterval, this->getName().toString(), outputsGraph, subModels, realtime_sync);
+#endif
     default :
       logError("oms2::FMICompositeModel::stepUntil: Internal error: Request for using unknown master algorithm.");
       return oms_status_error;
@@ -1046,6 +1054,8 @@ oms_status_enu_t oms2::FMICompositeModel::stepUntilStandard(ResultWriter& result
   return oms_status_ok;
 }
 
+#if !defined(__arm__)
+
 /**
  * \brief Parallel "doStep(..)" execution using task pool CTPL library (https://github.com/vit-vit/CTPL).
  */
@@ -1117,6 +1127,8 @@ oms_status_enu_t oms2::FMICompositeModel::stepUntilPCTPL(ResultWriter& resultWri
   return oms_status_ok;
 }
 
+#endif // #if !defined(__arm__)
+
 void oms2::FMICompositeModel::simulate_asynchronous(ResultWriter& resultWriter, double stopTime, double communicationInterval, double loggingInterval, void (*cb)(const char* ident, double time, oms_status_enu_t status))
 {
   logTrace();
@@ -1161,20 +1173,34 @@ void oms2::FMICompositeModel::simulate_asynchronous(ResultWriter& resultWriter, 
 }
 
 #if !defined(NO_TLM)
-oms_status_enu_t oms2::FMICompositeModel::simulateTLM(double startTime, double stopTime, double tolerance, double loggingInterval, std::string server)
+oms_status_enu_t oms2::FMICompositeModel::initializeTLM(double startTime, double tolerance, std::string server)
 {
   logTrace();
-
-  this->tlmServer = server;
 
   Model *model = oms2::Scope::GetInstance().getModel(getName());
   model->setStartTime(startTime);
   model->setTolerance(tolerance);
-  communicationInterval = model->getCommunicationInterval();
-  model->initialize();
-  ResultWriter *resultWriter = model->getResultWriter();
 
-  initializeSockets();
+  if(oms_status_ok != model->initialize()) {
+    return logError("[oms2::FMICompositeModel::simulateTLM] model initialization failed");
+  }
+
+  if(oms_status_ok != updateInitialTLMValues()) {
+    return logError("[oms2::FMICompositeModel::simulateTLM] socket initialization failed");
+  }
+
+  tlmInitialized = true;
+
+  return oms_status_ok;
+}
+
+
+oms_status_enu_t oms2::FMICompositeModel::simulateTLM(double stopTime, double loggingInterval)
+{
+  logTrace();
+
+  Model *model = oms2::Scope::GetInstance().getModel(getName());
+  ResultWriter *resultWriter = model->getResultWriter();
 
   logInfo("Starting simulation loop.");
 
@@ -1206,16 +1232,21 @@ oms_status_enu_t oms2::FMICompositeModel::simulateTLM(double startTime, double s
       updateInputs(outputsGraph);
   }
 
-  finalizeSockets();
+  finalizeTLMSockets();
 
   logInfo("Simulation of model "+getName().toString()+" complete.");
 
   return oms_status_ok;
 }
 
-oms_status_enu_t oms2::FMICompositeModel::setupSockets()
+oms_status_enu_t oms2::FMICompositeModel::setupTLMSockets(double startTime, std::string server)
 {
   logInfo("Starting TLM simulation thread for model "+getName().toString());
+
+  time = startTime;
+
+  Model *model = oms2::Scope::GetInstance().getModel(getName());
+  communicationInterval = model->getCommunicationInterval();
 
   //Limit communication interval to half TLM delay
   //This is for avoiding extrapolation when running asynchronously.
@@ -1236,7 +1267,7 @@ oms_status_enu_t oms2::FMICompositeModel::setupSockets()
                    time,
                    1, //Unused argument anyway
                    communicationInterval,
-                   tlmServer)) {
+                   server)) {
     logError("Error initializing the TLM plugin.");
     return oms_status_error;
   }
@@ -1250,10 +1281,12 @@ oms_status_enu_t oms2::FMICompositeModel::setupSockets()
     }
   }
 
+  tlmConnected = true;
+
   return oms_status_ok;
 }
 
-oms_status_enu_t oms2::FMICompositeModel::initializeSockets()
+oms_status_enu_t oms2::FMICompositeModel::updateInitialTLMValues()
 {
   //Apply initial values for signal and effort
   for(TLMInterface *ifc : tlmInterfaces) {
@@ -1346,7 +1379,7 @@ oms_status_enu_t oms2::FMICompositeModel::initializeSockets()
   return oms_status_ok;
 }
 
-void oms2::FMICompositeModel::readFromSockets(double time, std::string fmu)
+void oms2::FMICompositeModel::readFromTLMSockets(double time, std::string fmu)
 {
   for(TLMInterface *ifc : tlmInterfaces) {
     if(!fmu.empty() &&
@@ -1483,7 +1516,7 @@ void oms2::FMICompositeModel::readFromSockets(double time, std::string fmu)
 }
 
 
-void oms2::FMICompositeModel::writeToSockets(double time, std::string fmu)
+void oms2::FMICompositeModel::writeToTLMSockets(double time, std::string fmu)
 {
   for(TLMInterface *ifc : tlmInterfaces) {
     if(!fmu.empty() &&
@@ -1534,7 +1567,7 @@ void oms2::FMICompositeModel::writeToSockets(double time, std::string fmu)
   }
 }
 
-void oms2::FMICompositeModel::finalizeSockets()
+void oms2::FMICompositeModel::finalizeTLMSockets()
 {
   //Wait for close permission, to prevent socket from being
   //destroyed before master has read all data
@@ -1542,7 +1575,7 @@ void oms2::FMICompositeModel::finalizeSockets()
 
   delete plugin;
 }
-#endif
+#endif //!defined(NO_TLM)
 
 oms_status_enu_t oms2::FMICompositeModel::setInteger(const oms2::SignalRef& sr, int value)
 {
