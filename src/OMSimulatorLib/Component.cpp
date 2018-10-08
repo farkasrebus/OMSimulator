@@ -29,40 +29,35 @@
  *
  */
 
-#ifndef _OMS_BOOST_H_
-#define _OMS_BOOST_H_
+#include "Component.h"
 
- 
-#ifdef __cplusplus
-extern "C"
+#include "ssd/Tags.h"
+
+oms3::Component::Component(const ComRef& cref)
+  : element(oms_element_component, cref), cref(cref)
 {
-#endif
-
-#if (BOOST_VERSION < 104600)
-#if defined(_MSC_VER) || defined(__MINGW32__)
-#include <windows.h>
-#endif
-#endif 
-
-#ifdef __cplusplus
+  connectors.push_back(NULL);
+  element.setConnectors(&connectors[0]);
 }
-#endif
- 
-#include <cstdlib>
-#include <string>
-#include <boost/version.hpp>
-#include <boost/filesystem.hpp>
 
-#if (BOOST_VERSION >= 105300)
-#include <boost/lockfree/queue.hpp>
-#include <ctpl.h>
-#else // use the standard queue
-#include <ctpl_stl.h>
-#endif
+oms3::Component::~Component()
+{
+  for (const auto& connector : connectors)
+    if (connector)
+      delete connector;
+}
 
+oms_status_enu_t oms3::Component::exportToSSD(pugi::xml_node& node) const
+{
+  node.append_attribute("name") = this->getName().c_str();
+  return oms_status_ok;
+}
 
-boost::filesystem::path oms_temp_directory_path(void);
-boost::filesystem::path oms_canonical(boost::filesystem::path p);
-boost::filesystem::path oms_unique_path(std::string prefix);
-
-#endif
+oms3::Connector *oms3::Component::getConnector(const oms3::ComRef &cref)
+{
+  for(auto &connector : connectors) {
+    if(connector && connector->getName() == cref)
+      return connector;
+  }
+  return NULL;
+}

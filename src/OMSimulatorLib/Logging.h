@@ -53,7 +53,7 @@ class Log
 public:
   static void Info(const std::string& msg);
   static oms_status_enu_t Warning(const std::string& msg);
-  static oms_status_enu_t Error(const std::string& msg);
+  static oms_status_enu_t Error(const std::string& msg, const std::string& function);
   static void Debug(const std::string& msg);
   static void Trace(const std::string& function, const std::string& file, const long line);
 
@@ -91,7 +91,7 @@ private:
 
 #define logInfo(msg)    Log::Info(msg)
 #define logWarning(msg) Log::Warning(msg)
-#define logError(msg)   Log::Error(msg)
+#define logError(msg)   Log::Error(msg, __func__)
 
 #ifdef OMS_DEBUG_LOGGING
   #define logDebug(msg) Log::Debug(msg)
@@ -100,5 +100,11 @@ private:
   #define logDebug(msg) ((void)0)
   #define logTrace()    ((void)0)
 #endif
+
+// Common error messages
+#define logError_OnlyForModel                      logError("Only implemented for model identifiers")
+#define logError_ModelNotInScope(cref)             logError("Model \"" + std::string(cref) + "\" does not exist in the scope")
+#define logError_NotImplemented                    logError("Not implemented")
+#define logError_SystemNotInModel(model, system)   logError("Model \"" + std::string(model) + "\" does not contain system \"" + std::string(system) + "\"")
 
 #endif

@@ -29,40 +29,41 @@
  *
  */
 
-#ifndef _OMS_BOOST_H_
-#define _OMS_BOOST_H_
+#ifndef _OMS_SYSTEM_SC_H_
+#define _OMS_SYSTEM_SC_H_
 
- 
-#ifdef __cplusplus
-extern "C"
+#include "ComRef.h"
+#include "System.h"
+#include "Types.h"
+
+namespace oms3
 {
-#endif
+  class Model;
 
-#if (BOOST_VERSION < 104600)
-#if defined(_MSC_VER) || defined(__MINGW32__)
-#include <windows.h>
-#endif
-#endif 
+  class SystemSC : public System
+  {
+  public:
+    virtual ~SystemSC();
 
-#ifdef __cplusplus
+    static System* NewSystem(const oms3::ComRef& cref, Model* parentModel, System* parentSystem);
+    oms_status_enu_t exportToSSD_SimulationInformation(pugi::xml_node& node) const;
+    oms_status_enu_t importFromSSD_SimulationInformation(const pugi::xml_node& node);
+
+  protected:
+    SystemSC(const ComRef& cref, Model* parentModel, System* parentSystem);
+
+    // stop the compiler generating methods copying the object
+    SystemSC(SystemSC const& copy);            ///< not implemented
+    SystemSC& operator=(SystemSC const& copy); ///< not implemented
+
+  private:
+    std::string solverName = "cvode";
+    double absoluteTolerance = 1e-4;
+    double relativeTolerance = 1e-4;
+    double minimumStepSize = 1e-4;
+    double maximumStepSize = 1e-1;
+    double initialStepSize = 1e-4;
+  };
 }
-#endif
- 
-#include <cstdlib>
-#include <string>
-#include <boost/version.hpp>
-#include <boost/filesystem.hpp>
-
-#if (BOOST_VERSION >= 105300)
-#include <boost/lockfree/queue.hpp>
-#include <ctpl.h>
-#else // use the standard queue
-#include <ctpl_stl.h>
-#endif
-
-
-boost::filesystem::path oms_temp_directory_path(void);
-boost::filesystem::path oms_canonical(boost::filesystem::path p);
-boost::filesystem::path oms_unique_path(std::string prefix);
 
 #endif

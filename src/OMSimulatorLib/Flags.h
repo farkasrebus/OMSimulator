@@ -29,40 +29,30 @@
  *
  */
 
-#ifndef _OMS_BOOST_H_
-#define _OMS_BOOST_H_
+#ifndef _OMS3_FLAGS_H_
+#define _OMS3_FLAGS_H_
 
- 
-#ifdef __cplusplus
-extern "C"
+namespace oms3
 {
-#endif
+  class Flags
+  {
+  private:
+    Flags();
+    ~Flags();
 
-#if (BOOST_VERSION < 104600)
-#if defined(_MSC_VER) || defined(__MINGW32__)
-#include <windows.h>
-#endif
-#endif 
+    // stop the compiler generating methods copying the object
+    Flags(Flags const&);            ///< not implemented
+    Flags& operator=(Flags const&); ///< not implemented
 
-#ifdef __cplusplus
+    static Flags& GetInstance();
+
+  public:
+    static bool SuppressPath() {return GetInstance().suppressPath;}
+    static void SuppressPath(bool value) {GetInstance().suppressPath = value;}
+
+  private:
+    bool suppressPath;
+  };
 }
-#endif
- 
-#include <cstdlib>
-#include <string>
-#include <boost/version.hpp>
-#include <boost/filesystem.hpp>
-
-#if (BOOST_VERSION >= 105300)
-#include <boost/lockfree/queue.hpp>
-#include <ctpl.h>
-#else // use the standard queue
-#include <ctpl_stl.h>
-#endif
-
-
-boost::filesystem::path oms_temp_directory_path(void);
-boost::filesystem::path oms_canonical(boost::filesystem::path p);
-boost::filesystem::path oms_unique_path(std::string prefix);
 
 #endif

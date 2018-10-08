@@ -61,7 +61,7 @@ typedef enum {
   oms_causality_parameter,  ///< REMOVE ME
   oms_causality_bidir,      ///< bidirecitonal
   oms_causality_inherited,  ///< inherited
-  oms_causality_undefined   ///< REMOVE ME
+  oms_causality_undefined
 } oms_causality_enu_t;
 
 typedef enum {
@@ -77,6 +77,13 @@ typedef enum {
 } oms_solver_enu_t;
 
 typedef enum {
+  oms_element_none,
+  oms_element_system,
+  oms_element_component,
+  oms_element_externalmodel
+} oms3_element_enu_t;
+
+typedef enum {
   oms_component_none,
   oms_component_tlm,      ///< TLM composite model
   oms_component_fmi,      ///< FMI composite model
@@ -85,6 +92,19 @@ typedef enum {
   oms_component_table,    ///< lookup table
   oms_component_port      ///< port
 } oms_element_type_enu_t;
+
+typedef enum {
+  oms_system_none,
+  oms_system_tlm,      ///< TLM System
+  oms_system_wc,       ///< Weakly Coupled System
+  oms_system_sc        ///< Strongly Coupled System
+} oms_system_enu_t;
+
+typedef enum {
+  oms3_component_external, ///< External model
+  oms3_component_fmu,      ///< FMU
+  oms3_component_table     ///< lookup table
+} oms3_component_enu_t;
 
 typedef enum {
   oms_signal_type_real,
@@ -102,6 +122,12 @@ typedef enum {
   oms_connection_fmi, ///< FMI conncection (directed & undelayed signal connection)
   oms_connection_tlm  ///< TLM connection
 } oms_connection_type_enu_t;
+
+typedef enum {
+  oms3_connection_single, ///< FMI conncection (directed & undelayed signal connection)
+  oms3_connection_bus,  ///< Bus connection
+  oms3_connection_tlm
+} oms3_connection_type_enu_t;
 
 /**
  * \brief Message types used by the logging mechanism.
@@ -284,6 +310,40 @@ typedef struct {
 } ssd_system_geometry_t;
 
 /**
+ * \brief 5.3.6 ssd:SimulationInformation
+ *
+ * This element provides default information for useful solver/master
+ * algorithms and their default settings for processing the given component or
+ * (sub-)system. The information is purely an optional indicator of useful
+ * settings, any processing tool is free to use, merge, or discard this
+ * information in any way it sees fit.
+ *
+ * Multiple child-elements are allowed here in order to supply different
+ * settings for different kinds of solver/master algorithms.
+ *
+ * Simulation information can be present at multiple hierarchy levels of the
+ * overall system, including individual components. It is up to the processing
+ * tool to decide how best to integrate this information into its overall
+ * solving/simulation strategy. Tools supporting the use of multiple, different
+ * solvers/co-simulation master algorithms inside one simulation can make use
+ * of multiple different settings at different scopes, however this standard
+ * does not presume or require the existence of this functionality.
+ */
+typedef struct {
+  int dummy; ///< just to make msvc happy
+} ssd_simulation_information_t;
+
+/**
+ * \brief Parameters for TLM connection
+ */
+typedef struct {
+  double delay;
+  double alpha;
+  double linearimpedance;
+  double angularimpedance;
+} oms3_tlm_connection_parameters_t;
+
+/**
  * \brief Connection between two connectors.
  */
 typedef struct {
@@ -295,19 +355,57 @@ typedef struct {
   /// \todo optional TLM attributes
 } oms_connection_t;
 
+typedef struct {
+  oms3_connection_type_enu_t type;      ///< Connection type, e.g. TLM
+  char* conA;                          ///< Name of connector A
+  char* conB;                          ///< Name of connector B
+  ssd_connection_geometry_t* geometry; ///< Geometry information of the connection
+  oms3_tlm_connection_parameters_t* tlmparameters; ///< TLM parameters (only for TLM connections)
+} oms3_connection_t;
+
 /**
  * \brief Signal: input, output, and parameter
  */
 typedef struct {
   oms_causality_enu_t causality;      ///< input/output/parameter
-  oms_signal_type_enu_t type;         ///< Type of the conector
+  oms_signal_type_enu_t type;         ///< Type of the connector
   char* name;                         ///< Name of the connector
   ssd_connector_geometry_t* geometry; ///< Geometry information of the connector
 } oms_connector_t;
 
 /**
+ * /brief Bus connector
+ */
+typedef struct {
+  char* name;
+  char** connectors;
+  ssd_connector_geometry_t* geometry;
+} oms3_busconnector_t;
+
+/**
+ * /brief TLM Bus connector
+ */
+typedef struct {
+  char* name;
+  ssd_connector_geometry_t* geometry;
+  char* domain;
+  int dimensions;
+  oms_tlm_interpolation_t interpolation;
+} oms3_tlmbusconnector_t;
+
+/**
  * \brief Element (aka ssd:Component)
  */
+typedef struct _oms3_element_t{
+  oms3_element_enu_t type;           ///< Element type, i.e. system or component
+  char* name;                        ///< Name of the element
+  struct _oms3_element_t** elements; ///< List (null-terminated array) of all sub-elements
+  oms_connector_t** connectors;      ///< List (null-terminated array) of all interface variables: inputs, outputs, and parameters.
+  oms3_busconnector_t** busconnectors;  ///< List (null-terminated array) of all bus connectors
+  oms3_tlmbusconnector_t** tlmbusconnectors;  ///< List (null-terminated array) of all TLM bus connectors
+  ssd_element_geometry_t* geometry;  ///< Geometry information of the element
+} oms3_element_t;
+
 typedef struct {
   oms_element_type_enu_t type;      ///< Element type, e.g. FMU
   char* name;                       ///< Name of the element
@@ -441,8 +539,6 @@ typedef struct {
    */
   bool canInterpolateInputs;
 } oms_fmu_info_t;
-
-
 
 #ifdef __cplusplus
 }

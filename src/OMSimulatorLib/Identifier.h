@@ -29,40 +29,11 @@
  *
  */
 
-#ifndef _OMS_BOOST_H_
-#define _OMS_BOOST_H_
+#ifndef _OMSIMULATOR_IDENTIFIER_H_
+#define _OMSIMULATOR_IDENTIFIER_H_
 
- 
-#ifdef __cplusplus
-extern "C"
-{
-#endif
+#include <RegEx.h>
 
-#if (BOOST_VERSION < 104600)
-#if defined(_MSC_VER) || defined(__MINGW32__)
-#include <windows.h>
-#endif
-#endif 
-
-#ifdef __cplusplus
-}
-#endif
- 
-#include <cstdlib>
-#include <string>
-#include <boost/version.hpp>
-#include <boost/filesystem.hpp>
-
-#if (BOOST_VERSION >= 105300)
-#include <boost/lockfree/queue.hpp>
-#include <ctpl.h>
-#else // use the standard queue
-#include <ctpl_stl.h>
-#endif
-
-
-boost::filesystem::path oms_temp_directory_path(void);
-boost::filesystem::path oms_canonical(boost::filesystem::path p);
-boost::filesystem::path oms_unique_path(std::string prefix);
+extern const oms_regex regex_ident;
 
 #endif

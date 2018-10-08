@@ -33,7 +33,6 @@
 #define _OMS2_SIGNAL_REF_H_
 
 #include "ComRef.h"
-
 #include <string>
 
 namespace oms2

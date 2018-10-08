@@ -31,19 +31,556 @@
 
 #include "OMSimulator.h"
 
-#include "MatReader.h"
 #include "ComRef.h"
 #include "Element.h"
+#include "Flags.h"
 #include "FMUInfo.h"
 #include "Logging.h"
+#include "MatReader.h"
 #include "Model.h"
-#include "Scope.h"
 #include "ResultReader.h"
+#include "Scope.h"
+#include "System.h"
 #include "Types.h"
 #include "Version.h"
 
 #include <string>
 #include <boost/filesystem.hpp>
+
+/* ************************************ */
+/* oms3                                 */
+/*                                      */
+/* Experimental API                     */
+/* ************************************ */
+
+const char* oms3_getVersion()
+{
+  return oms_git_version;
+}
+
+oms_status_enu_t oms3_setLogFile(const char* filename)
+{
+  return Log::setLogFile(filename);
+}
+
+void oms3_setMaxLogFileSize(const unsigned long size)
+{
+  Log::setMaxLogFileSize(size);
+}
+
+oms_status_enu_t oms3_setTempDirectory(const char* newTempDir)
+{
+  return oms3::Scope::GetInstance().setTempDirectory(newTempDir);
+}
+
+oms_status_enu_t oms3_setWorkingDirectory(const char* newWorkingDir)
+{
+  return oms3::Scope::GetInstance().setWorkingDirectory(newWorkingDir);
+}
+
+oms_status_enu_t oms3_newModel(const char* cref)
+{
+  return oms3::Scope::GetInstance().newModel(oms3::ComRef(cref));
+}
+
+oms_status_enu_t oms3_rename(const char* cref_, const char* newCref_)
+{
+  oms3::ComRef cref(cref_);
+  oms3::ComRef newCref(newCref_);
+
+  if (cref.isValidIdent())
+    return oms3::Scope::GetInstance().renameModel(cref, newCref);
+  else
+    return logError_OnlyForModel;
+}
+
+oms_status_enu_t oms3_delete(const char* cref_)
+{
+  oms3::ComRef cref(cref_);
+
+  if (cref.isValidIdent())
+    return oms3::Scope::GetInstance().deleteModel(cref);
+  else
+    return logError_OnlyForModel;
+}
+
+oms_status_enu_t oms3_export(const char* cref_, const char* filename)
+{
+  return oms3::Scope::GetInstance().exportModel(oms3::ComRef(cref_), std::string(filename));
+}
+
+oms_status_enu_t oms3_import(const char* filename, char** cref)
+{
+  return oms3::Scope::GetInstance().importModel(std::string(filename), cref);
+}
+
+oms_status_enu_t oms3_list(const char* cref_, char** contents)
+{
+  oms3::ComRef tail(cref_);
+  oms3::ComRef front = tail.pop_front();
+  oms3::Model* model = oms3::Scope::GetInstance().getModel(front);
+  if (!model)
+    return logError_ModelNotInScope(front);
+
+  return model->list(tail, contents);
+}
+
+oms_status_enu_t oms3_parseModelName(const char* contents, char** cref)
+{
+  return logError_NotImplemented;
+}
+
+oms_status_enu_t oms3_importString(const char* contents, char** cref)
+{
+  return logError_NotImplemented;
+}
+
+oms_status_enu_t oms3_addSystem(const char* cref_, oms_system_enu_t type)
+{
+  oms3::ComRef cref(cref_);
+  oms3::ComRef modelCref = cref.pop_front();
+  oms3::Model* model = oms3::Scope::GetInstance().getModel(modelCref);
+  if (!model)
+    return logError_ModelNotInScope(modelCref);
+
+  return model->addSystem(cref, type);
+}
+
+oms_status_enu_t oms3_copySystem(const char* source, const char* target)
+{
+  return logError_NotImplemented;
+}
+
+oms_status_enu_t oms3_getElement(const char* cref_, oms3_element_t** element)
+{
+  return oms3::Scope::GetInstance().getElement(oms3::ComRef(cref_), reinterpret_cast<oms3::Element**>(element));
+}
+
+oms_status_enu_t oms3_getElements(const char* cref, oms3_element_t*** elements)
+{
+  return oms3::Scope::GetInstance().getElements(oms3::ComRef(cref), reinterpret_cast<oms3::Element***>(elements));
+}
+
+oms_status_enu_t oms3_setElementGeometry(const char* cref, const ssd_element_geometry_t* geometry)
+{
+  if (!geometry)
+  {
+    logWarning("[oms3_setElementGeometry] NULL pointer");
+    return oms_status_warning;
+  }
+
+  oms3::ComRef tail(cref);
+  oms3::ComRef modelCref = tail.pop_front();
+
+  oms3::Model* model = oms3::Scope::GetInstance().getModel(modelCref);
+  if (!model) {
+    return logError_ModelNotInScope(modelCref);
+  }
+
+  oms3::System* system = model->getSystem(tail);
+  if (!system) {
+    return logError_SystemNotInModel(modelCref, tail);
+  }
+
+  system->setGeometry(*reinterpret_cast<const oms3::ssd::ElementGeometry*>(geometry));
+  return oms_status_ok;
+}
+
+oms_status_enu_t oms3_addConnector(const char *cref, oms_causality_enu_t causality, oms_signal_type_enu_t type)
+{
+  logTrace();
+
+  oms3::ComRef tail(cref);
+  oms3::ComRef modelCref = tail.pop_front();
+  oms3::ComRef systemCref = tail.pop_front();
+
+  oms3::Model* model = oms3::Scope::GetInstance().getModel(modelCref);
+  if(!model) {
+    return logError_ModelNotInScope(modelCref);
+  }
+
+  oms3::System* system = model->getSystem(systemCref);
+  if(!system) {
+    return logError_SystemNotInModel(modelCref, systemCref);
+  }
+
+  return system->addConnector(tail, causality, type);
+}
+
+oms_status_enu_t oms3_getConnector(const char* cref, oms_connector_t** connector)
+{
+  oms3::ComRef tail(cref);
+  oms3::ComRef modelCref = tail.pop_front();
+  oms3::ComRef systemCref = tail.pop_front();
+
+  oms3::Model* model = oms3::Scope::GetInstance().getModel(modelCref);
+  if (!model) {
+    return logError_ModelNotInScope(modelCref);
+  }
+
+  oms3::System* system = model->getSystem(systemCref);
+  if (!system) {
+    return logError_SystemNotInModel(modelCref, tail);
+  }
+
+  oms3::Connector** connector_ = reinterpret_cast<oms3::Connector**>(connector);
+  *connector_ = system->getConnector(tail);
+  return oms_status_ok;
+}
+
+oms_status_enu_t oms3_setCommandLineOption(const char* cmd)
+{
+  if (std::string(cmd) == "--suppressPath=true")
+    oms3::Flags::SuppressPath(true);
+  else if (std::string(cmd) == "--suppressPath=false")
+    oms3::Flags::SuppressPath(false);
+  else
+    return logError("Unknown flag or option: \"" + std::string(cmd) + "\"");
+
+  return oms_status_ok;
+}
+
+oms_status_enu_t oms3_getSystemType(const char* cref, oms_system_enu_t* type)
+{
+  oms3::ComRef tail(cref);
+  oms3::ComRef modelCref = tail.pop_front();
+
+  *type = oms_system_none;
+
+  oms3::Model* model = oms3::Scope::GetInstance().getModel(modelCref);
+  if (!model) {
+    return logError_ModelNotInScope(modelCref);
+  }
+
+  oms3::System* system = model->getSystem(tail);
+  if (!system) {
+    return logError_SystemNotInModel(modelCref, tail);
+  }
+
+  *type = system->getType();
+  return oms_status_ok;
+}
+
+oms_status_enu_t oms3_addConnection(const char *crefA, const char *crefB)
+{
+  logTrace();
+
+  oms3::ComRef tailA(crefA);
+  oms3::ComRef modelCref = tailA.pop_front();
+  oms3::ComRef systemCref = tailA.pop_front();
+
+  oms3::ComRef tailB(crefB);
+  tailB.pop_front();
+  tailB.pop_front();
+
+  oms3::Model* model = oms3::Scope::GetInstance().getModel(modelCref);
+  if (!model) {
+    return logError_ModelNotInScope(modelCref);
+  }
+
+  oms3::System* system = model->getSystem(systemCref);
+  if (!system) {
+    return logError_SystemNotInModel(modelCref, systemCref);
+  }
+
+  return system->addConnection(tailA,tailB);
+}
+
+oms_status_enu_t oms3_updateConnection(const char *crefA, const char *crefB, const oms3_connection_t* connection)
+{
+  oms3::ComRef tailA(crefA);
+  oms3::ComRef modelCref = tailA.pop_front();
+  oms3::ComRef systemCref = tailA.pop_front();
+
+  oms3::ComRef tailB(crefB);
+  tailB.pop_front();
+  tailB.pop_front();
+
+  oms3::Model* model = oms3::Scope::GetInstance().getModel(modelCref);
+  if (!model) {
+    return logError_ModelNotInScope(modelCref);
+  }
+
+  oms3::System* system = model->getSystem(systemCref);
+  if (!system) {
+    return logError_SystemNotInModel(modelCref, systemCref);
+  }
+
+  return system->updateConnection(tailA, tailB, connection);
+}
+
+oms_status_enu_t oms3_setConnectorGeometry(const char *cref, const ssd_connector_geometry_t *geometry)
+{
+  logTrace();
+
+  oms3::ComRef tail(cref);
+  oms3::ComRef modelCref = tail.pop_front();
+  oms3::ComRef systemCref = tail.pop_front();
+
+  oms3::Model* model = oms3::Scope::GetInstance().getModel(modelCref);
+  if (!model) {
+    return logError_ModelNotInScope(modelCref);
+  }
+
+  oms3::System* system = model->getSystem(systemCref);
+  if (!system) {
+    return logError_SystemNotInModel(modelCref, systemCref);
+  }
+
+  return system->setConnectorGeometry(tail, reinterpret_cast<const oms2::ssd::ConnectorGeometry*>(geometry));
+}
+
+oms_status_enu_t oms3_setConnectionGeometry(const char *crefA, const char *crefB, const ssd_connection_geometry_t *geometry)
+{
+  logTrace();
+
+  oms3::ComRef tailA(crefA);
+  oms3::ComRef modelCref = tailA.pop_front();
+  oms3::ComRef systemCref = tailA.pop_front();
+
+  oms3::ComRef tailB(crefB);
+  tailB.pop_front();
+  tailB.pop_front();
+
+  oms3::Model* model = oms3::Scope::GetInstance().getModel(modelCref);
+  if (!model) {
+    return logError_ModelNotInScope(modelCref);
+  }
+
+  oms3::System* system = model->getSystem(systemCref);
+  if (!system) {
+    return logError_SystemNotInModel(modelCref, systemCref);
+  }
+
+  return system->setConnectionGeometry(tailA,tailB, reinterpret_cast<const oms2::ssd::ConnectionGeometry*>(geometry));
+}
+
+oms_status_enu_t oms3_getConnections(const char *cref, oms3_connection_t ***connections)
+{
+  logTrace();
+
+  oms3::ComRef tail(cref);
+  oms3::ComRef modelCref = tail.pop_front();
+  oms3::ComRef systemCref = tail.pop_front();
+
+  oms3::Model* model = oms3::Scope::GetInstance().getModel(modelCref);
+  if (!model) {
+    return logError_ModelNotInScope(modelCref);
+  }
+
+  oms3::System* system = model->getSystem(systemCref);
+  if (!system) {
+    return logError_SystemNotInModel(modelCref, systemCref);
+  }
+
+  (*connections) = reinterpret_cast<oms3_connection_t**>(system->getConnections(tail));
+
+  return oms_status_ok;
+}
+
+oms_status_enu_t oms3_addBus(const char *cref)
+{
+  logTrace();
+  oms3::ComRef tail(cref);
+  oms3::ComRef modelCref = tail.pop_front();
+  oms3::ComRef systemCref = tail.pop_front();
+  oms3::Model* model = oms3::Scope::GetInstance().getModel(modelCref);
+  if (!model) {
+    return logError_ModelNotInScope(modelCref);
+  }
+  oms3::System* system = model->getSystem(systemCref);
+  if (!system) {
+    return logError_SystemNotInModel(modelCref, systemCref);
+  }
+  return system->addBus(tail);
+}
+
+oms_status_enu_t oms3_getBus(const char* cref, oms3_busconnector_t** busConnector)
+{
+  oms3::ComRef tail(cref);
+  oms3::ComRef modelCref = tail.pop_front();
+  oms3::ComRef systemCref = tail.pop_front();
+
+  oms3::Model* model = oms3::Scope::GetInstance().getModel(modelCref);
+  if (!model) {
+    return logError_ModelNotInScope(modelCref);
+  }
+
+  oms3::System* system = model->getSystem(systemCref);
+  if (!system) {
+    return logError_SystemNotInModel(modelCref, systemCref);
+  }
+
+  oms3::BusConnector** busConnector_ = reinterpret_cast<oms3::BusConnector**>(busConnector);
+  *busConnector_ = system->getBusConnector(tail);
+  return oms_status_ok;
+}
+
+oms_status_enu_t oms3_setBusGeometry(const char* cref, const ssd_connector_geometry_t* geometry)
+{
+  oms3::ComRef tail(cref);
+  oms3::ComRef modelCref = tail.pop_front();
+  oms3::ComRef systemCref = tail.pop_front();
+
+  oms3::Model* model = oms3::Scope::GetInstance().getModel(modelCref);
+  if (!model) {
+    return logError_ModelNotInScope(modelCref);
+  }
+
+  oms3::System* system = model->getSystem(systemCref);
+  if (!system) {
+    return logError_SystemNotInModel(modelCref, systemCref);
+  }
+
+  return system->setBusGeometry(tail, reinterpret_cast<const oms2::ssd::ConnectorGeometry*>(geometry));
+}
+
+oms_status_enu_t oms3_addTLMBus(const char *cref, const char *domain, const int dimensions, const oms_tlm_interpolation_t interpolation)
+{
+  logTrace();
+  oms3::ComRef tail(cref);
+  oms3::ComRef modelCref = tail.pop_front();
+  oms3::ComRef systemCref = tail.pop_front();
+  oms3::Model* model = oms3::Scope::GetInstance().getModel(modelCref);
+  if(!model) {
+    return logError_ModelNotInScope(modelCref);
+  }
+  oms3::System* system = model->getSystem(systemCref);
+  if(!system) {
+    return logError_SystemNotInModel(modelCref, systemCref);
+  }
+  return system->addTLMBus(tail, domain, dimensions, interpolation);
+}
+
+oms_status_enu_t oms3_getTLMBus(const char* cref, oms3_tlmbusconnector_t** tlmBusConnector)
+{
+  oms3::ComRef tail(cref);
+  oms3::ComRef modelCref = tail.pop_front();
+  oms3::ComRef systemCref = tail.pop_front();
+
+  oms3::Model* model = oms3::Scope::GetInstance().getModel(modelCref);
+  if (!model) {
+    return logError_ModelNotInScope(modelCref);
+  }
+
+  oms3::System* system = model->getSystem(systemCref);
+  if (!system) {
+    return logError_SystemNotInModel(modelCref, systemCref);
+  }
+
+  oms3::TLMBusConnector** tlmBusConnector_ = reinterpret_cast<oms3::TLMBusConnector**>(tlmBusConnector);
+  *tlmBusConnector_ = system->getTLMBusConnector(tail);
+  return oms_status_ok;
+}
+
+oms_status_enu_t oms3_addConnectorToBus(const char *busCref, const char *connectorCref)
+{
+  logTrace();
+  oms3::ComRef busTail(busCref);
+  oms3::ComRef modelCref = busTail.pop_front();
+  oms3::ComRef systemCref = busTail.pop_front();
+  oms3::ComRef connectorTail(connectorCref);
+  if (modelCref != connectorTail.pop_front())
+    return logError("Bus and connector must belong to same model");
+  if (systemCref != connectorTail.pop_front())
+    return logError("Bus and connector must belong to same system");
+  oms3::Model* model = oms3::Scope::GetInstance().getModel(modelCref);
+  if (!model) {
+    return logError_ModelNotInScope(modelCref);
+  }
+  oms3::System* system = model->getSystem(systemCref);
+  if (!system) {
+    return logError_SystemNotInModel(modelCref, systemCref);
+  }
+  return system->addConnectorToBus(busTail, connectorTail);
+}
+
+oms_status_enu_t oms3_addConnectorToTLMBus(const char *busCref, const char *connectorCref, const char* type)
+{
+  logTrace();
+  oms3::ComRef busTail(busCref);
+  oms3::ComRef modelCref = busTail.pop_front();
+  oms3::ComRef systemCref = busTail.pop_front();
+  oms3::ComRef connectorTail(connectorCref);
+  if (modelCref != connectorTail.pop_front())
+    return logError("Bus and connector must belong to same model");
+  if (systemCref != connectorTail.pop_front())
+    return logError("Bus and connector must belong to same system");
+  oms3::Model* model = oms3::Scope::GetInstance().getModel(modelCref);
+  if (!model) {
+    return logError_ModelNotInScope(modelCref);
+  }
+  oms3::System* system = model->getSystem(systemCref);
+  if (!system) {
+    return logError_SystemNotInModel(modelCref, systemCref);
+  }
+  return system->addConnectorToTLMBus(busTail, connectorTail, type);
+}
+
+oms_status_enu_t oms3_setTLMBusGeometry(const char* cref, const ssd_connector_geometry_t* geometry)
+{
+  oms3::ComRef tail(cref);
+  oms3::ComRef modelCref = tail.pop_front();
+  oms3::ComRef systemCref = tail.pop_front();
+
+  oms3::Model* model = oms3::Scope::GetInstance().getModel(modelCref);
+  if (!model) {
+    return logError_ModelNotInScope(modelCref);
+  }
+
+  oms3::System* system = model->getSystem(systemCref);
+  if (!system) {
+    return logError_SystemNotInModel(modelCref, systemCref);
+  }
+
+  return system->setTLMBusGeometry(tail, reinterpret_cast<const oms2::ssd::ConnectorGeometry*>(geometry));
+}
+
+oms_status_enu_t oms3_addTLMConnection(const char *crefA, const char *crefB, double delay, double alpha, double linearimpedance, double angularimpedance)
+{
+  logTrace();
+
+  oms3::ComRef tailA(crefA);
+  oms3::ComRef modelCref = tailA.pop_front();
+  oms3::ComRef systemCref = tailA.pop_front();
+
+  oms3::ComRef tailB(crefB);
+  tailB.pop_front();
+  tailB.pop_front();
+
+  oms3::Model* model = oms3::Scope::GetInstance().getModel(modelCref);
+  if(!model) {
+    return logError_ModelNotInScope(modelCref);
+  }
+
+  oms3::System* system = model->getSystem(systemCref);
+  if(!system) {
+    return logError_SystemNotInModel(modelCref, systemCref);
+  }
+
+  return system->addTLMConnection(tailA,tailB,delay,alpha,linearimpedance,angularimpedance);
+}
+
+oms_status_enu_t oms3_addExternalModel(const char *cref, const char *path, const char *startscript)
+{
+  logTrace();
+
+  oms3::ComRef tail(cref);
+  oms3::ComRef modelCref = tail.pop_front();
+  oms3::ComRef systemCref = tail.pop_front();
+
+  oms3::Model* model = oms3::Scope::GetInstance().getModel(modelCref);
+  if(!model) {
+    return logError_ModelNotInScope(modelCref);
+  }
+
+  oms3::System* system = model->getSystem(systemCref);
+  if(!system) {
+    return logError_SystemNotInModel(modelCref, systemCref);
+  }
+
+  return system->addExternalModel(tail, path, startscript);
+}
 
 /* ************************************ */
 /* OMSimulator 2.0                      */
@@ -634,3 +1171,4 @@ int oms2_exists(const char* cref)
   logTrace();
   return oms2::Scope::GetInstance().exists(oms2::ComRef(cref)) ? 1 : 0;
 }
+

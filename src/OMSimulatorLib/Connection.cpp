@@ -32,9 +32,155 @@
 #include "Connection.h"
 #include "ssd/ConnectionGeometry.h"
 #include "Logging.h"
+#include "ssd/Tags.h"
 
 #include <cstring>
 #include <iostream>
+
+
+oms3::Connection::Connection(const oms3::ComRef& conA, const oms3::ComRef& conB, oms3_connection_type_enu_t type)
+{
+  std::string str;
+
+  this->type = type;
+
+  str = std::string(conA);
+  this->conA = new char[str.size()+1];
+  strcpy(this->conA, str.c_str());
+
+  str = std::string(conB);
+  this->conB = new char[str.size()+1];
+  strcpy(this->conB, str.c_str());
+
+  this->geometry = reinterpret_cast<ssd_connection_geometry_t*>(new oms2::ssd::ConnectionGeometry());
+
+  tlmparameters = NULL;
+}
+
+oms3::Connection::~Connection()
+{
+  if (this->conA) delete[] this->conA;
+  if (this->conB) delete[] this->conB;
+  if (this->tlmparameters) delete tlmparameters;
+  if (this->geometry) delete reinterpret_cast<oms2::ssd::ConnectionGeometry*>(this->geometry);
+}
+
+oms3::Connection::Connection(const oms3::Connection& rhs)
+{
+  this->type = rhs.type;
+
+  this->conA = new char[strlen(rhs.conA)+1];
+  strcpy(this->conA, rhs.conA);
+
+  this->conB = new char[strlen(rhs.conB)+1];
+  strcpy(this->conB, rhs.conB);
+
+  oms2::ssd::ConnectionGeometry* geometry_ = new oms2::ssd::ConnectionGeometry();
+  *geometry_ = *reinterpret_cast<oms2::ssd::ConnectionGeometry*>(rhs.geometry);
+  this->geometry = reinterpret_cast<ssd_connection_geometry_t*>(geometry_);
+
+  tlmparameters = NULL;
+}
+
+oms3::Connection& oms3::Connection::operator=(const oms3::Connection& rhs)
+{
+  // check for self-assignment
+  if(&rhs == this)
+    return *this;
+
+  if (this->type != rhs.type)
+    logWarning("[oms3::Connection::operator=] changing type of connection");
+  this->type = rhs.type;
+
+  if (this->conA) delete[] this->conA;
+  this->conA = new char[strlen(rhs.conA)+1];
+  strcpy(this->conA, rhs.conA);
+
+  if (this->conB) delete[] this->conB;
+  this->conB = new char[strlen(rhs.conB)+1];
+  strcpy(this->conB, rhs.conB);
+
+  oms2::ssd::ConnectionGeometry* geometry_ = new oms2::ssd::ConnectionGeometry();
+  *geometry_ = *reinterpret_cast<oms2::ssd::ConnectionGeometry*>(rhs.geometry);
+  this->geometry = reinterpret_cast<ssd_connection_geometry_t*>(geometry_);
+
+  if (this->tlmparameters) {
+    delete tlmparameters;
+    tlmparameters = NULL;
+  }
+  if (rhs.tlmparameters) {
+    setTLMParameters(rhs.tlmparameters->delay, rhs.tlmparameters->alpha, rhs.tlmparameters->linearimpedance, rhs.tlmparameters->angularimpedance);
+  }
+
+  return *this;
+}
+
+oms_status_enu_t oms3::Connection::exportToSSD(pugi::xml_node &root) const
+{
+  pugi::xml_node node;
+  if(type == oms3_connection_single) {
+    node = root.append_child(oms2::ssd::ssd_connection);
+  }
+  else if(type == oms3_connection_bus || type == oms3_connection_tlm) {
+    node = root.append_child(oms::bus_connection);
+  }
+
+  ComRef startConnectorRef(conA);
+  ComRef startElementRef = startConnectorRef.pop_front();
+  ComRef endConnectorRef(conB);
+  ComRef endElementRef = endConnectorRef.pop_front();
+
+  node.append_attribute("startElement") = startElementRef.c_str();
+  node.append_attribute("startConnector") = startConnectorRef.c_str();
+  node.append_attribute("endElement") = endElementRef.c_str();
+  node.append_attribute("endConnector") = endConnectorRef.c_str();
+
+  if(type == oms3_connection_tlm) {
+    node.append_attribute("delay") = std::to_string(tlmparameters->delay).c_str();
+    node.append_attribute("alpha") = std::to_string(tlmparameters->alpha).c_str();
+    node.append_attribute("linearimpedance") = std::to_string(tlmparameters->linearimpedance).c_str();
+    node.append_attribute("angularimpedance") = std::to_string(tlmparameters->angularimpedance).c_str();
+  }
+
+  getGeometry()->exportToSSD(node);
+
+  return oms_status_ok;
+}
+
+void oms3::Connection::setGeometry(const oms2::ssd::ConnectionGeometry* newGeometry)
+{
+  oms2::ssd::ConnectionGeometry* geometry_ = reinterpret_cast<oms2::ssd::ConnectionGeometry*>(this->geometry);
+  if (geometry_)
+    delete geometry_;
+  geometry_ = new oms2::ssd::ConnectionGeometry(*newGeometry);
+  this->geometry = reinterpret_cast<ssd_connection_geometry_t*>(geometry_);
+}
+
+void oms3::Connection::setTLMParameters(double delay, double alpha, double linearimpedance, double angualrimpedance)
+{
+  if(!tlmparameters)
+    tlmparameters = new oms3_tlm_connection_parameters_t;
+
+  tlmparameters->delay = delay;
+  tlmparameters->alpha = alpha;
+  tlmparameters->linearimpedance = linearimpedance;
+  tlmparameters->angularimpedance = angualrimpedance;
+}
+
+
+bool oms3::Connection::isEqual(const oms3::ComRef& signalA, const oms3::ComRef& signalB) const
+{
+  return (signalA == oms3::ComRef(this->conA) && signalB == oms3::ComRef(this->conB)) || (signalA == oms3::ComRef(this->conB) && signalB == oms3::ComRef(this->conA));
+}
+
+bool oms3::Connection::isEqual(const oms3::Connection& connection) const
+{
+  const oms3::ComRef& conA_ = connection.getSignalA();
+  const oms3::ComRef& conB_ = connection.getSignalB();
+  return isEqual(conA_, conB_);
+}
+
+
 
 oms2::Connection::Connection(const oms2::ComRef& parent, const oms2::SignalRef& conA, const oms2::SignalRef& conB)
 {

@@ -29,40 +29,40 @@
  *
  */
 
-#ifndef _OMS_BOOST_H_
-#define _OMS_BOOST_H_
+#ifndef _OMS_COMPONENT_H_
+#define _OMS_COMPONENT_H_
 
- 
-#ifdef __cplusplus
-extern "C"
+#include "ComRef.h"
+#include "Types.h"
+#include "Element.h"
+#include <pugixml.hpp>
+
+namespace oms3
 {
-#endif
+  class Component
+  {
+  public:
+    virtual ~Component();
 
-#if (BOOST_VERSION < 104600)
-#if defined(_MSC_VER) || defined(__MINGW32__)
-#include <windows.h>
-#endif
-#endif 
+    const ComRef& getName() const {return cref;}
+    oms_status_enu_t exportToSSD(pugi::xml_node& node) const;
+    oms3::Element* getElement() {return &element;}
+    oms3::Connector *getConnector(const ComRef &cref);
 
-#ifdef __cplusplus
+  protected:
+
+  protected:
+    Component(const ComRef& cref);
+
+    // stop the compiler generating methods copying the object
+    Component(Component const&);            ///< not implemented
+    Component& operator=(Component const&); ///< not implemented
+
+  private:
+    oms3::Element element;
+    oms3::ComRef cref;
+    std::vector<oms3::Connector*> connectors;
+  };
 }
-#endif
- 
-#include <cstdlib>
-#include <string>
-#include <boost/version.hpp>
-#include <boost/filesystem.hpp>
-
-#if (BOOST_VERSION >= 105300)
-#include <boost/lockfree/queue.hpp>
-#include <ctpl.h>
-#else // use the standard queue
-#include <ctpl_stl.h>
-#endif
-
-
-boost::filesystem::path oms_temp_directory_path(void);
-boost::filesystem::path oms_canonical(boost::filesystem::path p);
-boost::filesystem::path oms_unique_path(std::string prefix);
 
 #endif
