@@ -35,6 +35,7 @@
 #include "ComRef.h"
 #include "Types.h"
 #include "Element.h"
+#include "StepSizeConfiguration.h"
 
 #include <pugixml.hpp>
 
@@ -91,6 +92,7 @@ namespace oms3
 #include "FMICompositeModel.h"
 #include "TLMCompositeModel.h"
 #include "ssd/SystemGeometry.h"
+#include "SignalRef.h"
 
 #include <string>
 
@@ -126,6 +128,10 @@ namespace oms2
     ResultWriter *getResultWriter() const {return resultFile;}
     void setMasterAlgorithm(MasterAlgorithm value) {masterAlgorithm = value;}
     MasterAlgorithm getMasterAlgorithm() const {return masterAlgorithm;}
+    //
+    void setCriticalVariable(const oms2::SignalRef& var) {stepSizeConfiguration=new StepSizeConfiguration(var);}
+    StepSizeConfiguration* getStepSizeConfiguration() {return stepSizeConfiguration;};
+    //
     void setTolerance(double value) {tolerance = value;}
     double getTolerance() const {return tolerance;}
 
@@ -173,6 +179,7 @@ namespace oms2
     unsigned int bufferSize = 1;
     ResultWriter *resultFile = NULL;
     MasterAlgorithm masterAlgorithm = MasterAlgorithm::STANDARD;  ///< master algorithm for FMI co-simulation, default MasterAlgorithm::STANDARD
+    StepSizeConfiguration* stepSizeConfiguration = NULL;
 
     oms_modelState_enu_t modelState;  ///< internal model state, e.g. initialization state
   };

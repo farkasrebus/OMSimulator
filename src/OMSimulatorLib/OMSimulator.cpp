@@ -1098,6 +1098,12 @@ oms_status_enu_t oms2_setMasterAlgorithm(const char* ident, const char* masterAl
   return oms2::Scope::GetInstance().setMasterAlgorithm(oms2::ComRef(ident), std::string(masterAlgorithm));
 }
 
+oms_status_enu_t oms2_setCriticalVariable(const char* signal)
+{
+  logTrace();
+  return oms2::Scope::GetInstance().setCriticalVariable(oms2::SignalRef(signal));
+}
+
 oms_status_enu_t experimental_setActivationRatio(const char* cref, int k)
 {
   logTrace();

@@ -141,6 +141,7 @@ namespace oms2
 #if !defined(__arm__)
     oms_status_enu_t stepUntilPCTPL(ResultWriter& resultWriter, double stopTime, double communicationInterval, double loggingInterval, bool realtime_sync);
 #endif // if !defined(__arm__)
+    oms_status_enu_t stepUntilASSC(ResultWriter& resultWriter, double stopTime, double communicationInterval, double loggingInterval, bool realtime_sync);
     oms_status_enu_t updateDependencyGraphs();
 
 #if !defined(NO_TLM)

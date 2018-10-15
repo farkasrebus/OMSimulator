@@ -340,6 +340,11 @@ oms2::Model::~Model()
     reset(true);
     CompositeModel::DeleteModel(compositeModel);
   }
+
+  if (stepSizeConfiguration) 
+  {
+    delete stepSizeConfiguration;
+  }
 }
 
 oms2::Model* oms2::Model::NewModel(oms_element_type_enu_t type, const oms2::ComRef& cref)

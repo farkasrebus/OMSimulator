@@ -1957,6 +1957,10 @@ oms_status_enu_t oms2::Scope::setMasterAlgorithm(const ComRef& cref, const std::
   {
     model->setMasterAlgorithm(oms2::MasterAlgorithm::PMRCHANNELM);
   }
+  else if (masterAlgorithm == "assc")
+  {
+    model->setMasterAlgorithm(oms2::MasterAlgorithm::ASSC);
+  }
   else {
     std::string message = std::string("Unsupported master algorithm ")
       + masterAlgorithm + std::string("\nFollowing master algorithms are supported:\n")
@@ -1973,6 +1977,27 @@ oms_status_enu_t oms2::Scope::setMasterAlgorithm(const ComRef& cref, const std::
   return oms_status_ok;
 }
 
+oms_status_enu_t oms2::Scope::setCriticalVariable(const oms2::SignalRef& signal)
+{
+  logTrace();
+  ComRef cref = signal.getCref();
+
+  if (!cref.isIdent())
+  {
+    // Sub-model
+    ComRef modelCref = cref.first();
+    Model* model = getModel(modelCref);
+    if (!model)
+    {
+      logError("[oms2::Scope::setCriticalVariable] failed");
+      return oms_status_error;
+    }
+    model -> setCriticalVariable(signal);
+    return oms_status_ok;
+  }
+
+  return oms_status_error;
+}
 
 oms_status_enu_t oms2::Scope::setActivationRatio(const ComRef& cref, int k)
 {

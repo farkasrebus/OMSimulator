@@ -976,6 +976,10 @@ oms_status_enu_t oms2::FMICompositeModel::stepUntil(ResultWriter& resultWriter, 
     status = oms2::stepUntilPMRChannel<oms2::PMRChannelM>(resultWriter, stopTime, communicationInterval, loggingInterval, this->getName().toString(), outputsGraph, subModels, realtime_sync);
     break;
 #endif
+  case MasterAlgorithm::ASSC :
+    logDebug("oms2::FMICompositeModel::stepUntil: Using master algorithm 'assc'");
+    status = stepUntilASSC(resultWriter, stopTime,communicationInterval,loggingInterval,realtime_sync);
+    break;
   default:
     logError("oms2::FMICompositeModel::stepUntil: Internal error: Request for using unknown master algorithm.");
   }
@@ -1141,6 +1145,60 @@ oms_status_enu_t oms2::FMICompositeModel::stepUntilPCTPL(ResultWriter& resultWri
 }
 
 #endif // #if !defined(__arm__)
+
+oms_status_enu_t oms2::FMICompositeModel::stepUntilASSC(ResultWriter& resultWriter, double stopTime, double communicationInterval, double loggingInterval, bool realtime_sync)
+{
+  logTrace();
+  auto start = std::chrono::steady_clock::now();
+
+  while (time<stopTime) {
+    //This is a minimal step size controller to provide a skeleton for integration
+    double nextStepSize=communicationInterval;
+    //TODO this is a horrible solution - getSSC from scope, or make SSC part of FMICompositeModel instead...
+    const oms2::SignalRef* var = oms2::Scope::GetInstance().getModel(getName())->getStepSizeConfiguration()->getCriticalVariable();
+    double value;
+    this->getReal(*var,value);
+    if (value > 0.5) {nextStepSize=communicationInterval/2.0;}
+    time+=nextStepSize;
+    if (time>stopTime) {
+      time=stopTime;
+    }
+    //After this point everything is copied from standard algorithm
+    for (const auto& it : subModels)
+      if (oms_component_fmu_old != it.second->getType())
+        it.second->doStep(time);
+
+    for (const auto& it : solvers)
+      it.second->doStep(time);
+    
+    if (realtime_sync)
+    {
+      auto now = std::chrono::steady_clock::now();
+      // seems a cast to a sufficient high resolution of time is necessary for avoiding truncation errors
+      auto next = start + std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::duration<double>(time));
+      std::chrono::duration<double> margin = next - now;
+      // std::cout << "[oms2::FMICompositeModel::stepUntilStandard] doStep: " << std::to_string(time  - communicationInterval) << "s -> " << std::to_string(time) << "s, real-time margin=" << std::to_string(margin.count()) << "s" << std::endl;
+      if (margin < std::chrono::duration<double>(0))
+        logError(std::string("[oms2::FMICompositeModel::stepUntilStandard] real-time frame overrun, time=") + std::to_string(time) + std::string("s, exceeded margin=") + std::to_string(margin.count()) + std::string("s\n"));
+
+      std::this_thread::sleep_until(next);
+    }
+
+    // input := output
+    if (loggingInterval >= 0.0 && time - tLastEmit >= loggingInterval)
+    {
+      if (loggingInterval <= 0.0)
+        emit(resultWriter);
+      updateInputs(outputsGraph);
+      emit(resultWriter);
+    }
+    else
+      updateInputs(outputsGraph);
+
+  }
+  
+  return oms_status_ok;
+}
 
 void oms2::FMICompositeModel::simulate_asynchronous(ResultWriter& resultWriter, double stopTime, double communicationInterval, double loggingInterval, void (*cb)(const char* ident, double time, oms_status_enu_t status))
 {
