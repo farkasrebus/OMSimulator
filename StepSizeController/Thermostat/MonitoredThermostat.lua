@@ -15,12 +15,12 @@ oms2_addFMU("MonitoredThermostat","ThermostatMonitor_ThermostatOnMonitor.fmu","T
 
 
 oms2_addSolver("MonitoredThermostat", "solver", "internal")
-oms2_connectSolver("MonitoredThermostat", "Room", "solver")
-oms2_connectSolver("MonitoredThermostat", "Thermostat", "solver")
-oms2_connectSolver("MonitoredThermostat","CentralMonitor","solver")
-oms2_connectSolver("MonitoredThermostat","TemperatureMonitor","solver")
-oms2_connectSolver("MonitoredThermostat","HeatingMonitor","solver")
-oms2_connectSolver("MonitoredThermostat","ThermostatMonitor","solver")
+oms2_addConnection("MonitoredThermostat", "Room", "solver")
+oms2_addConnection("MonitoredThermostat", "Thermostat", "solver")
+oms2_addConnection("MonitoredThermostat","CentralMonitor","solver")
+oms2_addConnection("MonitoredThermostat","TemperatureMonitor","solver")
+oms2_addConnection("MonitoredThermostat","HeatingMonitor","solver")
+oms2_addConnection("MonitoredThermostat","ThermostatMonitor","solver")
 
 oms2_addConnection("MonitoredThermostat",
 	"Thermostat:Thermostat_HeatingControlPort_set_hysteresis_intervallum_hysteresis_intervallum",

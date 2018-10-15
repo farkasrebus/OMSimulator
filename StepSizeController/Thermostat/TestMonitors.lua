@@ -9,11 +9,11 @@ oms2_addFMU("HeatSystem","ThermostatMonitor_ThermostatOnMonitor.fmu","Thermostat
 oms2_addFMU("HeatSystem","ThermostatMonitor_DummyTestEnvironment.fmu","Env")
 
 oms2_addSolver("HeatSystem", "solver", "internal")
-oms2_connectSolver("HeatSystem","CentralMonitor","solver")
-oms2_connectSolver("HeatSystem","TemperatureMonitor","solver")
-oms2_connectSolver("HeatSystem","HeatingMonitor","solver")
-oms2_connectSolver("HeatSystem","ThermostatMonitor","solver")
-oms2_connectSolver("HeatSystem","Env","solver")
+oms2_addConnection("HeatSystem","CentralMonitor","solver")
+oms2_addConnection("HeatSystem","TemperatureMonitor","solver")
+oms2_addConnection("HeatSystem","HeatingMonitor","solver")
+oms2_addConnection("HeatSystem","ThermostatMonitor","solver")
+oms2_addConnection("HeatSystem","Env","solver")
 
 oms2_addConnection("HeatSystem","Env:turnThermostatOn","ThermostatMonitor:turnOn")
 oms2_addConnection("HeatSystem","Env:turnThermostatOff","ThermostatMonitor:turnOff")
