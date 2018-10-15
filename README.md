@@ -1,5 +1,6 @@
 # Adaptive step size control for OMSimulator
 
+
 This repository is forked from [OpenModelica/OMSimulator](https://github.com/OpenModelica/OMSimulator) with the goal of extending it with additive step size control for efficient and precise simulation.
 
 ## Simulation and step size control
