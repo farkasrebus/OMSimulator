@@ -1,5 +1,14 @@
 #include "StepSizeConfiguration.h"
+#include "SignalRef.h"
+#include "Logging.h"
 
-StepSizeConfiguration::StepSizeConfiguration(const oms2::SignalRef& var) :critical(&var) {};
+StepSizeConfiguration::StepSizeConfiguration(const oms2::SignalRef& var) :critical(new oms2::SignalRef(var)) {
+};
 
-StepSizeConfiguration::~StepSizeConfiguration() {};
+StepSizeConfiguration::~StepSizeConfiguration() {
+    delete critical;
+};
+
+oms2::SignalRef* StepSizeConfiguration::getCriticalVariable() {
+    return critical;
+}

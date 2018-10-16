@@ -1008,6 +1008,36 @@ static int OMSimulatorLua_oms2_setMasterAlgorithm(lua_State *L)
   return 1;
 }
 
+//oms_status_enu_t oms2_setCriticalVariable(const char* signal);
+static int OMSimulatorLua_oms2_setCriticalVariable(lua_State *L)
+{
+  if (lua_gettop(L) != 1)
+    return luaL_error(L, "expecting exactly 1 argument");
+  luaL_checktype(L, 1, LUA_TSTRING);
+
+  const char *ident = lua_tostring(L, 1);
+  oms_status_enu_t status = oms2_setCriticalVariable(ident);
+
+  lua_pushinteger(L, status);
+  return 1;
+}
+
+//oms_status_enu_t oms2_getCriticalVariable(const char* ident, char** signal); 
+static int OMSimulatorLua_oms2_getCriticalVariable(lua_State *L)
+{
+  if (lua_gettop(L) != 1)
+    return luaL_error(L, "expecting exactly 1 argument");
+  luaL_checktype(L, 1, LUA_TSTRING);
+
+  const char* ident = lua_tostring(L, 1);
+  char* signal = NULL;
+  oms_status_enu_t status=oms2_getCriticalVariable(ident, &signal); 
+  
+  lua_pushstring(L, signal ? signal : "");
+  lua_pushinteger(L, status);
+  return 2;
+}
+
 //oms_status_enu_t experimental_setActivationRatio(const char* cref, int k);
 static int OMSimulatorLua_experimental_setActivationRatio(lua_State *L)
 {
@@ -2021,6 +2051,8 @@ DLLEXPORT int luaopen_OMSimulatorLua(lua_State *L)
   REGISTER_LUA_CALL(oms2_setLoggingLevel);
   REGISTER_LUA_CALL(oms2_setLoggingSamples);
   REGISTER_LUA_CALL(oms2_setMasterAlgorithm);
+  REGISTER_LUA_CALL(oms2_setCriticalVariable);
+  REGISTER_LUA_CALL(oms2_getCriticalVariable);
   REGISTER_LUA_CALL(oms2_setMaxLogFileSize);
   REGISTER_LUA_CALL(oms2_setReal);
   REGISTER_LUA_CALL(oms2_setRealParameter);

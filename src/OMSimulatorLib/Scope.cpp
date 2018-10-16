@@ -572,7 +572,7 @@ oms_status_enu_t oms2::Scope::initialize(const ComRef& name)
   oms2::Model* model = getModel(name);
   if (!model)
     return oms_status_error;
-
+    
   return model->initialize();
 }
 
@@ -1993,6 +1993,49 @@ oms_status_enu_t oms2::Scope::setCriticalVariable(const oms2::SignalRef& signal)
       return oms_status_error;
     }
     model -> setCriticalVariable(signal);
+    
+    return oms_status_ok;
+  }
+
+  return oms_status_error;
+}
+
+oms_status_enu_t oms2::Scope::getCriticalVariable(const ComRef& cref, char** signal){
+  if (!cref.isIdent()) {
+    // Sub-model
+    ComRef modelCref = cref.first();
+    Model* model = getModel(modelCref);
+    if (!model)
+    {
+      logError("[oms2::Scope::setActivationRatio] failed");
+      return oms_status_error;
+    }
+    SignalRef* critSignal= model-> getStepSizeConfiguration()->getCriticalVariable();
+    std::string name=critSignal->toString();
+    if (!name.empty())
+    {
+      *signal = (char*) malloc(strlen(name.c_str()) + 1);
+      strcpy(*signal, name.c_str());
+    }
+    //*signal=const_cast<char*>(critSignal->toString().c_str());
+
+    return oms_status_ok;
+  } else {
+    Model* model = getModel(cref);
+    if (!model)
+    {
+      logError("[oms2::Scope::setActivationRatio] failed");
+      return oms_status_error;
+    }
+
+    SignalRef* critSignal= model-> getStepSizeConfiguration()->getCriticalVariable();
+    std::string name=critSignal->toString();
+    if (!name.empty())
+    {
+      *signal = (char*) malloc(strlen(name.c_str()) + 1);
+      strcpy(*signal, name.c_str());
+    }
+
     return oms_status_ok;
   }
 

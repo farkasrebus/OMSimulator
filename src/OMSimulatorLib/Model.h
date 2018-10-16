@@ -129,7 +129,7 @@ namespace oms2
     void setMasterAlgorithm(MasterAlgorithm value) {masterAlgorithm = value;}
     MasterAlgorithm getMasterAlgorithm() const {return masterAlgorithm;}
     //
-    void setCriticalVariable(const oms2::SignalRef& var) {stepSizeConfiguration=new StepSizeConfiguration(var);}
+    void setCriticalVariable(const oms2::SignalRef& var);
     StepSizeConfiguration* getStepSizeConfiguration() {return stepSizeConfiguration;};
     //
     void setTolerance(double value) {tolerance = value;}

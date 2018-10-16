@@ -1,0 +1,152 @@
+Tue Oct 16 15:32:33 2018 | info:    Initializing logging (OMSimulator v2.0.0-dev-785-g937ee4a-linux)
+Tue Oct 16 15:32:33 2018 | trace:   oms2_setTempDirectory (/home/farkasr/git/OMSimulator/src/OMSimulatorLib/OMSimulator.cpp:944)
+Tue Oct 16 15:32:33 2018 | trace:   Scope (/home/farkasr/git/OMSimulator/src/OMSimulatorLib/Scope.cpp:360)
+Tue Oct 16 15:32:33 2018 | trace:   setTempDirectory (/home/farkasr/git/OMSimulator/src/OMSimulatorLib/Scope.cpp:647)
+Tue Oct 16 15:32:33 2018 | info:    New temp directory: "/home/farkasr/git/OMSimulator/StepSizeController/TrafficLight/tmp"
+Tue Oct 16 15:32:33 2018 | trace:   oms2_newFMIModel (/home/farkasr/git/OMSimulator/src/OMSimulatorLib/OMSimulator.cpp:649)
+Tue Oct 16 15:32:33 2018 | trace:   newFMIModel (/home/farkasr/git/OMSimulator/src/OMSimulatorLib/Scope.cpp:383)
+Tue Oct 16 15:32:33 2018 | trace:   SystemGeometry (/home/farkasr/git/OMSimulator/src/OMSimulatorLib/ssd/SystemGeometry.cpp:39)
+Tue Oct 16 15:32:33 2018 | trace:   Model (/home/farkasr/git/OMSimulator/src/OMSimulatorLib/Model.cpp:332)
+Tue Oct 16 15:32:33 2018 | trace:   ElementGeometry (/home/farkasr/git/OMSimulator/src/OMSimulatorLib/ssd/ElementGeometry.cpp:168)
+Tue Oct 16 15:32:33 2018 | trace:   CompositeModel (/home/farkasr/git/OMSimulator/src/OMSimulatorLib/CompositeModel.cpp:42)
+Tue Oct 16 15:32:33 2018 | trace:   FMICompositeModel (/home/farkasr/git/OMSimulator/src/OMSimulatorLib/FMICompositeModel.cpp:61)
+Tue Oct 16 15:32:33 2018 | trace:   oms2_addFMU (/home/farkasr/git/OMSimulator/src/OMSimulatorLib/OMSimulator.cpp:671)
+Tue Oct 16 15:32:33 2018 | trace:   addFMU (/home/farkasr/git/OMSimulator/src/OMSimulatorLib/Scope.cpp:443)
+Tue Oct 16 15:32:33 2018 | trace:   getModel (/home/farkasr/git/OMSimulator/src/OMSimulatorLib/Scope.cpp:1124)
+Tue Oct 16 15:32:33 2018 | trace:   ElementGeometry (/home/farkasr/git/OMSimulator/src/OMSimulatorLib/ssd/ElementGeometry.cpp:168)
+Tue Oct 16 15:32:33 2018 | debug:   Using "/home/farkasr/git/OMSimulator/StepSizeController/TrafficLight/tmp/temp_8eWKvq" as temp directory for Car
+Tue Oct 16 15:32:33 2018 | debug:   [log level VERBOSE] module FMILIB: Allocating FMIL context
+Tue Oct 16 15:32:33 2018 | debug:   [log level VERBOSE] module FMILIB: Detecting FMI standard version
+Tue Oct 16 15:32:33 2018 | debug:   [log level VERBOSE] module FMIZIP: Unpacking FMU into /home/farkasr/git/OMSimulator/StepSizeController/TrafficLight/tmp/temp_8eWKvq
+Tue Oct 16 15:32:33 2018 | debug:   [log level VERBOSE] module FMIXML: Parsing XML to detect FMI standard version
+Tue Oct 16 15:32:33 2018 | debug:   [log level VERBOSE] module FMIXML: XML specifies FMI 2.0
+Tue Oct 16 15:32:33 2018 | debug:   module FMILIB: XML specifies FMI standard version 2.0
+Tue Oct 16 15:32:33 2018 | debug:   [log level VERBOSE] module FMILIB: Parsing model description XML
+Tue Oct 16 15:32:33 2018 | debug:   [log level VERBOSE] module FMI2XML: Parsing XML element fmiModelDescription
+Tue Oct 16 15:32:33 2018 | debug:   [log level VERBOSE] module FMI2XML: Parsing XML element ModelExchange
+Tue Oct 16 15:32:33 2018 | debug:   [log level VERBOSE] module FMI2XML: Parsing XML element CoSimulation
+Tue Oct 16 15:32:33 2018 | debug:   [log level VERBOSE] module FMI2XML: Parsing XML element TypeDefinitions
+Tue Oct 16 15:32:33 2018 | debug:   [log level VERBOSE] module FMI2XML: Parsing XML element LogCategories
+Tue Oct 16 15:32:33 2018 | debug:   [log level VERBOSE] module FMI2XML: Parsing XML element ModelVariables
+Tue Oct 16 15:32:33 2018 | debug:   [log level VERBOSE] module FMI2XML: Building alias index
+Tue Oct 16 15:32:33 2018 | debug:   [log level VERBOSE] module FMI2XML: Variables color and lightColorReal reference the same vr 6. Marking 'lightColorReal' as alias.
+Tue Oct 16 15:32:33 2018 | debug:   [log level VERBOSE] module FMI2XML: Parsing XML element ModelStructure
+Tue Oct 16 15:32:33 2018 | debug:   [log level VERBOSE] module FMI2XML: Parsing XML element Derivatives
+Tue Oct 16 15:32:33 2018 | debug:   module FMI2XML: Found model identifiers for ModelExchange and CoSimulation
+Tue Oct 16 15:32:33 2018 | debug:   [log level VERBOSE] module FMILIB: Parsing finished successfully
+Tue Oct 16 15:32:33 2018 | debug:   FMU ME & CS
+Tue Oct 16 15:32:33 2018 | debug:   module FMILIB: Loading 'linux64' binary with 'default' platform types
+Tue Oct 16 15:32:33 2018 | debug:   [log level VERBOSE] module FMICAPI: Loaded FMU binary from /home/farkasr/git/OMSimulator/StepSizeController/TrafficLight/tmp/temp_8eWKvq/binaries/linux64/TrafficLightScenario_Car.so
+Tue Oct 16 15:32:33 2018 | debug:   [log level VERBOSE] module FMICAPI: Loading functions for the co-simulation interface
+Tue Oct 16 15:32:33 2018 | debug:   [log level VERBOSE] module FMILIB: Successfully loaded all the interface functions
+Tue Oct 16 15:32:33 2018 | debug:   Car (logFmi2Call): fmi2Instantiate: GUID={a0270204-62e3-4c9b-a9ab-c9eb19add43f}
+Tue Oct 16 15:32:33 2018 | debug:   19 variables
+Tue Oct 16 15:32:33 2018 | debug:   3 states
+Tue Oct 16 15:32:33 2018 | trace:   ConnectorGeometry (/home/farkasr/git/OMSimulator/src/OMSimulatorLib/ssd/ConnectorGeometry.cpp:41)
+Tue Oct 16 15:32:33 2018 | trace:   ConnectorGeometry (/home/farkasr/git/OMSimulator/src/OMSimulatorLib/ssd/ConnectorGeometry.cpp:49)
+Tue Oct 16 15:32:33 2018 | trace:   ~ConnectorGeometry (/home/farkasr/git/OMSimulator/src/OMSimulatorLib/ssd/ConnectorGeometry.cpp:57)
+Tue Oct 16 15:32:33 2018 | trace:   ConnectorGeometry (/home/farkasr/git/OMSimulator/src/OMSimulatorLib/ssd/ConnectorGeometry.cpp:49)
+Tue Oct 16 15:32:33 2018 | trace:   ~ConnectorGeometry (/home/farkasr/git/OMSimulator/src/OMSimulatorLib/ssd/ConnectorGeometry.cpp:57)
+Tue Oct 16 15:32:33 2018 | trace:   ConnectorGeometry (/home/farkasr/git/OMSimulator/src/OMSimulatorLib/ssd/ConnectorGeometry.cpp:49)
+Tue Oct 16 15:32:33 2018 | trace:   ~ConnectorGeometry (/home/farkasr/git/OMSimulator/src/OMSimulatorLib/ssd/ConnectorGeometry.cpp:57)
+Tue Oct 16 15:32:33 2018 | trace:   ConnectorGeometry (/home/farkasr/git/OMSimulator/src/OMSimulatorLib/ssd/ConnectorGeometry.cpp:49)
+Tue Oct 16 15:32:33 2018 | trace:   setConnectors (/home/farkasr/git/OMSimulator/src/OMSimulatorLib/Element.cpp:169)
+Tue Oct 16 15:32:33 2018 | trace:   ConnectorGeometry (/home/farkasr/git/OMSimulator/src/OMSimulatorLib/ssd/ConnectorGeometry.cpp:49)
+Tue Oct 16 15:32:33 2018 | trace:   ~ConnectorGeometry (/home/farkasr/git/OMSimulator/src/OMSimulatorLib/ssd/ConnectorGeometry.cpp:57)
+Tue Oct 16 15:32:33 2018 | debug:   oms2::FMUWrapper::initializeDependencyGraph_initialUnknowns: [Car: TrafficLightScenario_Car.fmu] no dependencies
+Tue Oct 16 15:32:33 2018 | debug:   oms2::FMUWrapper::initializeDependencyGraph_outputs: [Car: TrafficLightScenario_Car.fmu] no dependencies
+Tue Oct 16 15:32:33 2018 | trace:   ~ConnectorGeometry (/home/farkasr/git/OMSimulator/src/OMSimulatorLib/ssd/ConnectorGeometry.cpp:57)
+Tue Oct 16 15:32:33 2018 | trace:   deleteComponents (/home/farkasr/git/OMSimulator/src/OMSimulatorLib/FMICompositeModel.cpp:645)
+Tue Oct 16 15:32:33 2018 | trace:   oms2_addFMU (/home/farkasr/git/OMSimulator/src/OMSimulatorLib/OMSimulator.cpp:671)
+Tue Oct 16 15:32:33 2018 | trace:   addFMU (/home/farkasr/git/OMSimulator/src/OMSimulatorLib/Scope.cpp:443)
+Tue Oct 16 15:32:33 2018 | trace:   getModel (/home/farkasr/git/OMSimulator/src/OMSimulatorLib/Scope.cpp:1124)
+Tue Oct 16 15:32:33 2018 | trace:   ElementGeometry (/home/farkasr/git/OMSimulator/src/OMSimulatorLib/ssd/ElementGeometry.cpp:168)
+Tue Oct 16 15:32:33 2018 | debug:   Using "/home/farkasr/git/OMSimulator/StepSizeController/TrafficLight/tmp/temp_L1PSvN" as temp directory for Light
+Tue Oct 16 15:32:33 2018 | debug:   [log level VERBOSE] module FMILIB: Allocating FMIL context
+Tue Oct 16 15:32:33 2018 | debug:   [log level VERBOSE] module FMILIB: Detecting FMI standard version
+Tue Oct 16 15:32:33 2018 | debug:   [log level VERBOSE] module FMIZIP: Unpacking FMU into /home/farkasr/git/OMSimulator/StepSizeController/TrafficLight/tmp/temp_L1PSvN
+Tue Oct 16 15:32:33 2018 | debug:   [log level VERBOSE] module FMIXML: Parsing XML to detect FMI standard version
+Tue Oct 16 15:32:33 2018 | debug:   [log level VERBOSE] module FMIXML: XML specifies FMI 2.0
+Tue Oct 16 15:32:33 2018 | debug:   module FMILIB: XML specifies FMI standard version 2.0
+Tue Oct 16 15:32:33 2018 | debug:   [log level VERBOSE] module FMILIB: Parsing model description XML
+Tue Oct 16 15:32:33 2018 | debug:   [log level VERBOSE] module FMI2XML: Parsing XML element fmiModelDescription
+Tue Oct 16 15:32:33 2018 | debug:   [log level VERBOSE] module FMI2XML: Parsing XML element ModelExchange
+Tue Oct 16 15:32:33 2018 | debug:   [log level VERBOSE] module FMI2XML: Parsing XML element CoSimulation
+Tue Oct 16 15:32:33 2018 | debug:   [log level VERBOSE] module FMI2XML: Parsing XML element TypeDefinitions
+Tue Oct 16 15:32:33 2018 | debug:   [log level VERBOSE] module FMI2XML: Parsing XML element LogCategories
+Tue Oct 16 15:32:33 2018 | debug:   [log level VERBOSE] module FMI2XML: Parsing XML element ModelVariables
+Tue Oct 16 15:32:33 2018 | debug:   [log level VERBOSE] module FMI2XML: Building alias index
+Tue Oct 16 15:32:33 2018 | debug:   [log level VERBOSE] module FMI2XML: Variables color and colorReal reference the same vr 0. Marking 'colorReal' as alias.
+Tue Oct 16 15:32:33 2018 | debug:   [log level VERBOSE] module FMI2XML: Parsing XML element ModelStructure
+Tue Oct 16 15:32:33 2018 | debug:   [log level VERBOSE] module FMI2XML: Parsing XML element Outputs
+Tue Oct 16 15:32:33 2018 | debug:   module FMI2XML: Found model identifiers for ModelExchange and CoSimulation
+Tue Oct 16 15:32:33 2018 | debug:   [log level VERBOSE] module FMILIB: Parsing finished successfully
+Tue Oct 16 15:32:33 2018 | debug:   FMU ME & CS
+Tue Oct 16 15:32:33 2018 | debug:   module FMILIB: Loading 'linux64' binary with 'default' platform types
+Tue Oct 16 15:32:33 2018 | debug:   [log level VERBOSE] module FMICAPI: Loaded FMU binary from /home/farkasr/git/OMSimulator/StepSizeController/TrafficLight/tmp/temp_L1PSvN/binaries/linux64/TrafficLightScenario_DummyTrafficLight.so
+Tue Oct 16 15:32:33 2018 | debug:   [log level VERBOSE] module FMICAPI: Loading functions for the co-simulation interface
+Tue Oct 16 15:32:33 2018 | debug:   [log level VERBOSE] module FMILIB: Successfully loaded all the interface functions
+Tue Oct 16 15:32:33 2018 | debug:   Light (logFmi2Call): fmi2Instantiate: GUID={81b4d514-b4cc-4531-bcff-0e7503cda324}
+Tue Oct 16 15:32:33 2018 | debug:   3 variables
+Tue Oct 16 15:32:33 2018 | debug:   0 states
+Tue Oct 16 15:32:33 2018 | trace:   ConnectorGeometry (/home/farkasr/git/OMSimulator/src/OMSimulatorLib/ssd/ConnectorGeometry.cpp:41)
+Tue Oct 16 15:32:33 2018 | trace:   ConnectorGeometry (/home/farkasr/git/OMSimulator/src/OMSimulatorLib/ssd/ConnectorGeometry.cpp:49)
+Tue Oct 16 15:32:33 2018 | trace:   ~ConnectorGeometry (/home/farkasr/git/OMSimulator/src/OMSimulatorLib/ssd/ConnectorGeometry.cpp:57)
+Tue Oct 16 15:32:33 2018 | trace:   ConnectorGeometry (/home/farkasr/git/OMSimulator/src/OMSimulatorLib/ssd/ConnectorGeometry.cpp:49)
+Tue Oct 16 15:32:33 2018 | trace:   setConnectors (/home/farkasr/git/OMSimulator/src/OMSimulatorLib/Element.cpp:169)
+Tue Oct 16 15:32:33 2018 | trace:   ConnectorGeometry (/home/farkasr/git/OMSimulator/src/OMSimulatorLib/ssd/ConnectorGeometry.cpp:49)
+Tue Oct 16 15:32:33 2018 | trace:   ~ConnectorGeometry (/home/farkasr/git/OMSimulator/src/OMSimulatorLib/ssd/ConnectorGeometry.cpp:57)
+Tue Oct 16 15:32:33 2018 | debug:   oms2::FMUWrapper::initializeDependencyGraph_initialUnknowns: [Light: TrafficLightScenario_DummyTrafficLight.fmu] no dependencies
+Tue Oct 16 15:32:33 2018 | debug:   oms2::FMUWrapper::initializeDependencyGraph_outputs: [Light: TrafficLightScenario_DummyTrafficLight.fmu] no dependencies
+Tue Oct 16 15:32:33 2018 | trace:   ~ConnectorGeometry (/home/farkasr/git/OMSimulator/src/OMSimulatorLib/ssd/ConnectorGeometry.cpp:57)
+Tue Oct 16 15:32:33 2018 | trace:   deleteComponents (/home/farkasr/git/OMSimulator/src/OMSimulatorLib/FMICompositeModel.cpp:645)
+Tue Oct 16 15:32:33 2018 | trace:   oms2_addSolver (/home/farkasr/git/OMSimulator/src/OMSimulatorLib/OMSimulator.cpp:1183)
+Tue Oct 16 15:32:33 2018 | trace:   getModel (/home/farkasr/git/OMSimulator/src/OMSimulatorLib/Scope.cpp:1124)
+Tue Oct 16 15:32:33 2018 | trace:   oms2_addConnection (/home/farkasr/git/OMSimulator/src/OMSimulatorLib/OMSimulator.cpp:783)
+Tue Oct 16 15:32:33 2018 | trace:   getModel (/home/farkasr/git/OMSimulator/src/OMSimulatorLib/Scope.cpp:1124)
+Tue Oct 16 15:32:33 2018 | trace:   oms2_addConnection (/home/farkasr/git/OMSimulator/src/OMSimulatorLib/OMSimulator.cpp:783)
+Tue Oct 16 15:32:33 2018 | trace:   getModel (/home/farkasr/git/OMSimulator/src/OMSimulatorLib/Scope.cpp:1124)
+Tue Oct 16 15:32:33 2018 | trace:   oms2_addConnection (/home/farkasr/git/OMSimulator/src/OMSimulatorLib/OMSimulator.cpp:783)
+Tue Oct 16 15:32:33 2018 | trace:   addConnection (/home/farkasr/git/OMSimulator/src/OMSimulatorLib/Scope.cpp:1028)
+Tue Oct 16 15:32:33 2018 | trace:   getModel (/home/farkasr/git/OMSimulator/src/OMSimulatorLib/Scope.cpp:1124)
+Tue Oct 16 15:32:33 2018 | trace:   ConnectionGeometry (/home/farkasr/git/OMSimulator/src/OMSimulatorLib/ssd/ConnectionGeometry.cpp:41)
+Tue Oct 16 15:32:33 2018 | trace:   oms2_setResultFile (/home/farkasr/git/OMSimulator/src/OMSimulatorLib/OMSimulator.cpp:1091)
+Tue Oct 16 15:32:33 2018 | trace:   getModel (/home/farkasr/git/OMSimulator/src/OMSimulatorLib/Scope.cpp:1124)
+Tue Oct 16 15:32:33 2018 | trace:   oms2_setStopTime (/home/farkasr/git/OMSimulator/src/OMSimulatorLib/OMSimulator.cpp:1073)
+Tue Oct 16 15:32:33 2018 | trace:   getModel (/home/farkasr/git/OMSimulator/src/OMSimulatorLib/Scope.cpp:1124)
+Tue Oct 16 15:32:33 2018 | trace:   oms2_setCommunicationInterval (/home/farkasr/git/OMSimulator/src/OMSimulatorLib/OMSimulator.cpp:1079)
+Tue Oct 16 15:32:33 2018 | trace:   getModel (/home/farkasr/git/OMSimulator/src/OMSimulatorLib/Scope.cpp:1124)
+Tue Oct 16 15:32:33 2018 | trace:   oms2_setMasterAlgorithm (/home/farkasr/git/OMSimulator/src/OMSimulatorLib/OMSimulator.cpp:1097)
+Tue Oct 16 15:32:33 2018 | trace:   getModel (/home/farkasr/git/OMSimulator/src/OMSimulatorLib/Scope.cpp:1124)
+Tue Oct 16 15:32:33 2018 | trace:   oms2_setCriticalVariable (/home/farkasr/git/OMSimulator/src/OMSimulatorLib/OMSimulator.cpp:1103)
+Tue Oct 16 15:32:33 2018 | trace:   setCriticalVariable (/home/farkasr/git/OMSimulator/src/OMSimulatorLib/Scope.cpp:1982)
+Tue Oct 16 15:32:33 2018 | trace:   getModel (/home/farkasr/git/OMSimulator/src/OMSimulatorLib/Scope.cpp:1124)
+Tue Oct 16 15:32:33 2018 | trace:   oms2_getCriticalVariable (/home/farkasr/git/OMSimulator/src/OMSimulatorLib/OMSimulator.cpp:1108)
+Tue Oct 16 15:32:33 2018 | trace:   getModel (/home/farkasr/git/OMSimulator/src/OMSimulatorLib/Scope.cpp:1124)
+Tue Oct 16 15:32:33 2018 | trace:   oms2_unloadModel (/home/farkasr/git/OMSimulator/src/OMSimulatorLib/OMSimulator.cpp:665)
+Tue Oct 16 15:32:33 2018 | trace:   unloadModel (/home/farkasr/git/OMSimulator/src/OMSimulatorLib/Scope.cpp:424)
+Tue Oct 16 15:32:33 2018 | trace:   reset (/home/farkasr/git/OMSimulator/src/OMSimulatorLib/FMICompositeModel.cpp:937)
+Tue Oct 16 15:32:33 2018 | trace:   ~FMICompositeModel (/home/farkasr/git/OMSimulator/src/OMSimulatorLib/FMICompositeModel.cpp:68)
+Tue Oct 16 15:32:33 2018 | trace:   deleteComponents (/home/farkasr/git/OMSimulator/src/OMSimulatorLib/FMICompositeModel.cpp:645)
+Tue Oct 16 15:32:33 2018 | trace:   ~ConnectionGeometry (/home/farkasr/git/OMSimulator/src/OMSimulatorLib/ssd/ConnectionGeometry.cpp:70)
+Tue Oct 16 15:32:33 2018 | trace:   ~FMUWrapper (/home/farkasr/git/OMSimulator/src/OMSimulatorLib/FMUWrapper.cpp:111)
+Tue Oct 16 15:32:33 2018 | debug:   Car (logFmi2Call): fmi2FreeInstance
+Tue Oct 16 15:32:33 2018 | debug:   [log level VERBOSE] module FMILIB: Releasing FMU CAPI interface
+Tue Oct 16 15:32:33 2018 | debug:   [log level VERBOSE] module FMICAPI: Successfully unloaded FMU binary
+Tue Oct 16 15:32:33 2018 | debug:   [log level VERBOSE] module FMILIB: Releasing allocated library resources
+Tue Oct 16 15:32:33 2018 | debug:   removed working directory: "/home/farkasr/git/OMSimulator/StepSizeController/TrafficLight/tmp/temp_8eWKvq"
+Tue Oct 16 15:32:33 2018 | trace:   ~ConnectorGeometry (/home/farkasr/git/OMSimulator/src/OMSimulatorLib/ssd/ConnectorGeometry.cpp:57)
+Tue Oct 16 15:32:33 2018 | trace:   ~ElementGeometry (/home/farkasr/git/OMSimulator/src/OMSimulatorLib/ssd/ElementGeometry.cpp:207)
+Tue Oct 16 15:32:33 2018 | trace:   ~FMUWrapper (/home/farkasr/git/OMSimulator/src/OMSimulatorLib/FMUWrapper.cpp:111)
+Tue Oct 16 15:32:33 2018 | debug:   Light (logFmi2Call): fmi2FreeInstance
+Tue Oct 16 15:32:33 2018 | debug:   [log level VERBOSE] module FMILIB: Releasing FMU CAPI interface
+Tue Oct 16 15:32:33 2018 | debug:   [log level VERBOSE] module FMICAPI: Successfully unloaded FMU binary
+Tue Oct 16 15:32:33 2018 | debug:   [log level VERBOSE] module FMILIB: Releasing allocated library resources
+Tue Oct 16 15:32:33 2018 | debug:   removed working directory: "/home/farkasr/git/OMSimulator/StepSizeController/TrafficLight/tmp/temp_L1PSvN"
+Tue Oct 16 15:32:33 2018 | trace:   ~ConnectorGeometry (/home/farkasr/git/OMSimulator/src/OMSimulatorLib/ssd/ConnectorGeometry.cpp:57)
+Tue Oct 16 15:32:33 2018 | trace:   ~ElementGeometry (/home/farkasr/git/OMSimulator/src/OMSimulatorLib/ssd/ElementGeometry.cpp:207)
+Tue Oct 16 15:32:33 2018 | trace:   ~ElementGeometry (/home/farkasr/git/OMSimulator/src/OMSimulatorLib/ssd/ElementGeometry.cpp:207)
+Tue Oct 16 15:32:33 2018 | trace:   ~SystemGeometry (/home/farkasr/git/OMSimulator/src/OMSimulatorLib/ssd/SystemGeometry.cpp:59)
+Tue Oct 16 15:32:33 2018 | info:    Removed model from scope: TrafficLight
+Tue Oct 16 15:32:33 2018 | trace:   ~Scope (/home/farkasr/git/OMSimulator/src/OMSimulatorLib/Scope.cpp:367)
+Tue Oct 16 15:32:33 2018 | info:    Logging completed properly

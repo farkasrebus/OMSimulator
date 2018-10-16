@@ -1104,6 +1104,11 @@ oms_status_enu_t oms2_setCriticalVariable(const char* signal)
   return oms2::Scope::GetInstance().setCriticalVariable(oms2::SignalRef(signal));
 }
 
+oms_status_enu_t oms2_getCriticalVariable(const char* ident, char** signal) {
+  logTrace();
+  return oms2::Scope::GetInstance().getCriticalVariable(oms2::ComRef(ident),signal);
+}
+
 oms_status_enu_t experimental_setActivationRatio(const char* cref, int k)
 {
   logTrace();

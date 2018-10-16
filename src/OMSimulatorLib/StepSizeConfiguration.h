@@ -12,7 +12,7 @@ class StepSizeConfiguration {
         StepSizeConfiguration(const oms2::SignalRef& var);
         ~StepSizeConfiguration();
 
-        const oms2::SignalRef* getCriticalVariable() {return critical;};
+        oms2::SignalRef* getCriticalVariable();
     /*
         void addEventIndicator(oms2::Variable var);
         std::vector<oms2::Variable> getEventIndicators();
@@ -26,7 +26,7 @@ class StepSizeConfiguration {
        /* std::vector<oms2::Variable> eventVariables;
         std::vector<oms2::Variable> timeIndicators;
         std::vector<ValueIndicator> valueIndicators;*/
-        const oms2::SignalRef* critical;
+        oms2::SignalRef* critical;
         
 };
 /*

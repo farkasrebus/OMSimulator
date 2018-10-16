@@ -624,7 +624,6 @@ oms2::FMISubModel* oms2::FMICompositeModel::getSubModel(const oms2::ComRef& cref
       logWarning("composite model \"" + getName() + "\" doesn't contain a submodel called \"" + cref + "\"");
     return NULL;
   }
-
   return it->second;
 }
 
@@ -1151,18 +1150,23 @@ oms_status_enu_t oms2::FMICompositeModel::stepUntilASSC(ResultWriter& resultWrit
   logTrace();
   auto start = std::chrono::steady_clock::now();
 
+  //TODO this is a horrible solution - getSSC from scope, or make SSC part of FMICompositeModel instead...
+  const oms2::SignalRef* var = oms2::Scope::GetInstance().getModel(getName())->getStepSizeConfiguration()->getCriticalVariable();
+
   while (time<stopTime) {
     //This is a minimal step size controller to provide a skeleton for integration
     double nextStepSize=communicationInterval;
-    //TODO this is a horrible solution - getSSC from scope, or make SSC part of FMICompositeModel instead...
-    const oms2::SignalRef* var = oms2::Scope::GetInstance().getModel(getName())->getStepSizeConfiguration()->getCriticalVariable();
+    
     double value;
-    this->getReal(*var,value);
+    //this->getReal(*var,value);
+    oms2::Scope::GetInstance().getReal(*var,value);
+
     if (value > 0.5) {nextStepSize=communicationInterval/2.0;}
     time+=nextStepSize;
     if (time>stopTime) {
       time=stopTime;
     }
+  
     //After this point everything is copied from standard algorithm
     for (const auto& it : subModels)
       if (oms_component_fmu_old != it.second->getType())
@@ -1696,7 +1700,6 @@ oms_status_enu_t oms2::FMICompositeModel::getReal(const oms2::SignalRef& sr, dou
   oms2::FMISubModel* model = getSubModel(sr.getCref());
   if (!model)
     return oms_status_error;
-
   oms_status_enu_t status = model->getReal(sr, value);
   return status;
 }

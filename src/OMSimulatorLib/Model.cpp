@@ -791,6 +791,10 @@ oms_status_enu_t oms2::Model::simulate_realtime()
   return status;
 }
 
+void oms2::Model::setCriticalVariable(const oms2::SignalRef& var){
+  stepSizeConfiguration=new StepSizeConfiguration(var);
+}
+
 void oms2::Model::setResultFile(const std::string& value, unsigned int bufferSize)
 {
   resultFilename = value;

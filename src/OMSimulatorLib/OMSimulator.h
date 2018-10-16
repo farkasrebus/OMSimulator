@@ -724,6 +724,11 @@ oms_status_enu_t oms2_setMasterAlgorithm(const char* ident, const char* masterAl
 oms_status_enu_t oms2_setCriticalVariable(const char* signal);
 
 /**
+ * TODO
+ */
+oms_status_enu_t oms2_getCriticalVariable(const char* ident, char** signal);
+
+/**
  * \brief Experimental feature for setting the activation ratio of FMUs for
  *  experimenting with multi-rate master algorithms.
  *
