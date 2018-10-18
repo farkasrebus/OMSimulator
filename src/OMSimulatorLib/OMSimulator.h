@@ -717,16 +717,20 @@ oms_status_enu_t oms2_setResultFile(const char* cref, const char* filename, int 
  */
 oms_status_enu_t oms2_setMasterAlgorithm(const char* ident, const char* masterAlgorithm);
 
+/**
+ * TODO
+ */
+oms_status_enu_t oms2_addEventIndicator(const char* signal);
 
 /**
  * TODO
  */
-oms_status_enu_t oms2_setCriticalVariable(const char* signal);
+oms_status_enu_t oms2_setMinimalStepSize(const char* ident, double min);
 
 /**
  * TODO
  */
-oms_status_enu_t oms2_getCriticalVariable(const char* ident, char** signal);
+oms_status_enu_t oms2_setMaximalStepSize(const char* ident, double max);
 
 /**
  * \brief Experimental feature for setting the activation ratio of FMUs for

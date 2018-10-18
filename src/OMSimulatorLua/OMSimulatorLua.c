@@ -1008,6 +1008,51 @@ static int OMSimulatorLua_oms2_setMasterAlgorithm(lua_State *L)
   return 1;
 }
 
+//oms_status_enu_t oms2_addEventIndicator(const char* signal);
+static int OMSimulatorLua_oms2_addEventIndicator(lua_State *L)
+{
+  if (lua_gettop(L) != 1)
+    return luaL_error(L, "expecting exactly 1 argument");
+  luaL_checktype(L, 1, LUA_TSTRING);
+
+  const char *ident = lua_tostring(L, 1);
+  oms_status_enu_t status=oms2_addEventIndicator(ident);
+
+  lua_pushinteger(L,status);
+  return 1;  
+}
+
+//oms_status_enu_t oms2_setMinimalStepSize(const char* ident, double min); 
+static int OMSimulatorLua_oms2_setMinimalStepSize(lua_State *L)
+{
+  if (lua_gettop(L) != 2)
+    return luaL_error(L, "expecting exactly 2 arguments");
+  luaL_checktype(L, 1, LUA_TSTRING);
+  luaL_checktype(L, 2, LUA_TNUMBER);
+
+  const char* cref = lua_tostring(L, 1);
+  double communicationInterval = lua_tonumber(L, 2);
+  oms_status_enu_t status = oms2_setMinimalStepSize(cref, communicationInterval);
+  lua_pushinteger(L, status);
+  return 1;
+}
+
+//oms_status_enu_t oms2_setMaximalStepSize(const char* ident, double max);
+static int OMSimulatorLua_oms2_setMaximalStepSize(lua_State *L)
+{
+  if (lua_gettop(L) != 2)
+    return luaL_error(L, "expecting exactly 2 arguments");
+  luaL_checktype(L, 1, LUA_TSTRING);
+  luaL_checktype(L, 2, LUA_TNUMBER);
+
+  const char* cref = lua_tostring(L, 1);
+  double communicationInterval = lua_tonumber(L, 2);
+  oms_status_enu_t status = oms2_setMaximalStepSize(cref, communicationInterval);
+  lua_pushinteger(L, status);
+  return 1;
+}
+
+/*
 //oms_status_enu_t oms2_setCriticalVariable(const char* signal);
 static int OMSimulatorLua_oms2_setCriticalVariable(lua_State *L)
 {
@@ -1037,7 +1082,7 @@ static int OMSimulatorLua_oms2_getCriticalVariable(lua_State *L)
   lua_pushinteger(L, status);
   return 2;
 }
-
+*/
 //oms_status_enu_t experimental_setActivationRatio(const char* cref, int k);
 static int OMSimulatorLua_experimental_setActivationRatio(lua_State *L)
 {
@@ -2051,8 +2096,9 @@ DLLEXPORT int luaopen_OMSimulatorLua(lua_State *L)
   REGISTER_LUA_CALL(oms2_setLoggingLevel);
   REGISTER_LUA_CALL(oms2_setLoggingSamples);
   REGISTER_LUA_CALL(oms2_setMasterAlgorithm);
-  REGISTER_LUA_CALL(oms2_setCriticalVariable);
-  REGISTER_LUA_CALL(oms2_getCriticalVariable);
+  REGISTER_LUA_CALL(oms2_addEventIndicator);
+  //REGISTER_LUA_CALL(oms2_setCriticalVariable);
+  //REGISTER_LUA_CALL(oms2_getCriticalVariable);
   REGISTER_LUA_CALL(oms2_setMaxLogFileSize);
   REGISTER_LUA_CALL(oms2_setReal);
   REGISTER_LUA_CALL(oms2_setRealParameter);

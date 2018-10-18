@@ -319,6 +319,7 @@ oms_status_enu_t oms3::Model::getAllResources(std::vector<std::string>& resource
 #include "Scope.h"
 #include "ssd/Tags.h"
 #include "TLMCompositeModel.h"
+#include "StepSizeConfiguration.h"
 
 #include <regex>
 #include <thread>
@@ -327,7 +328,7 @@ oms_status_enu_t oms3::Model::getAllResources(std::vector<std::string>& resource
 #include <boost/filesystem.hpp>
 
 oms2::Model::Model(const oms2::ComRef& cref)
-  : systemGeometry(), resultFilename(cref.toString() + "_res.mat"), resultFile(NULL)
+  : systemGeometry(), resultFilename(cref.toString() + "_res.mat"), resultFile(NULL), stepSizeConfiguration(new StepSizeConfiguration())
 {
   logTrace();
   modelState = oms_modelState_instantiated;
@@ -789,10 +790,6 @@ oms_status_enu_t oms2::Model::simulate_realtime()
 
   oms_status_enu_t status = compositeModel->stepUntil(*resultFile, stopTime, communicationInterval, loggingInterval, masterAlgorithm, true);
   return status;
-}
-
-void oms2::Model::setCriticalVariable(const oms2::SignalRef& var){
-  stepSizeConfiguration=new StepSizeConfiguration(var);
 }
 
 void oms2::Model::setResultFile(const std::string& value, unsigned int bufferSize)

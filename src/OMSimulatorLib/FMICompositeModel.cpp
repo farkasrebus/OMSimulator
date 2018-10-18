@@ -1151,17 +1151,37 @@ oms_status_enu_t oms2::FMICompositeModel::stepUntilASSC(ResultWriter& resultWrit
   auto start = std::chrono::steady_clock::now();
 
   //TODO this is a horrible solution - getSSC from scope, or make SSC part of FMICompositeModel instead...
-  const oms2::SignalRef* var = oms2::Scope::GetInstance().getModel(getName())->getStepSizeConfiguration()->getCriticalVariable();
+  StepSizeConfiguration* ssc=oms2::Scope::GetInstance().getModel(getName())->getStepSizeConfiguration();
+  //store previous values of eventIndicators
+  std::vector<std::pair<oms2::SignalRef,double>> prevValues;
+  //get inital values of eventIndicators
+  for (auto const& var: ssc -> getEventIndicators()) {
+    double value;
+    this -> getReal(var,value);
+    prevValues.push_back(std::pair<oms2::SignalRef,double>(var, value));
+  }
 
   while (time<stopTime) {
     //This is a minimal step size controller to provide a skeleton for integration
     double nextStepSize=communicationInterval;
     
-    double value;
-    //this->getReal(*var,value);
-    oms2::Scope::GetInstance().getReal(*var,value);
+    //Check if event occurred
+    bool event=false;
+    for (auto& pair:prevValues) {
+      double currVal;
+      this -> getReal(pair.first,currVal);
+      if (currVal != pair.second)
+      {
+        event=true;
+        pair.second=currVal;
+      }
+    }
 
-    if (value > 0.5) {nextStepSize=communicationInterval/2.0;}
+    //if event occurred change step size to minimal
+    if (event)
+      nextStepSize=ssc->getMinimalStepSize();
+
+
     time+=nextStepSize;
     if (time>stopTime) {
       time=stopTime;

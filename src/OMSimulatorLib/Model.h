@@ -95,6 +95,7 @@ namespace oms3
 #include "SignalRef.h"
 
 #include <string>
+#include <vector>
 
 namespace oms2
 {
@@ -129,7 +130,6 @@ namespace oms2
     void setMasterAlgorithm(MasterAlgorithm value) {masterAlgorithm = value;}
     MasterAlgorithm getMasterAlgorithm() const {return masterAlgorithm;}
     //
-    void setCriticalVariable(const oms2::SignalRef& var);
     StepSizeConfiguration* getStepSizeConfiguration() {return stepSizeConfiguration;};
     //
     void setTolerance(double value) {tolerance = value;}
@@ -179,7 +179,7 @@ namespace oms2
     unsigned int bufferSize = 1;
     ResultWriter *resultFile = NULL;
     MasterAlgorithm masterAlgorithm = MasterAlgorithm::STANDARD;  ///< master algorithm for FMI co-simulation, default MasterAlgorithm::STANDARD
-    StepSizeConfiguration* stepSizeConfiguration = NULL;
+    StepSizeConfiguration* stepSizeConfiguration;
 
     oms_modelState_enu_t modelState;  ///< internal model state, e.g. initialization state
   };

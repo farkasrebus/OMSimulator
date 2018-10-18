@@ -9,24 +9,27 @@ class ValueIndicator;
 
 class StepSizeConfiguration {
     public:
-        StepSizeConfiguration(const oms2::SignalRef& var);
+        StepSizeConfiguration();
         ~StepSizeConfiguration();
 
-        oms2::SignalRef* getCriticalVariable();
-    /*
-        void addEventIndicator(oms2::Variable var);
-        std::vector<oms2::Variable> getEventIndicators();
-        void addTimeIndicator(oms2::Variable var);
+        void setMinimalStepSize(double min) {minimalStepSize=min;};
+        double getMinimalStepSize() {return minimalStepSize;};
+        void setMaximalStepSize(double max) {maximalStepSize=max;};
+        double getMaximalStepSize() {return maximalStepSize;};
+        void addEventIndicator(const oms2::SignalRef& signal);
+        std::vector<oms2::SignalRef> getEventIndicators() {return eventIndicators;};
+    /*    void addTimeIndicator(oms2::Variable var);
         std::vector<oms2::Variable> getTimeIndicators();
         void addStaticValueIndicator(oms2::Variable var,double lower,double upper, double stepSize);
         //TODO: getFunction
         //TODO: same for dynamic stuff
     */
     private:
-       /* std::vector<oms2::Variable> eventVariables;
-        std::vector<oms2::Variable> timeIndicators;
+        double minimalStepSize;
+        double maximalStepSize;
+        std::vector<oms2::SignalRef> eventIndicators;
+       /* std::vector<oms2::Variable> timeIndicators;
         std::vector<ValueIndicator> valueIndicators;*/
-        oms2::SignalRef* critical;
         
 };
 /*

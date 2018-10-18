@@ -2,13 +2,10 @@
 #include "SignalRef.h"
 #include "Logging.h"
 
-StepSizeConfiguration::StepSizeConfiguration(const oms2::SignalRef& var) :critical(new oms2::SignalRef(var)) {
-};
+StepSizeConfiguration::StepSizeConfiguration() :minimalStepSize(1.0e-2), maximalStepSize(1.0e-2) {};
 
-StepSizeConfiguration::~StepSizeConfiguration() {
-    delete critical;
-};
+StepSizeConfiguration::~StepSizeConfiguration() {};
 
-oms2::SignalRef* StepSizeConfiguration::getCriticalVariable() {
-    return critical;
+void StepSizeConfiguration::addEventIndicator(const oms2::SignalRef& signal) {
+    eventIndicators.push_back(signal);
 }

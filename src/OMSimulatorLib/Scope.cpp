@@ -1976,8 +1976,68 @@ oms_status_enu_t oms2::Scope::setMasterAlgorithm(const ComRef& cref, const std::
 
   return oms_status_ok;
 }
+oms_status_enu_t oms2::Scope::addEventIndicator(const oms2::SignalRef& signal)
+{
+  logTrace();
+  ComRef cref=signal.getCref();
 
-oms_status_enu_t oms2::Scope::setCriticalVariable(const oms2::SignalRef& signal)
+  if (!cref.isIdent()) {
+    ComRef modelCref=cref.first();
+    Model* model=getModel(modelCref);
+    if (!model)
+    {
+      logError("[oms2::Scope::addEventIndicator] failed");
+      return oms_status_error;
+    }
+    model -> getStepSizeConfiguration()->addEventIndicator(signal);
+    
+    return oms_status_ok;
+  }
+
+  return oms_status_error;
+}
+
+oms_status_enu_t oms2::Scope::setMinimalStepSize(const ComRef& cref, double min)
+{
+  logTrace();
+
+  if (cref.isIdent()) {
+    Model* model = getModel(cref);
+    if (!model)
+    {
+      logError("[oms2::Scope::setMinimalStepSize] failed");
+      return oms_status_error;
+    }
+
+    model -> getStepSizeConfiguration() -> setMinimalStepSize(min);
+
+    return oms_status_ok;
+  }
+
+  return oms_status_error;
+}
+
+oms_status_enu_t oms2::Scope::setMaximalStepSize(const ComRef& cref, double max)
+{
+  logTrace();
+
+  if (cref.isIdent()) {
+    Model* model = getModel(cref);
+    if (!model)
+    {
+      logError("[oms2::Scope::setMaximalStepSize] failed");
+      return oms_status_error;
+    }
+
+    model -> getStepSizeConfiguration() -> setMaximalStepSize(max);
+
+    return oms_status_ok;
+  }
+
+  return oms_status_error;
+}
+
+/*oms_status_enu_t oms2::Scope::setCriticalVariable(const oms2::SignalRef& signal)
 {
   logTrace();
   ComRef cref = signal.getCref();
@@ -2040,7 +2100,7 @@ oms_status_enu_t oms2::Scope::getCriticalVariable(const ComRef& cref, char** sig
   }
 
   return oms_status_error;
-}
+}*/
 
 oms_status_enu_t oms2::Scope::setActivationRatio(const ComRef& cref, int k)
 {
