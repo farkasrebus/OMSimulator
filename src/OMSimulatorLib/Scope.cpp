@@ -1976,6 +1976,7 @@ oms_status_enu_t oms2::Scope::setMasterAlgorithm(const ComRef& cref, const std::
 
   return oms_status_ok;
 }
+
 oms_status_enu_t oms2::Scope::addEventIndicator(const oms2::SignalRef& signal)
 {
   logTrace();
@@ -1990,6 +1991,27 @@ oms_status_enu_t oms2::Scope::addEventIndicator(const oms2::SignalRef& signal)
       return oms_status_error;
     }
     model -> getStepSizeConfiguration()->addEventIndicator(signal);
+    
+    return oms_status_ok;
+  }
+
+  return oms_status_error;
+}
+
+oms_status_enu_t oms2::Scope::addTimeIndicator(const oms2::SignalRef& signal)
+{
+  logTrace();
+  ComRef cref=signal.getCref();
+
+  if (!cref.isIdent()) {
+    ComRef modelCref=cref.first();
+    Model* model=getModel(modelCref);
+    if (!model)
+    {
+      logError("[oms2::Scope::addTimeIndicator] failed");
+      return oms_status_error;
+    }
+    model -> getStepSizeConfiguration()->addTimeIndicator(signal);
     
     return oms_status_ok;
   }

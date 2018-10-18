@@ -9,3 +9,7 @@ StepSizeConfiguration::~StepSizeConfiguration() {};
 void StepSizeConfiguration::addEventIndicator(const oms2::SignalRef& signal) {
     eventIndicators.push_back(signal);
 }
+
+void StepSizeConfiguration::addTimeIndicator(const oms2::SignalRef& signal) {
+    timeIndicators.push_back(signal);
+}

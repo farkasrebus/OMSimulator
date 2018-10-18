@@ -1104,6 +1104,12 @@ oms_status_enu_t oms2_addEventIndicator(const char* signal)
   return oms2::Scope::GetInstance().addEventIndicator(oms2::SignalRef(signal));
 }
 
+oms_status_enu_t oms2_addTimeIndicator(const char* signal) 
+{
+  logTrace();
+  return oms2::Scope::GetInstance().addTimeIndicator(oms2::SignalRef(signal));
+}
+
 oms_status_enu_t oms2_setMinimalStepSize(const char* ident, double min) 
 {
   logTrace();

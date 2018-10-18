@@ -1022,6 +1022,20 @@ static int OMSimulatorLua_oms2_addEventIndicator(lua_State *L)
   return 1;  
 }
 
+//oms_status_enu_t oms2_addTimeIndicator(const char* signal);
+static int OMSimulatorLua_oms2_addTimeIndicator(lua_State *L)
+{
+  if (lua_gettop(L) != 1)
+    return luaL_error(L, "expecting exactly 1 argument");
+  luaL_checktype(L, 1, LUA_TSTRING);
+
+  const char *ident = lua_tostring(L, 1);
+  oms_status_enu_t status=oms2_addTimeIndicator(ident);
+
+  lua_pushinteger(L,status);
+  return 1;  
+}
+
 //oms_status_enu_t oms2_setMinimalStepSize(const char* ident, double min); 
 static int OMSimulatorLua_oms2_setMinimalStepSize(lua_State *L)
 {
@@ -2097,6 +2111,9 @@ DLLEXPORT int luaopen_OMSimulatorLua(lua_State *L)
   REGISTER_LUA_CALL(oms2_setLoggingSamples);
   REGISTER_LUA_CALL(oms2_setMasterAlgorithm);
   REGISTER_LUA_CALL(oms2_addEventIndicator);
+  REGISTER_LUA_CALL(oms2_addTimeIndicator);
+  REGISTER_LUA_CALL(oms2_setMinimalStepSize);
+  REGISTER_LUA_CALL(oms2_setMaximalStepSize);
   //REGISTER_LUA_CALL(oms2_setCriticalVariable);
   //REGISTER_LUA_CALL(oms2_getCriticalVariable);
   REGISTER_LUA_CALL(oms2_setMaxLogFileSize);

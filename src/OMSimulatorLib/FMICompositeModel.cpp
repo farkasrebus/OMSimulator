@@ -1160,6 +1160,9 @@ oms_status_enu_t oms2::FMICompositeModel::stepUntilASSC(ResultWriter& resultWrit
     this -> getReal(var,value);
     prevValues.push_back(std::pair<oms2::SignalRef,double>(var, value));
   }
+  //general bounds
+  double min=ssc -> getMinimalStepSize();
+  double max=ssc -> getMaximalStepSize();
 
   while (time<stopTime) {
     //This is a minimal step size controller to provide a skeleton for integration
@@ -1177,10 +1180,29 @@ oms_status_enu_t oms2::FMICompositeModel::stepUntilASSC(ResultWriter& resultWrit
       }
     }
 
-    //if event occurred change step size to minimal
+    //if event occurred change step size to minimal otherwise see other configuration parameters
     if (event)
+    {
       nextStepSize=ssc->getMinimalStepSize();
+    } else {
+      //check the next timed event
+      for (const auto& var:ssc -> getEventIndicators()) {
+        double nextEvent;
+        this -> getReal(var,nextEvent);
+        if (nextEvent>time) //smaller values indicate inactivity
+        {
+          if (nextEvent-time<nextStepSize) {
+            nextStepSize=nextEvent-time;
+          }
+        } 
+      }
 
+      
+
+      //ensure bounds
+      if (nextStepSize<min) nextStepSize=min;
+      if (nextStepSize>max) nextStepSize=max;
+    }
 
     time+=nextStepSize;
     if (time>stopTime) {

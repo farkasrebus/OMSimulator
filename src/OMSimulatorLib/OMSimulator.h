@@ -725,6 +725,11 @@ oms_status_enu_t oms2_addEventIndicator(const char* signal);
 /**
  * TODO
  */
+oms_status_enu_t oms2_addTimeIndicator(const char* signal);
+
+/**
+ * TODO
+ */
 oms_status_enu_t oms2_setMinimalStepSize(const char* ident, double min);
 
 /**
