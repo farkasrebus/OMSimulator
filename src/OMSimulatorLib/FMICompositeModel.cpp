@@ -1183,7 +1183,7 @@ oms_status_enu_t oms2::FMICompositeModel::stepUntilASSC(ResultWriter& resultWrit
     //if event occurred change step size to minimal otherwise see other configuration parameters
     if (event)
     {
-      nextStepSize=ssc->getMinimalStepSize();
+      nextStepSize=min;
     } else {
       //check the next timed event
       for (const auto& var:ssc -> getEventIndicators()) {
@@ -1197,7 +1197,44 @@ oms_status_enu_t oms2::FMICompositeModel::stepUntilASSC(ResultWriter& resultWrit
         } 
       }
 
-      
+      //check values for threshold crossing detection
+
+      for (const auto& pair:ssc -> getStaticThresholds())
+      {
+        double sigval;
+        this -> getReal(pair.first,sigval);
+        for (const auto& interval:pair.second)
+        {
+          if (sigval>interval.lower && sigval <interval.upper)
+          {
+            if (interval.stepSize<nextStepSize)
+            {
+              nextStepSize=interval.stepSize;
+            }
+          }
+        }
+      }
+
+      for (const auto& pair:ssc -> getDynamicThresholds())
+      {
+        double sigval;
+        this -> getReal(pair.first,sigval);
+        for (const auto& interval:pair.second)
+        {
+          double lower;
+          this -> getReal(interval.lower,lower);
+          double upper;
+          this -> getReal(interval.upper, upper);
+          if (sigval>lower && sigval<upper)
+          {
+            if (interval.stepSize<nextStepSize)
+            {
+              nextStepSize=interval.stepSize;
+            }
+          }
+        }
+      }
+
 
       //ensure bounds
       if (nextStepSize<min) nextStepSize=min;
