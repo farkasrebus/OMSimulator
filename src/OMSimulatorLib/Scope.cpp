@@ -2019,6 +2019,49 @@ oms_status_enu_t oms2::Scope::addTimeIndicator(const oms2::SignalRef& signal)
   return oms_status_error;
 }
 
+oms_status_enu_t oms2::Scope::addStaticValueIndicator(const oms2::SignalRef& signal, double lower, double upper, double stepSize) 
+{
+  logTrace();
+  ComRef cref=signal.getCref();
+
+  if (!cref.isIdent()) {
+    ComRef modelCref=cref.first();
+    Model* model=getModel(modelCref);
+    if (!model)
+    {
+      logError("[oms2::Scope::addStaticValueIndicator] failed");
+      return oms_status_error;
+    }
+    model -> getStepSizeConfiguration()->addStaticValueIndicator(signal,lower,upper,stepSize);
+    
+    return oms_status_ok;
+  }
+
+  return oms_status_error;
+}
+
+oms_status_enu_t oms2::Scope::addDynamicValueIndicator(const oms2::SignalRef& signal, const oms2::SignalRef& lower, const oms2::SignalRef& upper, double stepSize)
+{
+  logTrace();
+  ComRef cref=signal.getCref();
+
+  if (!cref.isIdent()) {
+    ComRef modelCref=cref.first();
+    Model* model=getModel(modelCref);
+    if (!model)
+    {
+      logError("[oms2::Scope::addDynamicValueIndicator] failed");
+      return oms_status_error;
+    }
+    model -> getStepSizeConfiguration()->addDynamicValueIndicator(signal,lower,upper,stepSize);
+    
+    return oms_status_ok;
+  }
+
+  return oms_status_error;
+}
+   
+
 oms_status_enu_t oms2::Scope::setMinimalStepSize(const ComRef& cref, double min)
 {
   logTrace();

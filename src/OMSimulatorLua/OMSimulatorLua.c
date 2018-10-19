@@ -1036,6 +1036,46 @@ static int OMSimulatorLua_oms2_addTimeIndicator(lua_State *L)
   return 1;  
 }
 
+//oms_status_enu_t oms2_addStaticValueIndicator(const char* signal, double lower, double upper, double stepSize);
+static int OMSimulatorLua_oms2_addStaticValueIndicator(lua_State *L)
+{
+   if (lua_gettop(L) != 4)
+    return luaL_error(L, "expecting exactly 4 arguments");
+  luaL_checktype(L, 1, LUA_TSTRING);
+  luaL_checktype(L, 2, LUA_TNUMBER);
+  luaL_checktype(L, 3, LUA_TNUMBER);
+  luaL_checktype(L, 4, LUA_TNUMBER);
+
+  const char *signal = lua_tostring(L, 1);
+  double lower = lua_tonumber(L, 2);
+  double upper = lua_tonumber(L, 3);
+  double stepSize = lua_tonumber(L, 4);
+  oms_status_enu_t status=oms2_addStaticValueIndicator(signal,lower,upper,stepSize);
+
+  lua_pushinteger(L,status);
+  return 1;
+}
+
+//oms_status_enu_t oms2_addDynamicValueIndicator(const char* signal, const char* lower, const char* upper, double stepSize);
+static int OMSimulatorLua_oms2_addDynamicValueIndicator(lua_State *L)
+{
+   if (lua_gettop(L) != 4)
+    return luaL_error(L, "expecting exactly 4 arguments");
+  luaL_checktype(L, 1, LUA_TSTRING);
+  luaL_checktype(L, 2, LUA_TSTRING);
+  luaL_checktype(L, 3, LUA_TSTRING);
+  luaL_checktype(L, 4, LUA_TNUMBER);
+
+  const char *signal = lua_tostring(L, 1);
+  const char *lower = lua_tostring(L, 2);
+  const char *upper = lua_tostring(L, 3);
+  double stepSize = lua_tonumber(L, 4);
+  oms_status_enu_t status=oms2_addDynamicValueIndicator(signal,lower,upper,stepSize);
+
+  lua_pushinteger(L,status);
+  return 1;
+}   
+
 //oms_status_enu_t oms2_setMinimalStepSize(const char* ident, double min); 
 static int OMSimulatorLua_oms2_setMinimalStepSize(lua_State *L)
 {
@@ -2112,10 +2152,10 @@ DLLEXPORT int luaopen_OMSimulatorLua(lua_State *L)
   REGISTER_LUA_CALL(oms2_setMasterAlgorithm);
   REGISTER_LUA_CALL(oms2_addEventIndicator);
   REGISTER_LUA_CALL(oms2_addTimeIndicator);
+  REGISTER_LUA_CALL(oms2_addStaticValueIndicator);
+  REGISTER_LUA_CALL(oms2_addDynamicValueIndicator);
   REGISTER_LUA_CALL(oms2_setMinimalStepSize);
   REGISTER_LUA_CALL(oms2_setMaximalStepSize);
-  //REGISTER_LUA_CALL(oms2_setCriticalVariable);
-  //REGISTER_LUA_CALL(oms2_getCriticalVariable);
   REGISTER_LUA_CALL(oms2_setMaxLogFileSize);
   REGISTER_LUA_CALL(oms2_setReal);
   REGISTER_LUA_CALL(oms2_setRealParameter);

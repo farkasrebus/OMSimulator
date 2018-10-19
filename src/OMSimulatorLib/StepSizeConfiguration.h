@@ -5,7 +5,17 @@
 
 #include <vector>
 
-class ValueIndicator;
+struct staticBound {
+    double lower;
+    double upper;
+    double stepSize;
+};
+
+struct dynamicBound {
+    const oms2::SignalRef lower;
+    const oms2::SignalRef upper;
+    double stepSize;
+};
 
 class StepSizeConfiguration {
     public:
@@ -20,37 +30,20 @@ class StepSizeConfiguration {
         std::vector<oms2::SignalRef> getEventIndicators() {return eventIndicators;};
         void addTimeIndicator(const oms2::SignalRef& signal);
         std::vector<oms2::SignalRef> getTimeIndicators() {return timeIndicators;};
-    /*    void addTimeIndicator(oms2::Variable var);
-        std::vector<oms2::Variable> getTimeIndicators();
-        void addStaticValueIndicator(oms2::Variable var,double lower,double upper, double stepSize);
-        //TODO: getFunction
-        //TODO: same for dynamic stuff
-    */
+        void addStaticValueIndicator(const oms2::SignalRef& signal, double lowerBound, double upperBound, double stepSize);
+        void addDynamicValueIndicator(const oms2::SignalRef& signal,const oms2::SignalRef& lower,const oms2::SignalRef& upper,double stepSize);
+        std::vector<std::pair<const oms2::SignalRef,std::vector<staticBound>>> getStaticThresholds() {return staticIntervals;};
+        std::vector<std::pair<const oms2::SignalRef,std::vector<dynamicBound>>> getDynamicThresholds(){return dynamicIntervals;};
+
     private:
         double minimalStepSize;
         double maximalStepSize;
         std::vector<oms2::SignalRef> eventIndicators;
         std::vector<oms2::SignalRef> timeIndicators;
-        //std::vector<StaticValueIndicator> staticValueIndicators;
-        //std::vector<DynamicValueIndicator> dynamicValueIndicators;
+        std::vector<std::pair<const oms2::SignalRef,std::vector<staticBound>>> staticIntervals;
+        std::vector<std::pair<const oms2::SignalRef,std::vector<dynamicBound>>> dynamicIntervals;
 };
 
-/*class StaticValueIndicator {
-    public:
-        oms2::Variable getVariable() {return var};//TODO: make this a vector
-        virtual double getStepSize(double value)=0;//TODO: make parameter a map
-
-    private:
-        oms2::Variable var;
-};
-
-/*class DynamicValueIndicator {
-    public:
-        oms2::Variable getVariable() {return var};//TODO: make this a vector
-        virtual double getStepSize(double value)=0;//TODO: make parameter a map
-
-    private:
-        oms2::Variable var;
-};*/
+//TODO: fix initialization
 
 #endif

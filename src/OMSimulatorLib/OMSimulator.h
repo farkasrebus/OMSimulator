@@ -730,6 +730,16 @@ oms_status_enu_t oms2_addTimeIndicator(const char* signal);
 /**
  * TODO
  */
+oms_status_enu_t oms2_addStaticValueIndicator(const char* signal, double lower, double upper, double stepSize);
+
+/**
+ * TODO
+ */
+oms_status_enu_t oms2_addDynamicValueIndicator(const char* signal, const char* lower, const char* upper, double stepSize);   
+
+/**
+ * TODO
+ */
 oms_status_enu_t oms2_setMinimalStepSize(const char* ident, double min);
 
 /**

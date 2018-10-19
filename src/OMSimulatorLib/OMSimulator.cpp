@@ -1110,6 +1110,18 @@ oms_status_enu_t oms2_addTimeIndicator(const char* signal)
   return oms2::Scope::GetInstance().addTimeIndicator(oms2::SignalRef(signal));
 }
 
+oms_status_enu_t oms2_addStaticValueIndicator(const char* signal, double lower, double upper, double stepSize)
+{
+  logTrace();
+  return oms2::Scope::GetInstance().addStaticValueIndicator(oms2::SignalRef(signal), lower, upper, stepSize);
+}
+
+oms_status_enu_t oms2_addDynamicValueIndicator(const char* signal, const char* lower, const char* upper, double stepSize)
+{
+  logTrace();
+  return oms2::Scope::GetInstance().addDynamicValueIndicator(oms2::SignalRef(signal), oms2::SignalRef(lower), oms2::SignalRef(upper), stepSize);
+}
+
 oms_status_enu_t oms2_setMinimalStepSize(const char* ident, double min) 
 {
   logTrace();
@@ -1122,18 +1134,6 @@ oms_status_enu_t oms2_setMaximalStepSize(const char* ident, double max)
   return oms2::Scope::GetInstance().setMaximalStepSize(oms2::ComRef(ident),max);
 }
 
-/*
-oms_status_enu_t oms2_setCriticalVariable(const char* signal)
-{
-  logTrace();
-  return oms2::Scope::GetInstance().setCriticalVariable(oms2::SignalRef(signal));
-}
-
-oms_status_enu_t oms2_getCriticalVariable(const char* ident, char** signal) {
-  logTrace();
-  return oms2::Scope::GetInstance().getCriticalVariable(oms2::ComRef(ident),signal);
-}
-*/
 oms_status_enu_t experimental_setActivationRatio(const char* cref, int k)
 {
   logTrace();
