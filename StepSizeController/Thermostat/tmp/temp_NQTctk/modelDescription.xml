@@ -1,0 +1,322 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fmiModelDescription
+  fmiVersion="2.0"
+  modelName="ThermostatMonitor.CentralMonitor"
+  guid="{0f62d11e-c13e-4487-966f-02951abfc8fb}"
+  description=""
+  generationTool="OpenModelica Compiler OpenModelica 1.12.0~7-g6d56dda"
+  generationDateAndTime="2018-08-10T13:03:29Z"
+  variableNamingConvention="structured"
+  numberOfEventIndicators="17">
+  <ModelExchange
+    modelIdentifier="ThermostatMonitor_CentralMonitor">
+  </ModelExchange>
+  <CoSimulation
+    modelIdentifier="ThermostatMonitor_CentralMonitor"
+    needsExecutionTool="false"
+    canHandleVariableCommunicationStepSize="true"
+    canInterpolateInputs="false"
+    maxOutputDerivativeOrder="1"
+    canRunAsynchronuously = "false"
+    canBeInstantiatedOnlyOncePerProcess="false"
+    canNotUseMemoryManagementFunctions="false"
+    canGetAndSetFMUstate="false"
+    canSerializeFMUstate="false"
+     />
+  <LogCategories>
+    <Category name="logEvents" />
+    <Category name="logSingularLinearSystems" />
+    <Category name="logNonlinearSystems" />
+    <Category name="logDynamicStateSelection" />
+    <Category name="logStatusWarning" />
+    <Category name="logStatusDiscard" />
+    <Category name="logStatusError" />
+    <Category name="logStatusFatal" />
+    <Category name="logStatusPending" />
+    <Category name="logAll" />
+    <Category name="logFmi2Call" />
+  </LogCategories>
+  <DefaultExperiment startTime="0.0" stopTime="1.0" tolerance="1e-06"/>
+  <ModelVariables>
+  <!-- Index of variable = "1" -->
+  <ScalarVariable
+    name="lastHeatReply"
+    valueReference="0"
+    variability="continuous"
+    causality="output"
+    initial="calculated">
+    <Real/>
+  </ScalarVariable>
+  <!-- Index of variable = "2" -->
+  <ScalarVariable
+    name="lastTempReply"
+    valueReference="1"
+    variability="continuous"
+    causality="output"
+    initial="calculated">
+    <Real/>
+  </ScalarVariable>
+  <!-- Index of variable = "3" -->
+  <ScalarVariable
+    name="lastTermReply"
+    valueReference="2"
+    variability="continuous"
+    causality="output"
+    initial="calculated">
+    <Real/>
+  </ScalarVariable>
+  <!-- Index of variable = "4" -->
+  <ScalarVariable
+    name="nextHeartBeat"
+    valueReference="3"
+    variability="continuous"
+    causality="local"
+    initial="calculated">
+    <Real/>
+  </ScalarVariable>
+  <!-- Index of variable = "5" -->
+  <ScalarVariable
+    name="state"
+    valueReference="4"
+    variability="continuous"
+    causality="output"
+    initial="calculated">
+    <Real/>
+  </ScalarVariable>
+  <!-- Index of variable = "6" -->
+  <ScalarVariable
+    name="der(lastHeatReply)"
+    valueReference="5"
+    variability="continuous"
+    causality="local"
+    initial="calculated">
+    <Real derivative="1"/>
+  </ScalarVariable>
+  <!-- Index of variable = "7" -->
+  <ScalarVariable
+    name="der(lastTempReply)"
+    valueReference="6"
+    variability="continuous"
+    causality="local"
+    initial="calculated">
+    <Real derivative="2"/>
+  </ScalarVariable>
+  <!-- Index of variable = "8" -->
+  <ScalarVariable
+    name="der(lastTermReply)"
+    valueReference="7"
+    variability="continuous"
+    causality="local"
+    initial="calculated">
+    <Real derivative="3"/>
+  </ScalarVariable>
+  <!-- Index of variable = "9" -->
+  <ScalarVariable
+    name="der(nextHeartBeat)"
+    valueReference="8"
+    variability="continuous"
+    causality="local"
+    initial="calculated">
+    <Real derivative="4"/>
+  </ScalarVariable>
+  <!-- Index of variable = "10" -->
+  <ScalarVariable
+    name="der(state)"
+    valueReference="9"
+    variability="continuous"
+    causality="local"
+    initial="calculated">
+    <Real derivative="5"/>
+  </ScalarVariable>
+  <!-- Index of variable = "11" -->
+  <ScalarVariable
+    name="heatReply"
+    valueReference="10"
+    variability="continuous"
+    causality="input"
+    >
+    <Real start="0.0"/>
+  </ScalarVariable>
+  <!-- Index of variable = "12" -->
+  <ScalarVariable
+    name="heatReq"
+    valueReference="11"
+    variability="continuous"
+    causality="output"
+    initial="calculated">
+    <Real/>
+  </ScalarVariable>
+  <!-- Index of variable = "13" -->
+  <ScalarVariable
+    name="tempReply"
+    valueReference="12"
+    variability="continuous"
+    causality="input"
+    >
+    <Real start="0.0"/>
+  </ScalarVariable>
+  <!-- Index of variable = "14" -->
+  <ScalarVariable
+    name="tempReq"
+    valueReference="13"
+    variability="continuous"
+    causality="output"
+    initial="calculated">
+    <Real/>
+  </ScalarVariable>
+  <!-- Index of variable = "15" -->
+  <ScalarVariable
+    name="termReply"
+    valueReference="14"
+    variability="continuous"
+    causality="input"
+    >
+    <Real start="0.0"/>
+  </ScalarVariable>
+  <!-- Index of variable = "16" -->
+  <ScalarVariable
+    name="termReq"
+    valueReference="15"
+    variability="continuous"
+    causality="output"
+    initial="calculated">
+    <Real/>
+  </ScalarVariable>
+  <!-- Index of variable = "17" -->
+  <ScalarVariable
+    name="heatOnGrant"
+    valueReference="0"
+    variability="discrete"
+    causality="output"
+    initial="calculated">
+    <Integer/>
+  </ScalarVariable>
+  <!-- Index of variable = "18" -->
+  <ScalarVariable
+    name="heatOnPermission"
+    valueReference="1"
+    variability="discrete"
+    causality="input"
+    >
+    <Integer start="0"/>
+  </ScalarVariable>
+  <!-- Index of variable = "19" -->
+  <ScalarVariable
+    name="_D_whenCondition1"
+    valueReference="0"
+    variability="discrete"
+    causality="local"
+    initial="calculated">
+    <Boolean/>
+  </ScalarVariable>
+  <!-- Index of variable = "20" -->
+  <ScalarVariable
+    name="_D_whenCondition10"
+    valueReference="1"
+    variability="discrete"
+    causality="local"
+    initial="calculated">
+    <Boolean/>
+  </ScalarVariable>
+  <!-- Index of variable = "21" -->
+  <ScalarVariable
+    name="_D_whenCondition2"
+    valueReference="2"
+    variability="discrete"
+    causality="local"
+    initial="calculated">
+    <Boolean/>
+  </ScalarVariable>
+  <!-- Index of variable = "22" -->
+  <ScalarVariable
+    name="_D_whenCondition3"
+    valueReference="3"
+    variability="discrete"
+    causality="local"
+    initial="calculated">
+    <Boolean/>
+  </ScalarVariable>
+  <!-- Index of variable = "23" -->
+  <ScalarVariable
+    name="_D_whenCondition4"
+    valueReference="4"
+    variability="discrete"
+    causality="local"
+    initial="calculated">
+    <Boolean/>
+  </ScalarVariable>
+  <!-- Index of variable = "24" -->
+  <ScalarVariable
+    name="_D_whenCondition5"
+    valueReference="5"
+    variability="discrete"
+    causality="local"
+    initial="calculated">
+    <Boolean/>
+  </ScalarVariable>
+  <!-- Index of variable = "25" -->
+  <ScalarVariable
+    name="_D_whenCondition6"
+    valueReference="6"
+    variability="discrete"
+    causality="local"
+    initial="calculated">
+    <Boolean/>
+  </ScalarVariable>
+  <!-- Index of variable = "26" -->
+  <ScalarVariable
+    name="_D_whenCondition7"
+    valueReference="7"
+    variability="discrete"
+    causality="local"
+    initial="calculated">
+    <Boolean/>
+  </ScalarVariable>
+  <!-- Index of variable = "27" -->
+  <ScalarVariable
+    name="_D_whenCondition8"
+    valueReference="8"
+    variability="discrete"
+    causality="local"
+    initial="calculated">
+    <Boolean/>
+  </ScalarVariable>
+  <!-- Index of variable = "28" -->
+  <ScalarVariable
+    name="_D_whenCondition9"
+    valueReference="9"
+    variability="discrete"
+    causality="local"
+    initial="calculated">
+    <Boolean/>
+  </ScalarVariable>
+  <!-- Index of variable = "29" -->
+  <ScalarVariable
+    name="grant"
+    valueReference="10"
+    variability="discrete"
+    causality="local"
+    initial="calculated">
+    <Boolean/>
+  </ScalarVariable>
+  </ModelVariables>
+  <ModelStructure>
+    <Outputs>
+      <Unknown index="1" dependencies="" dependenciesKind="" />
+      <Unknown index="2" dependencies="" dependenciesKind="" />
+      <Unknown index="3" dependencies="" dependenciesKind="" />
+      <Unknown index="5" dependencies="" dependenciesKind="" />
+      <Unknown index="12" dependencies="5" dependenciesKind="dependent" />
+      <Unknown index="14" dependencies="5" dependenciesKind="dependent" />
+      <Unknown index="16" dependencies="5" dependenciesKind="dependent" />
+      <Unknown index="17" dependencies="1 2 3 5" dependenciesKind="dependent dependent dependent dependent" />
+    </Outputs>
+    <Derivatives>
+      <Unknown index="6" dependencies="" dependenciesKind="" />
+      <Unknown index="7" dependencies="" dependenciesKind="" />
+      <Unknown index="8" dependencies="" dependenciesKind="" />
+      <Unknown index="9" dependencies="" dependenciesKind="" />
+      <Unknown index="10" dependencies="" dependenciesKind="" />
+    </Derivatives>
+  </ModelStructure>
+</fmiModelDescription>

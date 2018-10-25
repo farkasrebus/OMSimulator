@@ -1,0 +1,102 @@
+make: Entering directory '/tmp/OpenModelica_farkasr/OMEdit/ThermostatMonitor_CentralMonitor.fmutmp/sources'
+clang -fPIC -O0 -march=native  -fno-stack-protector -Wno-parentheses-equality -Wno-unused-variable -fPIC -fdollars-in-identifiers -Iinclude/ -Iinclude/fmi2 -I.    -DOMC_MODEL_PREFIX=ThermostatMonitor_CentralMonitor -DOMC_NUM_MIXED_SYSTEMS=0 -DOMC_NUM_LINEAR_SYSTEMS=0 -DOMC_NUM_NONLINEAR_SYSTEMS=0 -DOMC_NDELAY_EXPRESSIONS=0 -DOMC_NVAR_STRING=0  -c -o ThermostatMonitor_CentralMonitor_FMU.o ThermostatMonitor_CentralMonitor_FMU.c
+clang -fPIC -O0 -march=native  -fno-stack-protector -Wno-parentheses-equality -Wno-unused-variable -fPIC -fdollars-in-identifiers -Iinclude/ -Iinclude/fmi2 -I.    -DOMC_MODEL_PREFIX=ThermostatMonitor_CentralMonitor -DOMC_NUM_MIXED_SYSTEMS=0 -DOMC_NUM_LINEAR_SYSTEMS=0 -DOMC_NUM_NONLINEAR_SYSTEMS=0 -DOMC_NDELAY_EXPRESSIONS=0 -DOMC_NVAR_STRING=0  -c -o ThermostatMonitor_CentralMonitor.o ThermostatMonitor_CentralMonitor.c
+clang -fPIC -O0 -march=native  -fno-stack-protector -Wno-parentheses-equality -Wno-unused-variable -fPIC -fdollars-in-identifiers -Iinclude/ -Iinclude/fmi2 -I.    -DOMC_MODEL_PREFIX=ThermostatMonitor_CentralMonitor -DOMC_NUM_MIXED_SYSTEMS=0 -DOMC_NUM_LINEAR_SYSTEMS=0 -DOMC_NUM_NONLINEAR_SYSTEMS=0 -DOMC_NDELAY_EXPRESSIONS=0 -DOMC_NVAR_STRING=0  -c -o ThermostatMonitor_CentralMonitor_functions.o ThermostatMonitor_CentralMonitor_functions.c
+clang -fPIC -O0 -march=native  -fno-stack-protector -Wno-parentheses-equality -Wno-unused-variable -fPIC -fdollars-in-identifiers -Iinclude/ -Iinclude/fmi2 -I.    -DOMC_MODEL_PREFIX=ThermostatMonitor_CentralMonitor -DOMC_NUM_MIXED_SYSTEMS=0 -DOMC_NUM_LINEAR_SYSTEMS=0 -DOMC_NUM_NONLINEAR_SYSTEMS=0 -DOMC_NDELAY_EXPRESSIONS=0 -DOMC_NVAR_STRING=0  -c -o ThermostatMonitor_CentralMonitor_records.o ThermostatMonitor_CentralMonitor_records.c
+clang -fPIC -O0 -march=native  -fno-stack-protector -Wno-parentheses-equality -Wno-unused-variable -fPIC -fdollars-in-identifiers -Iinclude/ -Iinclude/fmi2 -I.    -DOMC_MODEL_PREFIX=ThermostatMonitor_CentralMonitor -DOMC_NUM_MIXED_SYSTEMS=0 -DOMC_NUM_LINEAR_SYSTEMS=0 -DOMC_NUM_NONLINEAR_SYSTEMS=0 -DOMC_NDELAY_EXPRESSIONS=0 -DOMC_NVAR_STRING=0  -c -o ThermostatMonitor_CentralMonitor_01exo.o ThermostatMonitor_CentralMonitor_01exo.c
+clang -fPIC -O0 -march=native  -fno-stack-protector -Wno-parentheses-equality -Wno-unused-variable -fPIC -fdollars-in-identifiers -Iinclude/ -Iinclude/fmi2 -I.    -DOMC_MODEL_PREFIX=ThermostatMonitor_CentralMonitor -DOMC_NUM_MIXED_SYSTEMS=0 -DOMC_NUM_LINEAR_SYSTEMS=0 -DOMC_NUM_NONLINEAR_SYSTEMS=0 -DOMC_NDELAY_EXPRESSIONS=0 -DOMC_NVAR_STRING=0  -c -o ThermostatMonitor_CentralMonitor_02nls.o ThermostatMonitor_CentralMonitor_02nls.c
+In file included from ThermostatMonitor_CentralMonitor_FMU.c:84:
+include/fmi2/fmu2_model_interface.c:1016:12: warning: comparison of unsigned expression < 0 is always false [-Wtautological-compare]
+    if (vr < 0 || vr >= NUMBER_OF_REALS|| setReal(comp, vr, x[i]) != fmi2OK) { // to be implemented by the includer of this file
+        ~~ ^ ~
+clang -fPIC -O0 -march=native  -fno-stack-protector -Wno-parentheses-equality -Wno-unused-variable -fPIC -fdollars-in-identifiers -Iinclude/ -Iinclude/fmi2 -I.    -DOMC_MODEL_PREFIX=ThermostatMonitor_CentralMonitor -DOMC_NUM_MIXED_SYSTEMS=0 -DOMC_NUM_LINEAR_SYSTEMS=0 -DOMC_NUM_NONLINEAR_SYSTEMS=0 -DOMC_NDELAY_EXPRESSIONS=0 -DOMC_NVAR_STRING=0  -c -o ThermostatMonitor_CentralMonitor_03lsy.o ThermostatMonitor_CentralMonitor_03lsy.c
+1 warning generated.
+clang -fPIC -O0 -march=native  -fno-stack-protector -Wno-parentheses-equality -Wno-unused-variable -fPIC -fdollars-in-identifiers -Iinclude/ -Iinclude/fmi2 -I.    -DOMC_MODEL_PREFIX=ThermostatMonitor_CentralMonitor -DOMC_NUM_MIXED_SYSTEMS=0 -DOMC_NUM_LINEAR_SYSTEMS=0 -DOMC_NUM_NONLINEAR_SYSTEMS=0 -DOMC_NDELAY_EXPRESSIONS=0 -DOMC_NVAR_STRING=0  -c -o ThermostatMonitor_CentralMonitor_04set.o ThermostatMonitor_CentralMonitor_04set.c
+clang -fPIC -O0 -march=native  -fno-stack-protector -Wno-parentheses-equality -Wno-unused-variable -fPIC -fdollars-in-identifiers -Iinclude/ -Iinclude/fmi2 -I.    -DOMC_MODEL_PREFIX=ThermostatMonitor_CentralMonitor -DOMC_NUM_MIXED_SYSTEMS=0 -DOMC_NUM_LINEAR_SYSTEMS=0 -DOMC_NUM_NONLINEAR_SYSTEMS=0 -DOMC_NDELAY_EXPRESSIONS=0 -DOMC_NVAR_STRING=0  -c -o ThermostatMonitor_CentralMonitor_05evt.o ThermostatMonitor_CentralMonitor_05evt.c
+clang -fPIC -O0 -march=native  -fno-stack-protector -Wno-parentheses-equality -Wno-unused-variable -fPIC -fdollars-in-identifiers -Iinclude/ -Iinclude/fmi2 -I.    -DOMC_MODEL_PREFIX=ThermostatMonitor_CentralMonitor -DOMC_NUM_MIXED_SYSTEMS=0 -DOMC_NUM_LINEAR_SYSTEMS=0 -DOMC_NUM_NONLINEAR_SYSTEMS=0 -DOMC_NDELAY_EXPRESSIONS=0 -DOMC_NVAR_STRING=0  -c -o ThermostatMonitor_CentralMonitor_06inz.o ThermostatMonitor_CentralMonitor_06inz.c
+clang -fPIC -O0 -march=native  -fno-stack-protector -Wno-parentheses-equality -Wno-unused-variable -fPIC -fdollars-in-identifiers -Iinclude/ -Iinclude/fmi2 -I.    -DOMC_MODEL_PREFIX=ThermostatMonitor_CentralMonitor -DOMC_NUM_MIXED_SYSTEMS=0 -DOMC_NUM_LINEAR_SYSTEMS=0 -DOMC_NUM_NONLINEAR_SYSTEMS=0 -DOMC_NDELAY_EXPRESSIONS=0 -DOMC_NVAR_STRING=0  -c -o ThermostatMonitor_CentralMonitor_07dly.o ThermostatMonitor_CentralMonitor_07dly.c
+clang -fPIC -O0 -march=native  -fno-stack-protector -Wno-parentheses-equality -Wno-unused-variable -fPIC -fdollars-in-identifiers -Iinclude/ -Iinclude/fmi2 -I.    -DOMC_MODEL_PREFIX=ThermostatMonitor_CentralMonitor -DOMC_NUM_MIXED_SYSTEMS=0 -DOMC_NUM_LINEAR_SYSTEMS=0 -DOMC_NUM_NONLINEAR_SYSTEMS=0 -DOMC_NDELAY_EXPRESSIONS=0 -DOMC_NVAR_STRING=0  -c -o ThermostatMonitor_CentralMonitor_08bnd.o ThermostatMonitor_CentralMonitor_08bnd.c
+clang -fPIC -O0 -march=native  -fno-stack-protector -Wno-parentheses-equality -Wno-unused-variable -fPIC -fdollars-in-identifiers -Iinclude/ -Iinclude/fmi2 -I.    -DOMC_MODEL_PREFIX=ThermostatMonitor_CentralMonitor -DOMC_NUM_MIXED_SYSTEMS=0 -DOMC_NUM_LINEAR_SYSTEMS=0 -DOMC_NUM_NONLINEAR_SYSTEMS=0 -DOMC_NDELAY_EXPRESSIONS=0 -DOMC_NVAR_STRING=0  -c -o ThermostatMonitor_CentralMonitor_09alg.o ThermostatMonitor_CentralMonitor_09alg.c
+clang -fPIC -O0 -march=native  -fno-stack-protector -Wno-parentheses-equality -Wno-unused-variable -fPIC -fdollars-in-identifiers -Iinclude/ -Iinclude/fmi2 -I.    -DOMC_MODEL_PREFIX=ThermostatMonitor_CentralMonitor -DOMC_NUM_MIXED_SYSTEMS=0 -DOMC_NUM_LINEAR_SYSTEMS=0 -DOMC_NUM_NONLINEAR_SYSTEMS=0 -DOMC_NDELAY_EXPRESSIONS=0 -DOMC_NVAR_STRING=0  -c -o ThermostatMonitor_CentralMonitor_10asr.o ThermostatMonitor_CentralMonitor_10asr.c
+clang -fPIC -O0 -march=native  -fno-stack-protector -Wno-parentheses-equality -Wno-unused-variable -fPIC -fdollars-in-identifiers -Iinclude/ -Iinclude/fmi2 -I.    -DOMC_MODEL_PREFIX=ThermostatMonitor_CentralMonitor -DOMC_NUM_MIXED_SYSTEMS=0 -DOMC_NUM_LINEAR_SYSTEMS=0 -DOMC_NUM_NONLINEAR_SYSTEMS=0 -DOMC_NDELAY_EXPRESSIONS=0 -DOMC_NVAR_STRING=0  -c -o ThermostatMonitor_CentralMonitor_11mix.o ThermostatMonitor_CentralMonitor_11mix.c
+clang -fPIC -O0 -march=native  -fno-stack-protector -Wno-parentheses-equality -Wno-unused-variable -fPIC -fdollars-in-identifiers -Iinclude/ -Iinclude/fmi2 -I.    -DOMC_MODEL_PREFIX=ThermostatMonitor_CentralMonitor -DOMC_NUM_MIXED_SYSTEMS=0 -DOMC_NUM_LINEAR_SYSTEMS=0 -DOMC_NUM_NONLINEAR_SYSTEMS=0 -DOMC_NDELAY_EXPRESSIONS=0 -DOMC_NVAR_STRING=0  -c -o ThermostatMonitor_CentralMonitor_12jac.o ThermostatMonitor_CentralMonitor_12jac.c
+clang -fPIC -O0 -march=native  -fno-stack-protector -Wno-parentheses-equality -Wno-unused-variable -fPIC -fdollars-in-identifiers -Iinclude/ -Iinclude/fmi2 -I.    -DOMC_MODEL_PREFIX=ThermostatMonitor_CentralMonitor -DOMC_NUM_MIXED_SYSTEMS=0 -DOMC_NUM_LINEAR_SYSTEMS=0 -DOMC_NUM_NONLINEAR_SYSTEMS=0 -DOMC_NDELAY_EXPRESSIONS=0 -DOMC_NVAR_STRING=0  -c -o ThermostatMonitor_CentralMonitor_13opt.o ThermostatMonitor_CentralMonitor_13opt.c
+clang -fPIC -O0 -march=native  -fno-stack-protector -Wno-parentheses-equality -Wno-unused-variable -fPIC -fdollars-in-identifiers -Iinclude/ -Iinclude/fmi2 -I.    -DOMC_MODEL_PREFIX=ThermostatMonitor_CentralMonitor -DOMC_NUM_MIXED_SYSTEMS=0 -DOMC_NUM_LINEAR_SYSTEMS=0 -DOMC_NUM_NONLINEAR_SYSTEMS=0 -DOMC_NDELAY_EXPRESSIONS=0 -DOMC_NVAR_STRING=0  -c -o ThermostatMonitor_CentralMonitor_14lnz.o ThermostatMonitor_CentralMonitor_14lnz.c
+clang -fPIC -O0 -march=native  -fno-stack-protector -Wno-parentheses-equality -Wno-unused-variable -fPIC -fdollars-in-identifiers -Iinclude/ -Iinclude/fmi2 -I.    -DOMC_MODEL_PREFIX=ThermostatMonitor_CentralMonitor -DOMC_NUM_MIXED_SYSTEMS=0 -DOMC_NUM_LINEAR_SYSTEMS=0 -DOMC_NUM_NONLINEAR_SYSTEMS=0 -DOMC_NDELAY_EXPRESSIONS=0 -DOMC_NVAR_STRING=0  -c -o ThermostatMonitor_CentralMonitor_15syn.o ThermostatMonitor_CentralMonitor_15syn.c
+clang -fPIC -O0 -march=native  -fno-stack-protector -Wno-parentheses-equality -Wno-unused-variable -fPIC -fdollars-in-identifiers -Iinclude/ -Iinclude/fmi2 -I.    -DOMC_MODEL_PREFIX=ThermostatMonitor_CentralMonitor -DOMC_NUM_MIXED_SYSTEMS=0 -DOMC_NUM_LINEAR_SYSTEMS=0 -DOMC_NUM_NONLINEAR_SYSTEMS=0 -DOMC_NDELAY_EXPRESSIONS=0 -DOMC_NVAR_STRING=0  -c -o ThermostatMonitor_CentralMonitor_16dae.o ThermostatMonitor_CentralMonitor_16dae.c
+clang -fPIC -O0 -march=native  -fno-stack-protector -Wno-parentheses-equality -Wno-unused-variable -fPIC -fdollars-in-identifiers -Iinclude/ -Iinclude/fmi2 -I.    -DOMC_MODEL_PREFIX=ThermostatMonitor_CentralMonitor -DOMC_NUM_MIXED_SYSTEMS=0 -DOMC_NUM_LINEAR_SYSTEMS=0 -DOMC_NUM_NONLINEAR_SYSTEMS=0 -DOMC_NDELAY_EXPRESSIONS=0 -DOMC_NVAR_STRING=0  -c -o ThermostatMonitor_CentralMonitor_17inl.o ThermostatMonitor_CentralMonitor_17inl.c
+clang -fPIC -O0 -march=native  -fno-stack-protector -Wno-parentheses-equality -Wno-unused-variable -fPIC -fdollars-in-identifiers -Iinclude/ -Iinclude/fmi2 -I.    -DOMC_MODEL_PREFIX=ThermostatMonitor_CentralMonitor -DOMC_NUM_MIXED_SYSTEMS=0 -DOMC_NUM_LINEAR_SYSTEMS=0 -DOMC_NUM_NONLINEAR_SYSTEMS=0 -DOMC_NDELAY_EXPRESSIONS=0 -DOMC_NVAR_STRING=0  -c -o ThermostatMonitor_CentralMonitor_init_fmu.o ThermostatMonitor_CentralMonitor_init_fmu.c
+ThermostatMonitor_CentralMonitor_init_fmu.c:294:50: warning: implicit conversion from 'double' to 'modelica_integer' (aka 'long') changes value from 1.797693134862316E+308 to 9223372036854775807 [-Wliteral-conversion]
+  modelData->integerVarsData[0].attribute.min = -DBL_MAX;
+                                              ~  ^~~~~~~
+/usr/lib/llvm-3.8/bin/../lib/clang/3.8.0/include/float.h:107:17: note: expanded from macro 'DBL_MAX'
+#define DBL_MAX __DBL_MAX__
+                ^~~~~~~~~~~
+<built-in>:118:21: note: expanded from here
+#define __DBL_MAX__ 1.7976931348623157e+308
+                    ^~~~~~~~~~~~~~~~~~~~~~~
+ThermostatMonitor_CentralMonitor_init_fmu.c:295:49: warning: implicit conversion from 'double' to 'modelica_integer' (aka 'long') changes value from 1.797693134862316E+308 to 9223372036854775807 [-Wliteral-conversion]
+  modelData->integerVarsData[0].attribute.max = DBL_MAX;
+                                              ~ ^~~~~~~
+/usr/lib/llvm-3.8/bin/../lib/clang/3.8.0/include/float.h:107:17: note: expanded from macro 'DBL_MAX'
+#define DBL_MAX __DBL_MAX__
+                ^~~~~~~~~~~
+<built-in>:118:21: note: expanded from here
+#define __DBL_MAX__ 1.7976931348623157e+308
+                    ^~~~~~~~~~~~~~~~~~~~~~~
+ThermostatMonitor_CentralMonitor_init_fmu.c:307:50: warning: implicit conversion from 'double' to 'modelica_integer' (aka 'long') changes value from 1.797693134862316E+308 to 9223372036854775807 [-Wliteral-conversion]
+  modelData->integerVarsData[1].attribute.min = -DBL_MAX;
+                                              ~  ^~~~~~~
+/usr/lib/llvm-3.8/bin/../lib/clang/3.8.0/include/float.h:107:17: note: expanded from macro 'DBL_MAX'
+#define DBL_MAX __DBL_MAX__
+                ^~~~~~~~~~~
+<built-in>:118:21: note: expanded from here
+#define __DBL_MAX__ 1.7976931348623157e+308
+                    ^~~~~~~~~~~~~~~~~~~~~~~
+ThermostatMonitor_CentralMonitor_init_fmu.c:308:49: warning: implicit conversion from 'double' to 'modelica_integer' (aka 'long') changes value from 1.797693134862316E+308 to 9223372036854775807 [-Wliteral-conversion]
+  modelData->integerVarsData[1].attribute.max = DBL_MAX;
+                                              ~ ^~~~~~~
+/usr/lib/llvm-3.8/bin/../lib/clang/3.8.0/include/float.h:107:17: note: expanded from macro 'DBL_MAX'
+#define DBL_MAX __DBL_MAX__
+                ^~~~~~~~~~~
+<built-in>:118:21: note: expanded from here
+#define __DBL_MAX__ 1.7976931348623157e+308
+                    ^~~~~~~~~~~~~~~~~~~~~~~
+4 warnings generated.
+mkdir -p ../binaries/linux64
+clang -shared -o ThermostatMonitor_CentralMonitor.so ThermostatMonitor_CentralMonitor_FMU.o ThermostatMonitor_CentralMonitor.o ThermostatMonitor_CentralMonitor_functions.o ThermostatMonitor_CentralMonitor_records.o ThermostatMonitor_CentralMonitor_01exo.o ThermostatMonitor_CentralMonitor_02nls.o ThermostatMonitor_CentralMonitor_03lsy.o ThermostatMonitor_CentralMonitor_04set.o ThermostatMonitor_CentralMonitor_05evt.o ThermostatMonitor_CentralMonitor_06inz.o ThermostatMonitor_CentralMonitor_07dly.o ThermostatMonitor_CentralMonitor_08bnd.o ThermostatMonitor_CentralMonitor_09alg.o ThermostatMonitor_CentralMonitor_10asr.o ThermostatMonitor_CentralMonitor_11mix.o ThermostatMonitor_CentralMonitor_12jac.o ThermostatMonitor_CentralMonitor_13opt.o ThermostatMonitor_CentralMonitor_14lnz.o ThermostatMonitor_CentralMonitor_15syn.o ThermostatMonitor_CentralMonitor_16dae.o ThermostatMonitor_CentralMonitor_17inl.o ThermostatMonitor_CentralMonitor_init_fmu.o  -L"/home/farkasr/git/OMSimulator/StepSizeController/Thermostat"   -L/usr/lib/x86_64-linux-gnu/omc -Wl,-rpath,/usr/lib/x86_64-linux-gnu/omc   -lSimulationRuntimeC -llapack -lblas -lm -lm -lomcgc -lpthread -rdynamic -Wl,--no-undefined -shared -static-libgcc -lm  -Wl,-Bstatic -llapack -lblas -lm  -Wl,-Bdynamic -Wl,-Bstatic -lpthread -Wl,-Bdynamic
+cp ThermostatMonitor_CentralMonitor.so ThermostatMonitor_CentralMonitor_FMU.libs config.log ../binaries/linux64/
+make distclean
+make[1]: Entering directory '/tmp/OpenModelica_farkasr/OMEdit/ThermostatMonitor_CentralMonitor.fmutmp/sources'
+rm -f ThermostatMonitor_CentralMonitor.def ThermostatMonitor_CentralMonitor.o ThermostatMonitor_CentralMonitor.a ThermostatMonitor_CentralMonitor.so ThermostatMonitor_CentralMonitor_FMU.o ThermostatMonitor_CentralMonitor.o ThermostatMonitor_CentralMonitor_functions.o ThermostatMonitor_CentralMonitor_records.o ThermostatMonitor_CentralMonitor_01exo.o ThermostatMonitor_CentralMonitor_02nls.o ThermostatMonitor_CentralMonitor_03lsy.o ThermostatMonitor_CentralMonitor_04set.o ThermostatMonitor_CentralMonitor_05evt.o ThermostatMonitor_CentralMonitor_06inz.o ThermostatMonitor_CentralMonitor_07dly.o ThermostatMonitor_CentralMonitor_08bnd.o ThermostatMonitor_CentralMonitor_09alg.o ThermostatMonitor_CentralMonitor_10asr.o ThermostatMonitor_CentralMonitor_11mix.o ThermostatMonitor_CentralMonitor_12jac.o ThermostatMonitor_CentralMonitor_13opt.o ThermostatMonitor_CentralMonitor_14lnz.o ThermostatMonitor_CentralMonitor_15syn.o ThermostatMonitor_CentralMonitor_16dae.o ThermostatMonitor_CentralMonitor_17inl.o ThermostatMonitor_CentralMonitor_init_fmu.o 
+rm -f Makefile config.status config.log
+make[1]: Leaving directory '/tmp/OpenModelica_farkasr/OMEdit/ThermostatMonitor_CentralMonitor.fmutmp/sources'
+cd .. && rm -f ../ThermostatMonitor_CentralMonitor.fmu && zip -r ../ThermostatMonitor_CentralMonitor.fmu *
+  adding: binaries/ (stored 0%)
+  adding: binaries/linux64/ (stored 0%)
+  adding: binaries/linux64/ThermostatMonitor_CentralMonitor_FMU.libs (stored 0%)
+  adding: binaries/linux64/config.log (deflated 86%)
+  adding: binaries/linux64/ThermostatMonitor_CentralMonitor.so (deflated 78%)
+  adding: modelDescription.xml (deflated 85%)
+  adding: sources/ (stored 0%)
+  adding: sources/ThermostatMonitor_CentralMonitor_13opt.c (deflated 75%)
+  adding: sources/config.guess (deflated 70%)
+  adding: sources/ThermostatMonitor_CentralMonitor.makefile (deflated 2%)
+  adding: sources/ThermostatMonitor_CentralMonitor_FMU.c (deflated 87%)
+  adding: sources/ThermostatMonitor_CentralMonitor_11mix.h (stored 0%)
+  adding: sources/ThermostatMonitor_CentralMonitor_functions.h (deflated 56%)
+  adding: sources/ThermostatMonitor_CentralMonitor_records.c (deflated 32%)
+  adding: sources/ThermostatMonitor_CentralMonitor_functions.c (deflated 43%)
+  adding: sources/ThermostatMonitor_CentralMonitor_04set.c (deflated 51%)
+  adding: sources/ThermostatMonitor_CentralMonitor_model.h (deflated 80%)
+  adding: sources/configure (deflated 76%)
+  adding: sources/ThermostatMonitor_CentralMonitor_literals.h (deflated 59%)
+  adding: sources/ThermostatMonitor_CentralMonitor_includes.h (stored 0%)
+  adding: sources/ThermostatMonitor_CentralMonitor_FMU.libs (stored 0%)
+  adding: sources/install-sh (deflated 61%)
+  adding: sources/ThermostatMonitor_CentralMonitor_08bnd.c (deflated 71%)
+  adding: sources/config.sub (deflated 71%)
+  adding: sources/ThermostatMonitor_CentralMonitor_15syn.c (deflated 64%)
+  adding: sources/ThermostatMonitor_CentralMonitor_init_fmu.c (deflated 91%)
+  adding: sources/ThermostatMonitor_CentralMonitor_16dae.c (deflated 35%)
+  adding: sources/ThermostatMonitor_CentralMonitor.log

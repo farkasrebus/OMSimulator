@@ -107,6 +107,7 @@ oms2_addConnection("MonitoredThermostat","CentralMonitor:heatReply","HeatingMoni
 oms2_addConnection("MonitoredThermostat","CentralMonitor:tempReply","TemperatureMonitor:reply")
 -- set result file
 oms2_setResultFile("MonitoredThermostat", "Test.mat")
+oms2_addSignalsToResults("MonitoredThermostat","CentralMonitor:nextHeartBeat")
 -- configure simulation
 oms2_setCommunicationInterval("MonitoredThermostat", 10.0)
 oms2_setStopTime("MonitoredThermostat", 1000.0)
@@ -114,6 +115,13 @@ oms2_setMasterAlgorithm("MonitoredThermostat","assc")
 -- configure assc
 oms2_addEventIndicator("MonitoredThermostat.Thermostat:Thermostat_HeatingControlPort_turn_heating_on")
 oms2_addEventIndicator("MonitoredThermostat.CentralMonitor:termReq")
+oms2_addEventIndicator("MonitoredThermostat.CentralMonitor:heatReq")
+oms2_addEventIndicator("MonitoredThermostat.CentralMonitor:tempReq")
+oms2_addEventIndicator("MonitoredThermostat.ThermostatMonitor:reply")
+oms2_addEventIndicator("MonitoredThermostat.HeatingMonitor:reply")
+oms2_addEventIndicator("MonitoredThermostat.TemperatureMonitor:reply")
+oms2_addTimeIndicator("MonitoredThermostat.CentralMonitor:nextHeartBeat")
+
 oms2_setMinimalStepSize("MonitoredThermostat", 0.1)
 oms2_setMaximalStepSize("MonitoredThermostat", 1.0)
 -- simulate

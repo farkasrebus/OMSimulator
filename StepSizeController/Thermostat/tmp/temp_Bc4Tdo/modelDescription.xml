@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<fmiModelDescription fmiVersion="2.0" guid="{51ff18ff-0176-4f26-bfc2-69f8fb635652}" modelName="advancedThermostat" numberOfEventIndicators="1">
+  <CoSimulation canHandleVariableCommunicationStepSize="true" modelIdentifier="advancedThermostat"/>
+  <LogCategories>
+    <Category name="logAll"/>
+    <Category name="logError"/>
+    <Category name="logFmiCall"/>
+    <Category name="logEvent"/>
+  </LogCategories>
+  <ModelVariables>
+    <ScalarVariable causality="output" initial="exact" name="Thermostat_HeatingControlPort_turn_heating_off" valueReference="0" variability="continuous">
+      <Integer start="1"/>
+    </ScalarVariable>
+    <ScalarVariable causality="input" initial="approx" name="Thermostat_HeatingControlPort_set_hysteresis_intervallum" valueReference="1" variability="continuous">
+      <Integer start="1"/>
+    </ScalarVariable>
+    <ScalarVariable causality="input" initial="approx" name="Thermostat_ThermostatControlPort_turn_thermostat_off" valueReference="2" variability="continuous">
+      <Integer start="1"/>
+    </ScalarVariable>
+    <ScalarVariable causality="input" initial="approx" name="Thermostat_TemperatureStreamPort_measured_temperature" valueReference="3" variability="continuous">
+      <Integer start="1"/>
+    </ScalarVariable>
+    <ScalarVariable causality="input" initial="approx" name="Thermostat_ThermostatControlPort_turn_thermostat_on" valueReference="4" variability="continuous">
+      <Integer start="1"/>
+    </ScalarVariable>
+    <ScalarVariable causality="output" initial="exact" name="Thermostat_HeatingControlPort_turn_heating_on" valueReference="5" variability="continuous">
+      <Integer start="1"/>
+    </ScalarVariable>
+    <ScalarVariable causality="input" initial="approx" name="Thermostat_ThermostatControlPort_set_target_temperature" valueReference="6" variability="continuous">
+      <Integer start="1"/>
+    </ScalarVariable>
+    <ScalarVariable causality="input" initial="approx" name="Thermostat_TemperatureStreamPort_measured_temperature_measured_temperature" valueReference="0" variability="continuous">
+      <Real start="1.0"/>
+    </ScalarVariable>
+    <ScalarVariable causality="input" initial="approx" name="Thermostat_TemperatureStreamPort_measured_temperature_measured_temperature1" valueReference="1" variability="continuous">
+      <Real start="1.0"/>
+    </ScalarVariable>
+    <ScalarVariable causality="input" initial="approx" name="Thermostat_TemperatureStreamPort_measured_temperature_measured_temperature2" valueReference="2" variability="continuous">
+      <Real start="1.0"/>
+    </ScalarVariable>
+    <ScalarVariable causality="input" initial="approx" name="Thermostat_ThermostatControlPort_set_target_temperature_target_temperature" valueReference="3" variability="continuous">
+      <Real start="1.0"/>
+    </ScalarVariable>
+    <ScalarVariable causality="input" initial="approx" name="Thermostat_ThermostatControlPort_set_target_temperature_target_temperature1" valueReference="4" variability="continuous">
+      <Real start="1.0"/>
+    </ScalarVariable>
+    <ScalarVariable causality="input" initial="approx" name="Thermostat_ThermostatControlPort_set_target_temperature_target_temperature2" valueReference="5" variability="continuous">
+      <Real start="1.0"/>
+    </ScalarVariable>
+    <ScalarVariable causality="input" initial="approx" name="Thermostat_HeatingControlPort_set_hysteresis_intervallum_hysteresis_intervallum" valueReference="6" variability="continuous">
+      <Real start="1.0"/>
+    </ScalarVariable>
+    <ScalarVariable causality="input" initial="approx" name="Thermostat_HeatingControlPort_set_hysteresis_intervallum_hysteresis_intervallum1" valueReference="7" variability="continuous">
+      <Real start="1.0"/>
+    </ScalarVariable>
+    <ScalarVariable causality="input" initial="approx" name="Thermostat_HeatingControlPort_set_hysteresis_intervallum_hysteresis_intervallum2" valueReference="8" variability="continuous">
+      <Real start="1.0"/>
+    </ScalarVariable>
+  </ModelVariables>
+  <ModelStructure>
+    <Outputs>
+      <Unknown index="2"/>
+      <Unknown index="3"/>
+      <Unknown index="4"/>
+      <Unknown index="5"/>
+      <Unknown index="7"/>
+      <Unknown index="8"/>
+      <Unknown index="9"/>
+      <Unknown index="10"/>
+      <Unknown index="11"/>
+      <Unknown index="12"/>
+      <Unknown index="13"/>
+      <Unknown index="14"/>
+      <Unknown index="15"/>
+      <Unknown index="16"/>
+    </Outputs>
+  </ModelStructure>
+</fmiModelDescription>
