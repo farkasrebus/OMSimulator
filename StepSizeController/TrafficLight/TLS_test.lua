@@ -20,16 +20,11 @@ oms2_setStopTime("TrafficLight", 5.0)
 oms2_setCommunicationInterval("TrafficLight", 0.01)
 
 oms2_setMasterAlgorithm("TrafficLight","assc")
-oms2_setCriticalVariable("TrafficLight.Car:distance");
-crit=oms2_getCriticalVariable("TrafficLight")
-print(crit);
 
---[[
+
+
 oms2_initialize("TrafficLight")
-dist=oms2_getReal("TrafficLight.Car:distance")
-print("dist: "..dist)
 oms2_simulate("TrafficLight")
---]]
 
 oms2_unloadModel("TrafficLight")
 
