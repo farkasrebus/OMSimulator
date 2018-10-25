@@ -1150,15 +1150,25 @@ oms_status_enu_t oms2::FMICompositeModel::stepUntilASSC(ResultWriter& resultWrit
   logTrace();
   auto start = std::chrono::steady_clock::now();
 
-  //TODO this is a horrible solution - getSSC from scope, or make SSC part of FMICompositeModel instead...
   StepSizeConfiguration* ssc=oms2::Scope::GetInstance().getModel(getName())->getStepSizeConfiguration();
   //store previous values of eventIndicators
   std::vector<std::pair<oms2::SignalRef,double>> prevValues;
   //get inital values of eventIndicators
-  for (auto const& var: ssc -> getEventIndicators()) {
+  for (auto const& sr: ssc -> getEventIndicators()) {
     double value;
-    this -> getReal(var,value);
-    prevValues.push_back(std::pair<oms2::SignalRef,double>(var, value));
+    oms2::Variable* var = getVariable(sr);
+    if (var->isTypeReal()) {
+      this -> getReal(sr,value);
+    } else if (var->isTypeInteger()) {
+      int intval;
+      this -> getInteger(sr,intval);
+      value=(double)intval;
+    } else {//if its a bool value
+      bool boolval;
+      this -> getBoolean(sr,boolval);
+      if (boolval) value=1.0; else value=0.0;
+    }
+    prevValues.push_back(std::pair<oms2::SignalRef,double>(sr, value));
   }
   //general bounds
   double min=ssc -> getMinimalStepSize();
@@ -1172,7 +1182,18 @@ oms_status_enu_t oms2::FMICompositeModel::stepUntilASSC(ResultWriter& resultWrit
     bool event=false;
     for (auto& pair:prevValues) {
       double currVal;
-      this -> getReal(pair.first,currVal);
+      oms2::Variable* var = getVariable(pair.first);
+      if (var -> isTypeReal()) {
+        this -> getReal(pair.first,currVal);
+      } else if (var -> isTypeInteger()) {
+        int intval;
+        this -> getInteger(pair.first,intval);
+        currVal=(double)intval;
+      } else {//if its a bool value
+        bool boolval;
+        this -> getBoolean(pair.first,boolval);
+        if (boolval) currVal=1.0; else currVal=0.0;
+      }
       if (currVal != pair.second)
       {
         event=true;
@@ -1186,7 +1207,7 @@ oms_status_enu_t oms2::FMICompositeModel::stepUntilASSC(ResultWriter& resultWrit
       nextStepSize=min;
     } else {
       //check the next timed event
-      for (const auto& var:ssc -> getEventIndicators()) {
+      for (const auto& var:ssc -> getTimeIndicators()) {
         double nextEvent;
         this -> getReal(var,nextEvent);
         if (nextEvent>time) //smaller values indicate inactivity
@@ -1751,6 +1772,24 @@ oms_status_enu_t oms2::FMICompositeModel::getInteger(const oms2::SignalRef& sr, 
   return status;
 }
 
+oms_status_enu_t oms2::FMICompositeModel::setBoolean(const oms2::SignalRef& sr, bool value)
+{
+  oms2::FMISubModel* model = getSubModel(sr.getCref());
+  if (!model)
+    return oms_status_error;
+
+  return model->setBoolean(sr, value);
+}
+
+oms_status_enu_t oms2::FMICompositeModel::getBoolean(const oms2::SignalRef& sr, bool& value)
+{
+  oms2::FMISubModel* model = getSubModel(sr.getCref());
+  if (!model)
+    return oms_status_error;
+
+  oms_status_enu_t status = model->getBoolean(sr, value);
+  return status;
+}
 
 oms_status_enu_t oms2::FMICompositeModel::setReal(const oms2::SignalRef& sr, double value)
 {
