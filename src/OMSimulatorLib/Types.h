@@ -50,6 +50,7 @@ typedef enum {
 } oms_status_enu_t;
 
 typedef enum {
+  oms_modelState_terminated,
   oms_modelState_instantiated,
   oms_modelState_initialization,
   oms_modelState_simulation
@@ -60,7 +61,6 @@ typedef enum {
   oms_causality_output,     ///< output
   oms_causality_parameter,  ///< REMOVE ME
   oms_causality_bidir,      ///< bidirecitonal
-  oms_causality_inherited,  ///< inherited
   oms_causality_undefined
 } oms_causality_enu_t;
 
@@ -80,7 +80,6 @@ typedef enum {
   oms_element_none,
   oms_element_system,
   oms_element_component,
-  oms_element_externalmodel
 } oms3_element_enu_t;
 
 typedef enum {
@@ -104,14 +103,8 @@ typedef enum {
   oms_component_none,
   oms_component_fmu,      ///< FMU
   oms_component_table,    ///< lookup table
-  oms_component_external  ///< External model
+  oms_component_external  ///< external model
 } oms_component_enu_t;
-
-typedef enum {
-  oms3_component_external, ///< External model
-  oms3_component_fmu,      ///< FMU
-  oms3_component_table     ///< lookup table
-} oms3_component_enu_t;
 
 typedef enum {
   oms_signal_type_real,
@@ -397,6 +390,7 @@ typedef struct {
   ssd_connector_geometry_t* geometry;
   char* domain;
   int dimensions;
+  double delay;
   oms_tlm_interpolation_t interpolation;
 } oms3_tlmbusconnector_t;
 

@@ -33,10 +33,11 @@ namespace oms3
     void setName(const oms3::ComRef& name);
     void setGeometry(const oms2::ssd::ConnectorGeometry* newGeometry);
 
-    const oms3::ComRef getName() const {return oms3::ComRef(std::string(name));}
+    const oms3::ComRef getName() const {return oms3::ComRef(name);}
     const oms2::ssd::ConnectorGeometry* getGeometry() const {return reinterpret_cast<oms2::ssd::ConnectorGeometry*>(geometry);}
 
     oms_status_enu_t addConnector(const oms3::ComRef& cref);
+    oms_status_enu_t deleteConnector(const oms3::ComRef& cref);
     std::vector<oms3::ComRef> getConnectors() const {return conrefs;}
 
     void updateConnectors();

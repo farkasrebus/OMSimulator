@@ -93,7 +93,7 @@ oms_status_enu_t oms3::Scope::deleteModel(const oms3::ComRef& cref)
 
   // update models_map
   if (models[it->second])
-    models_map[models[it->second]->getName()] = it->second;
+    models_map[models[it->second]->getCref()] = it->second;
   models_map.erase(it);
 
   return oms_status_ok;
@@ -141,13 +141,13 @@ oms_status_enu_t oms3::Scope::miniunz(const std::string& filename, const std::st
   int argc = systemStructure ? 6 : 5;
   char **argv = new char*[argc];
   int i=0;
-  argv[i++]="miniunz";
-  argv[i++]="-xo";
-  argv[i++]=(char*)filename.c_str();
+  argv[i++] = (char*)"miniunz";
+  argv[i++] = (char*)"-xo";
+  argv[i++] = (char*)filename.c_str();
   if (systemStructure)
-    argv[i++]="SystemStructure.ssd";
-  argv[i++]="-d";
-  argv[i++]=(char*)extractdir.c_str();
+    argv[i++] = (char*)"SystemStructure.ssd";
+  argv[i++] = (char*)"-d";
+  argv[i++] = (char*)extractdir.c_str();
   int status = ::miniunz(argc, argv);
   delete[] argv;
   std::string cd2 = Scope::GetInstance().getWorkingDirectory();
@@ -212,7 +212,7 @@ oms_status_enu_t oms3::Scope::importModel(const std::string& filename, char** _c
     return oms_status_error;
   }
 
-  *_cref = (char*)model->getName().c_str();
+  *_cref = (char*)model->getCref().c_str();
 
   return oms_status_ok;
 }
@@ -282,10 +282,7 @@ std::string oms3::Scope::getWorkingDirectory()
 oms_status_enu_t oms3::Scope::getElement(const oms3::ComRef& cref, oms3::Element** element)
 {
   if (!element)
-  {
-    logWarning("[oms3::Scope::getElement] NULL pointer");
-    return oms_status_warning;
-  }
+    return logWarning("[oms3::Scope::getElement] NULL pointer");
 
   oms3::ComRef tail(cref);
   oms3::ComRef front = tail.pop_front();
@@ -297,20 +294,22 @@ oms_status_enu_t oms3::Scope::getElement(const oms3::ComRef& cref, oms3::Element
     return logError("A model has no element information");
 
   oms3::System* system = model->getSystem(tail);
-  if (!system)
-    return logError("Model \"" + std::string(front) + "\" does not contain system \"" + std::string(tail) + "\"");
+  oms3::Component* component = model->getComponent(tail);
+  if (!system && !component)
+    return logError("Model \"" + std::string(front) + "\" does not contain system or component \"" + std::string(tail) + "\"");
 
-  *element = system->getElement();
+  if (system)
+    *element = system->getElement();
+  else
+    *element = component->getElement();
+
   return oms_status_ok;
 }
 
 oms_status_enu_t oms3::Scope::getElements(const oms3::ComRef& cref, oms3::Element*** elements)
 {
   if (!elements)
-  {
-    logWarning("[oms3::Scope::getElements] NULL pointer");
-    return oms_status_warning;
-  }
+    return logWarning("[oms3::Scope::getElements] NULL pointer");
 
   oms3::ComRef tail(cref);
   oms3::ComRef front = tail.pop_front();
@@ -805,7 +804,7 @@ oms_status_enu_t oms2::Scope::getSubModelPath(const oms2::ComRef& cref, char** p
   return oms_status_error;
 }
 
-oms_status_enu_t oms2::Scope::getFMUInfo(const oms2::ComRef& cref, const oms2::FMUInfo** fmuInfo)
+oms_status_enu_t oms2::Scope::getFMUInfo(const oms2::ComRef& cref, const oms3::FMUInfo** fmuInfo)
 {
   logTrace();
 

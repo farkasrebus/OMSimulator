@@ -81,10 +81,10 @@ namespace oms2
     oms_status_enu_t getBooleanParameter(const std::string& var, bool& value);
     const std::string getFMUPath() const {return fmuInfo.getPath();}
     const std::string getPath() const {return getFMUPath();}
-    const oms2::FMUInfo* getFMUInfo() const {return &(this->fmuInfo);}
-    const std::map<std::string, oms2::Option<double>>& getRealParameters() const {return realParameters;}
-    const std::map<std::string, oms2::Option<int>>& getIntegerParameters() const {return integerParameters;}
-    const std::map<std::string, oms2::Option<bool>>& getBooleanParameters() const {return booleanParameters;}
+    const oms3::FMUInfo* getFMUInfo() const {return &(this->fmuInfo);}
+    const std::map<std::string, oms3::Option<double>>& getRealParameters() const {return realParameters;}
+    const std::map<std::string, oms3::Option<int>>& getIntegerParameters() const {return integerParameters;}
+    const std::map<std::string, oms3::Option<bool>>& getBooleanParameters() const {return booleanParameters;}
 
     oms_status_enu_t setReal(const oms2::SignalRef& sr, double value);
     oms_status_enu_t getReal(const oms2::SignalRef& sr, double& value);
@@ -126,16 +126,16 @@ namespace oms2
 
     ComRef parent;
 
-    oms2::FMUInfo fmuInfo;
+    oms3::FMUInfo fmuInfo;
     std::vector<oms2::Variable> inputs;
     std::vector<oms2::Variable> outputs;
     std::vector<oms2::Variable> parameters;
     std::vector<oms2::Variable> allVariables;
     std::vector<bool> exportVariables;
 
-    std::map<std::string, oms2::Option<double>> realParameters;
-    std::map<std::string, oms2::Option<int>> integerParameters;
-    std::map<std::string, oms2::Option<bool>> booleanParameters;
+    std::map<std::string, oms3::Option<double>> realParameters;
+    std::map<std::string, oms3::Option<int>> integerParameters;
+    std::map<std::string, oms3::Option<bool>> booleanParameters;
 
     std::string tempDir;
 

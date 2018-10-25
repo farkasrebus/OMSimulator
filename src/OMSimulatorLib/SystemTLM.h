@@ -35,6 +35,7 @@
 #include "ComRef.h"
 #include "System.h"
 #include "Types.h"
+#include "../../OMTLMSimulator/common/Plugin/PluginImplementer.h"
 
 namespace oms3
 {
@@ -48,6 +49,16 @@ namespace oms3
     static System* NewSystem(const oms3::ComRef& cref, Model* parentModel, System* parentSystem);
     oms_status_enu_t exportToSSD_SimulationInformation(pugi::xml_node& node) const;
     oms_status_enu_t importFromSSD_SimulationInformation(const pugi::xml_node& node);
+    oms_status_enu_t setSocketData(const std::string& address, int managerPort, int monitorPort);
+    oms_status_enu_t setPositionAndOrientation(const ComRef &cref, std::vector<double> x, std::vector<double> A);
+
+    oms_status_enu_t instantiate();
+    oms_status_enu_t initialize();
+    oms_status_enu_t terminate();
+    oms_status_enu_t stepUntil(double stopTime);
+
+    oms_status_enu_t connectToSockets(const oms3::ComRef cref, std::string server);
+    void disconnectFromSockets(const oms3::ComRef cref);
 
   protected:
     SystemTLM(const ComRef& cref, Model* parentModel, System* parentSystem);
@@ -57,10 +68,15 @@ namespace oms3
     SystemTLM& operator=(SystemTLM const& copy); ///< not implemented
 
   private:
+    void* model;
+    std::string address = "";
+    int managerPort=0;
+    int monitorPort=0;
+
+    std::vector<ComRef> connectedsubsystems;
+    std::map<System*, TLMPlugin*> plugins;
+
     // simulation information
-    // ip
-    // managerport
-    // monitorport
   };
 }
 

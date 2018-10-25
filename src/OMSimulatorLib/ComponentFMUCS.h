@@ -32,8 +32,10 @@
 #ifndef _OMS_COMPONENT_FMU_CS_H_
 #define _OMS_COMPONENT_FMU_CS_H_
 
-#include "ComRef.h"
 #include "Component.h"
+#include "ComRef.h"
+#include "Option.h"
+#include "Variable.h"
 #include <fmilib.h>
 #include <map>
 #include <pugixml.hpp>
@@ -50,7 +52,19 @@ namespace oms3
   public:
     ~ComponentFMUCS();
 
-    static Component* NewComponent(const oms3::ComRef& cref, System* parentSystem, const std::string& fmuPath);
+    static Component* NewComponent(const ComRef& cref, System* parentSystem, const std::string& fmuPath);
+    static Component* NewComponent(const pugi::xml_node& node, System* parentSystem);
+    const FMUInfo* getFMUInfo() const {return &(this->fmuInfo);}
+
+    oms_status_enu_t exportToSSD(pugi::xml_node& node) const;
+    oms_status_enu_t instantiate();
+    oms_status_enu_t initialize();
+    oms_status_enu_t terminate();
+
+    oms_status_enu_t stepUntil(double stopTime);
+
+    oms_status_enu_t initializeDependencyGraph_initialUnknowns();
+    oms_status_enu_t initializeDependencyGraph_outputs();
 
   protected:
     ComponentFMUCS(const ComRef& cref, System* parentSystem, const std::string& fmuPath);
@@ -65,6 +79,20 @@ namespace oms3
     fmi_import_context_t* context = NULL;
     fmi2_import_t* fmu = NULL;
     std::string tempDir;
+
+    std::vector<Variable> allVariables;
+    std::vector<Variable> inputs;
+    std::vector<Variable> outputs;
+    std::vector<Variable> parameters;
+    std::vector<bool> exportVariables;
+
+    std::map<std::string, Option<double>> realParameters;
+    std::map<std::string, Option<int>> integerParameters;
+    std::map<std::string, Option<bool>> booleanParameters;
+
+    FMUInfo fmuInfo;
+
+    double time;
   };
 }
 

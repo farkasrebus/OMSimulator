@@ -32,9 +32,56 @@
 #include "Component.h"
 
 #include "Model.h"
-#include "ssd/Tags.h"
 #include "System.h"
 #include <OMSBoost.h>
+
+
+void oms3::fmiLogger(jm_callbacks* c, jm_string module, jm_log_level_enu_t log_level, jm_string message)
+{
+  switch (log_level)
+  {
+  case jm_log_level_info:    // Informative messages
+    logDebug("module " + std::string(module) + ": " + std::string(message));
+    break;
+  case jm_log_level_warning: // Non-critical issues
+    logWarning("module " + std::string(module) + ": " + std::string(message));
+    break;
+  case jm_log_level_error:   // Errors that may be not critical for some FMUs
+  case jm_log_level_fatal:   // Unrecoverable errors
+    logError("module " + std::string(module) + ": " + std::string(message));
+    break;
+  case jm_log_level_verbose: // Verbose messages
+  case jm_log_level_debug:   // Debug messages. Only enabled if library is configured with FMILIB_ENABLE_LOG_LEVEL_DEBUG
+    logDebug("[log level " + std::string(jm_log_level_to_string(log_level)) + "] module " + std::string(module) + ": " + std::string(message));
+  }
+}
+
+void oms3::fmi2logger(fmi2_component_environment_t env, fmi2_string_t instanceName, fmi2_status_t status, fmi2_string_t category, fmi2_string_t message, ...)
+{
+  int len;
+  char msg[1000];
+  va_list argp;
+  va_start(argp, message);
+  len = vsnprintf(msg, 1000, message, argp);
+
+  switch (status)
+  {
+  case fmi2_status_ok:
+  case fmi2_status_pending:
+    logDebug(std::string(instanceName) + " (" + category + "): " + msg);
+    break;
+  case fmi2_status_warning:
+    logWarning(std::string(instanceName) + " (" + category + "): " + msg);
+    break;
+  case fmi2_status_discard:
+  case fmi2_status_error:
+  case fmi2_status_fatal:
+    logError(std::string(instanceName) + " (" + category + "): " + msg);
+    break;
+  default:
+    logWarning("fmiStatus = " + std::string(fmi2_status_to_string(status)) + "; " + instanceName + " (" + category + "): " + msg);
+  }
+}
 
 oms3::Component::Component(const ComRef& cref, oms_component_enu_t type, System* parentSystem, const std::string& path)
   : element(oms_element_component, cref), cref(cref), type(type), parentSystem(parentSystem), path(path)
@@ -50,12 +97,9 @@ oms3::Component::~Component()
       delete connector;
 }
 
-oms_status_enu_t oms3::Component::exportToSSD(pugi::xml_node& node) const
+oms3::ComRef oms3::Component::getFullCref() const
 {
-  node.append_attribute("name") = this->getName().c_str();
-  node.append_attribute("type") = "application/x-fmu-sharedlibrary";
-  node.append_attribute("source") = path.c_str();
-  return oms_status_ok;
+  return parentSystem->getFullCref() + cref;
 }
 
 oms3::Connector* oms3::Component::getConnector(const oms3::ComRef &cref)

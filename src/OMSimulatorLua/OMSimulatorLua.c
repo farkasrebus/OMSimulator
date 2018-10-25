@@ -196,6 +196,25 @@ static int OMSimulatorLua_oms3_list(lua_State *L)
   return 2;
 }
 
+//oms_status_enu_t oms3_exportDependencyGraphs(const char* cref, const char* initialization, const char* simulation);
+static int OMSimulatorLua_oms3_exportDependencyGraphs(lua_State *L)
+{
+  if (lua_gettop(L) != 3)
+    return luaL_error(L, "expecting exactly 3 arguments");
+
+  luaL_checktype(L, 1, LUA_TSTRING);
+  luaL_checktype(L, 2, LUA_TSTRING);
+  luaL_checktype(L, 3, LUA_TSTRING);
+
+  const char* cref = lua_tostring(L, 1);
+  const char* initialization = lua_tostring(L, 2);
+  const char* simulation = lua_tostring(L, 3);
+
+  oms_status_enu_t status = oms3_exportDependencyGraphs(cref, initialization, simulation);
+  lua_pushinteger(L, status);
+  return 1;
+}
+
 //oms_status_enu_t oms3_parseModelName(const char* contents, char** cref);
 static int OMSimulatorLua_oms3_parseModelName(lua_State *L)
 {
@@ -470,6 +489,114 @@ static int OMSimulatorLua_oms3_addSubModel(lua_State *L)
 
   lua_pushinteger(L, status);
 
+  return 1;
+}
+
+//oms_status_enu_t oms3_instantiate(const char* ident);
+static int OMSimulatorLua_oms3_instantiate(lua_State *L)
+{
+  if (lua_gettop(L) != 1)
+    return luaL_error(L, "expecting exactly 1 argument");
+  luaL_checktype(L, 1, LUA_TSTRING);
+
+  const char* ident = lua_tostring(L, 1);
+  oms_status_enu_t status = oms3_instantiate(ident);
+  lua_pushinteger(L, status);
+  return 1;
+}
+
+//oms_status_enu_t oms3_initialize(const char* ident);
+static int OMSimulatorLua_oms3_initialize(lua_State *L)
+{
+  if (lua_gettop(L) != 1)
+    return luaL_error(L, "expecting exactly 1 argument");
+  luaL_checktype(L, 1, LUA_TSTRING);
+
+  const char* ident = lua_tostring(L, 1);
+  oms_status_enu_t status = oms3_initialize(ident);
+  lua_pushinteger(L, status);
+  return 1;
+}
+
+//oms_status_enu_t oms3_terminate(const char* ident);
+static int OMSimulatorLua_oms3_terminate(lua_State *L)
+{
+  if (lua_gettop(L) != 1)
+    return luaL_error(L, "expecting exactly 1 argument");
+  luaL_checktype(L, 1, LUA_TSTRING);
+
+  const char* ident = lua_tostring(L, 1);
+  oms_status_enu_t status = oms3_terminate(ident);
+  lua_pushinteger(L, status);
+  return 1;
+}
+
+//oms_status_enu_t oms3_simulate(const char* ident);
+static int OMSimulatorLua_oms3_simulate(lua_State *L)
+{
+  if (lua_gettop(L) != 1)
+    return luaL_error(L, "expecting exactly 1 argument");
+  luaL_checktype(L, 1, LUA_TSTRING);
+
+  const char* ident = lua_tostring(L, 1);
+  oms_status_enu_t status = oms3_simulate(ident);
+  lua_pushinteger(L, status);
+  return 1;
+}
+
+//oms_status_enu_t oms3_setTLMSocketData(const char* cref, const char* address, int managerPort, int monitorPort)
+static int OMSimulatorLua_oms3_setTLMSocketData(lua_State *L)
+{
+  if (lua_gettop(L) != 4)
+    return luaL_error(L, "expecting exactly 4 arguments");
+  luaL_checktype(L, 1, LUA_TSTRING);
+  luaL_checktype(L, 2, LUA_TSTRING);
+  luaL_checktype(L, 3, LUA_TNUMBER);
+  luaL_checktype(L, 4, LUA_TNUMBER);
+
+  const char *cref =    lua_tostring(L, 1);
+  const char *address = lua_tostring(L, 2);
+  int managerPort =     lua_tonumber(L, 3);
+  int monitorPort =     lua_tonumber(L, 4);
+
+  oms_status_enu_t status = oms3_setTLMSocketData(cref, address, managerPort, monitorPort);
+  lua_pushinteger(L, status);
+  return 1;
+}
+
+//oms_status_enu_t oms2_setTLMPositionAndOrientation(const char *cref, double x1, double x2, double x3, double A11, double A12, double A13, double A21, double A22, double A23, double A31, double A32, double A33)
+static int OMSimulatorLua_oms3_setTLMPositionAndOrientation(lua_State *L)
+{
+  if (lua_gettop(L) != 13)
+    return luaL_error(L, "expecting exactly 13 arguments");
+
+  luaL_checktype(L, 1, LUA_TSTRING);
+  luaL_checktype(L, 2, LUA_TSTRING);
+  const char *cref =  lua_tostring(L, 1);
+  const char *ifc = lua_tostring(L, 2);
+  int i;
+
+  //Position
+  double x[3];
+  for(i=0; i<3; ++i) {
+    luaL_checktype(L, i+3, LUA_TNUMBER);
+    x[i] = lua_tonumber(L, i+3);
+  }
+
+  //Orientation (3x3 matrix, stored as 1x9 vector)
+  double A[9];
+  for(i=0; i<9; ++i) {
+    luaL_checktype(L, i+6, LUA_TNUMBER);
+    A[i] = lua_tonumber(L, i+6);
+  }
+
+  oms_status_enu_t status = oms3_setTLMPositionAndOrientation(cref,
+                                                              x[0], x[1], x[2],
+                                                              A[0], A[1], A[2],
+                                                              A[3], A[4], A[5],
+                                                              A[6], A[7], A[8]);
+
+  lua_pushinteger(L, status);
   return 1;
 }
 
@@ -2080,10 +2207,13 @@ DLLEXPORT int luaopen_OMSimulatorLua(lua_State *L)
   REGISTER_LUA_CALL(oms3_copySystem);
   REGISTER_LUA_CALL(oms3_delete);
   REGISTER_LUA_CALL(oms3_export);
+  REGISTER_LUA_CALL(oms3_exportDependencyGraphs);
   REGISTER_LUA_CALL(oms3_getSystemType);
   REGISTER_LUA_CALL(oms3_getVersion);
   REGISTER_LUA_CALL(oms3_import);
   REGISTER_LUA_CALL(oms3_importString);
+  REGISTER_LUA_CALL(oms3_initialize);
+  REGISTER_LUA_CALL(oms3_instantiate);
   REGISTER_LUA_CALL(oms3_list);
   REGISTER_LUA_CALL(oms3_newModel);
   REGISTER_LUA_CALL(oms3_parseModelName);
@@ -2092,7 +2222,11 @@ DLLEXPORT int luaopen_OMSimulatorLua(lua_State *L)
   REGISTER_LUA_CALL(oms3_setLogFile);
   REGISTER_LUA_CALL(oms3_setMaxLogFileSize);
   REGISTER_LUA_CALL(oms3_setTempDirectory);
+  REGISTER_LUA_CALL(oms3_setTLMPositionAndOrientation);
+  REGISTER_LUA_CALL(oms3_setTLMSocketData);
   REGISTER_LUA_CALL(oms3_setWorkingDirectory);
+  REGISTER_LUA_CALL(oms3_simulate);
+  REGISTER_LUA_CALL(oms3_terminate);
   /* ************************************ */
   /* OMSimulator 2.0                      */
   /*                                      */

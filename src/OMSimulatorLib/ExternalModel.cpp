@@ -39,7 +39,21 @@
 #include <map>
 #include <iostream>
 
-oms3::ExternalModel *oms3::ExternalModel::NewModel(const oms3::ComRef &cref, const std::string &path, const std::string &startscript)
+oms3::ExternalModel::ExternalModel(const oms3::ComRef& cref, System* parentSystem, const std::string& path, const std::string& startscript)
+  : oms3::Component(cref, oms_component_external, parentSystem, path), startscript(startscript)
+{
+  tlmbusconnectors.push_back(NULL);
+  element.setTLMBusConnectors(&tlmbusconnectors[0]);
+}
+
+oms3::ExternalModel::~ExternalModel()
+{
+  for (const auto tlmbusconnector : tlmbusconnectors)
+    if(tlmbusconnector)
+      delete tlmbusconnector;
+}
+
+oms3::ExternalModel* oms3::ExternalModel::NewComponent(const oms3::ComRef& cref, System* parentSystem, const std::string& path, const std::string& startscript)
 {
   if (!cref.isValidIdent())
   {
@@ -47,7 +61,7 @@ oms3::ExternalModel *oms3::ExternalModel::NewModel(const oms3::ComRef &cref, con
     return NULL;
   }
 
-  oms3::ExternalModel *model = new oms3::ExternalModel(cref, path, startscript);
+  oms3::ExternalModel* model = new oms3::ExternalModel(cref, parentSystem, path, startscript);
   return model;
 }
 
@@ -74,7 +88,7 @@ oms3::TLMBusConnector *oms3::ExternalModel::getTLMBusConnector(const oms3::ComRe
 
 oms_status_enu_t oms3::ExternalModel::setRealParameter(const std::string &var, double value)
 {
-  std::map<std::string, oms2::Option<double>>::iterator it;
+  std::map<std::string, oms3::Option<double>>::iterator it;
   it = realParameters.find(var);
 
   if(it != realParameters.end()) {
@@ -87,7 +101,7 @@ oms_status_enu_t oms3::ExternalModel::setRealParameter(const std::string &var, d
 
 oms_status_enu_t oms3::ExternalModel::getRealParameter(const std::string &var, double &value)
 {
-  std::map<std::string, oms2::Option<double>>::iterator it;
+  std::map<std::string, oms3::Option<double>>::iterator it;
   it = realParameters.find(var);
 
   if(it != realParameters.end()) {
@@ -98,39 +112,20 @@ oms_status_enu_t oms3::ExternalModel::getRealParameter(const std::string &var, d
   return oms_status_error;
 }
 
-oms3::ExternalModel::ExternalModel(const oms3::ComRef &cref, const std::string &path, const std::string &startscript)
-  : element(oms_element_externalmodel, cref), cref(cref), startscript(startscript), path(path)
-{
-  logTrace();
-
-  this->path = path;
-  this->startscript = startscript;
-  this->cref = cref;
-
-  tlmbusconnectors.push_back(NULL);
-  element.setTLMBusConnectors(&tlmbusconnectors[0]);
-}
-
-oms3::ExternalModel::~ExternalModel()
-{
-  for (const auto tlmbusconnector : tlmbusconnectors)
-    if(tlmbusconnector)
-      delete tlmbusconnector;
-}
-
 oms_status_enu_t oms3::ExternalModel::exportToSSD(pugi::xml_node& node) const
 {
-  if(tlmbusconnectors[0]) {
+  if (tlmbusconnectors[0])
+  {
     pugi::xml_node annotations_node = node.append_child(oms2::ssd::ssd_annotations);
     pugi::xml_node annotation_node = annotations_node.append_child(oms2::ssd::ssd_annotation);
     annotation_node.append_attribute("type") = oms::annotation_type;
     for (const auto& tlmbusconnector : tlmbusconnectors)
-      if(tlmbusconnector)
+      if (tlmbusconnector)
         tlmbusconnector->exportToSSD(annotation_node);
   }
 
-  node.append_attribute("name") = this->getName().c_str();
-  node.append_attribute("source") = this->path.c_str();
+  node.append_attribute("name") = this->getCref().c_str();
+  node.append_attribute("source") = this->getPath().c_str();
   pugi::xml_node siminfo_node = node.append_child(oms2::ssd::ssd_simulation_information);
   pugi::xml_node annotations_node = siminfo_node.append_child(oms2::ssd::ssd_annotations);
   pugi::xml_node annotation_node = annotations_node.append_child(oms2::ssd::ssd_annotation);
@@ -141,10 +136,30 @@ oms_status_enu_t oms3::ExternalModel::exportToSSD(pugi::xml_node& node) const
   return oms_status_ok;
 }
 
+oms_status_enu_t oms3::ExternalModel::instantiate()
+{
+  return logError_NotImplemented;
+}
+
+oms_status_enu_t oms3::ExternalModel::initialize()
+{
+  return logError_NotImplemented;
+}
+
+oms_status_enu_t oms3::ExternalModel::terminate()
+{
+  return logError_NotImplemented;
+}
+
+/* ************************************ */
+/* oms2                                 */
+/*                                      */
+/*                                      */
+/* ************************************ */
 
 oms_status_enu_t oms2::ExternalModel::setRealParameter(const std::string &var, double value)
 {
-  std::map<std::string, oms2::Option<double>>::iterator it;
+  std::map<std::string, oms3::Option<double>>::iterator it;
   it = realParameters.find(var);
 
   if(it != realParameters.end()) {
@@ -157,7 +172,7 @@ oms_status_enu_t oms2::ExternalModel::setRealParameter(const std::string &var, d
 
 oms_status_enu_t oms2::ExternalModel::getRealParameter(const std::string &var, double &value)
 {
-  std::map<std::string, oms2::Option<double>>::iterator it;
+  std::map<std::string, oms3::Option<double>>::iterator it;
   it = realParameters.find(var);
 
   if(it != realParameters.end()) {

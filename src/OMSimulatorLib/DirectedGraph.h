@@ -29,17 +29,58 @@
  *
  */
 
-#ifndef _OMS2_DIRECTED_GRAPH_H_
-#define _OMS2_DIRECTED_GRAPH_H_
+#ifndef _OMS_DIRECTED_GRAPH_H_
+#define _OMS_DIRECTED_GRAPH_H_
 
+#include "ComRef.h"
+#include "Connector.h"
 #include "Variable.h"
 
+#include <deque>
 #include <fmilib.h>
+#include <map>
+#include <stack>
 #include <string>
 #include <vector>
-#include <map>
-#include <deque>
-#include <stack>
+
+namespace oms3
+{
+  class DirectedGraph
+  {
+  public:
+    DirectedGraph();
+    ~DirectedGraph();
+
+    void clear();
+
+    int addNode(const Connector& var);
+    void addEdge(const Connector& var1, const Connector& var2);
+
+    void dotExport(const std::string& filename);
+
+    void includeGraph(const DirectedGraph& graph, const ComRef& prefix);
+
+    const std::vector< std::vector< std::pair<int, int> > >& getSortedConnections();
+
+    const std::vector<Connector>& getNodes() {return nodes;}
+    const std::vector< std::pair<int, int> >& getEdges() {return edges;}
+
+  private:
+    std::deque< std::vector<int> > getSCCs();
+    void calculateSortedConnections();
+    void strongconnect(int v, std::vector< std::vector<int> > G, int& index, int *d, int *low, std::stack<int>& S, bool *stacked, std::deque< std::vector<int> >& components);
+
+    static int getEdgeIndex(const std::vector< std::pair<int, int> >& edges, int from, int to);
+
+  private:
+    std::vector<Connector> nodes;
+    std::vector< std::pair<int, int> > edges;
+
+    std::vector< std::vector<int> > G;
+    std::vector< std::vector< std::pair<int, int> > > sortedConnections;
+    bool sortedConnectionsAreValid;
+  };
+}
 
 namespace oms2
 {

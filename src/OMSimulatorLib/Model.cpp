@@ -59,6 +59,9 @@ oms3::Model::Model(const oms3::ComRef& cref, const std::string& tempDir)
 
 oms3::Model::~Model()
 {
+  if (oms_modelState_terminated != modelState)
+    terminate();
+
   if (system)
     delete system;
 }
@@ -114,17 +117,29 @@ oms3::System* oms3::Model::getSystem(const oms3::ComRef& cref)
   oms3::ComRef tail(cref);
   oms3::ComRef front = tail.pop_front();
 
-  oms3::System* system = NULL;
-
-  if (this->system->getName() == front)
+  if (this->system->getCref() == front)
   {
-    system = this->system;
-
-    if (!tail.isEmpty())
-      system = system->getSystem(tail);
+    if (tail.isEmpty())
+      return system;
+    else
+      return system->getSystem(tail);
   }
 
-  return system;
+  return NULL;
+}
+
+oms3::Component* oms3::Model::getComponent(const oms3::ComRef& cref)
+{
+  if (!system)
+    return NULL;
+
+  oms3::ComRef tail(cref);
+  oms3::ComRef front = tail.pop_front();
+
+  if (this->system->getCref() == front)
+    return system->getComponent(tail);
+
+  return NULL;
 }
 
 oms_status_enu_t oms3::Model::list(const oms3::ComRef& cref, char** contents)
@@ -151,7 +166,7 @@ oms_status_enu_t oms3::Model::list(const oms3::ComRef& cref, char** contents)
   {
     // list system
     if (!system)
-      return logError("Model \"" + std::string(getName()) + "\" does not contain any system");
+      return logError("Model \"" + std::string(getCref()) + "\" does not contain any system");
 
     System* subsystem = getSystem(cref);
     if (!subsystem)
@@ -181,20 +196,20 @@ oms_status_enu_t oms3::Model::addSystem(const oms3::ComRef& cref, oms_system_enu
   }
 
   if (!system)
-    return logError("Model \"" + std::string(getName()) + "\" does not contain any system");
+    return logError("Model \"" + std::string(getCref()) + "\" does not contain any system");
 
   oms3::ComRef tail(cref);
   oms3::ComRef front = tail.pop_front();
 
-  if (system->getName() == front)
+  if (system->getCref() == front)
     return system->addSubSystem(tail, type);
 
-  return logError("wrong input \"" + std::string(front) + "\" != \"" + std::string(system->getName()) + "\"");
+  return logError("wrong input \"" + std::string(front) + "\" != \"" + std::string(system->getCref()) + "\"");
 }
 
 oms_status_enu_t oms3::Model::exportToSSD(pugi::xml_node& node) const
 {
-  node.append_attribute("name") = this->getName().c_str();
+  node.append_attribute("name") = this->getCref().c_str();
   node.append_attribute("version") = "Draft20180219";
 
   if (system)
@@ -203,6 +218,11 @@ oms_status_enu_t oms3::Model::exportToSSD(pugi::xml_node& node) const
     if (oms_status_ok != system->exportToSSD(system_node))
       return logError("export of system failed");
   }
+
+  pugi::xml_node default_experiment = node.append_child(oms2::ssd::ssd_default_experiment);
+  default_experiment.append_attribute("startTime") = std::to_string(startTime).c_str();
+  default_experiment.append_attribute("stopTime") = std::to_string(stopTime).c_str();
+
   return oms_status_ok;
 }
 
@@ -236,6 +256,11 @@ oms_status_enu_t oms3::Model::importFromSSD(const pugi::xml_node& node)
       if (oms_status_ok != system->importFromSSD(*it))
         return oms_status_error;
     }
+    else if (name == oms2::ssd::ssd_default_experiment)
+    {
+      startTime = it->attribute("startTime").as_double(0.0);
+      stopTime = it->attribute("stopTime").as_double(1.0);
+    }
     else
       return logError("wrong xml schema detected");
   }
@@ -264,7 +289,7 @@ oms_status_enu_t oms3::Model::exportToFile(const std::string& filename) const
 
   boost::filesystem::path ssdPath = boost::filesystem::path(tempDir) / "SystemStructure.ssd";
   if (!doc.save_file(ssdPath.string().c_str()))
-    return logError("failed to export \"" + ssdPath.string() + "\" (for model \"" + std::string(this->getName()) + "\")");
+    return logError("failed to export \"" + ssdPath.string() + "\" (for model \"" + std::string(this->getCref()) + "\")");
 
   // Usage: minizip [-o] [-a] [-0 to -9] [-p password] [-j] file.zip [files_to_add]
   //        -o  Overwrite existing file.zip
@@ -282,10 +307,10 @@ oms_status_enu_t oms3::Model::exportToFile(const std::string& filename) const
   int argc = 4 + resources.size();
   char **argv = new char*[argc];
   int i=0;
-  argv[i++]="minizip";
-  argv[i++]="-o";
-  argv[i++]="-1";
-  argv[i++]="temp/model.ssp";
+  argv[i++] = (char*)"minizip";
+  argv[i++] = (char*)"-o";
+  argv[i++] = (char*)"-1";
+  argv[i++] = (char*)"temp/model.ssp";
   for (const auto& file : resources)
     argv[i++]=(char*)file.c_str();
   minizip(argc, argv);
@@ -303,6 +328,91 @@ oms_status_enu_t oms3::Model::getAllResources(std::vector<std::string>& resource
   resources.push_back("SystemStructure.ssd");
   if (system)
     return system->getAllResources(resources);
+  return oms_status_ok;
+}
+
+oms_status_enu_t oms3::Model::setStartTime(double value)
+{
+  if (oms_modelState_terminated != modelState)
+    return logError_ModelInWrongState(getCref());
+
+  startTime = value;
+  return oms_status_ok;
+}
+
+oms_status_enu_t oms3::Model::setStopTime(double value)
+{
+  if (oms_modelState_terminated != modelState)
+    return logError_ModelInWrongState(getCref());
+
+  stopTime = value;
+  return oms_status_ok;
+}
+
+oms_status_enu_t oms3::Model::instantiate()
+{
+  if (oms_modelState_terminated != modelState)
+    return logError_ModelInWrongState(getCref());
+
+  if (!system)
+    return logError("Model doesn't contain a system");
+
+  modelState = oms_modelState_initialization;
+  if (oms_status_ok != system->instantiate())
+  {
+    terminate();
+    return oms_status_error;
+  }
+
+  modelState = oms_modelState_instantiated;
+  return oms_status_ok;
+}
+
+oms_status_enu_t oms3::Model::initialize()
+{
+  if (oms_modelState_instantiated != modelState)
+    return logError_ModelInWrongState(getCref());
+
+  if (!system)
+    return logError("Model doesn't contain a system");
+
+  modelState = oms_modelState_initialization;
+  if (oms_status_ok != system->initialize())
+  {
+    terminate();
+    return logError_Initialization(system->getFullCref());
+  }
+
+  modelState = oms_modelState_simulation;
+  return oms_status_ok;
+}
+
+oms_status_enu_t oms3::Model::simulate()
+{
+  if (oms_modelState_simulation != modelState)
+    return logError_ModelInWrongState(getCref());
+
+  if (!system)
+    return logError("Model doesn't contain a system");
+
+  return system->stepUntil(stopTime);
+}
+
+oms_status_enu_t oms3::Model::terminate()
+{
+  if (oms_modelState_terminated == modelState)
+    return oms_status_ok;
+
+  if (oms_modelState_instantiated == modelState && oms_status_ok != system->initialize())
+    return logError_Termination(system->getFullCref());
+
+  if (!system)
+    return logError("Model doesn't contain a system");
+
+  if (oms_status_ok != system->terminate())
+    return logError_Termination(system->getFullCref());
+
+  modelState = oms_modelState_terminated;
   return oms_status_ok;
 }
 

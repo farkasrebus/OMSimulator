@@ -61,6 +61,7 @@ oms_status_enu_t oms3_importString(const char* contents, char** cref);
 oms_status_enu_t oms3_addSystem(const char* cref, oms_system_enu_t type);
 oms_status_enu_t oms3_copySystem(const char* source, const char* target);
 oms_status_enu_t oms3_addSubModel(const char* cref, const char* fmuPath);
+oms_status_enu_t oms3_getComponentType(const char* cref, oms_component_enu_t* type);
 oms_status_enu_t oms3_getElement(const char* cref, oms3_element_t** element);
 oms_status_enu_t oms3_getElements(const char* cref, oms3_element_t*** elements);
 oms_status_enu_t oms3_setElementGeometry(const char* cref, const ssd_element_geometry_t* geometry);
@@ -76,6 +77,7 @@ oms_status_enu_t oms3_updateConnection(const char* crefA, const char* crefB, con
 oms_status_enu_t oms3_addBus(const char* cref);
 oms_status_enu_t oms3_getBus(const char* cref, oms3_busconnector_t** busConnector);
 oms_status_enu_t oms3_addConnectorToBus(const char* busCref, const char* connectorCref);
+oms_status_enu_t oms3_deleteConnectorFromBus(const char* busCref, const char* connectorCref);
 oms_status_enu_t oms3_setBusGeometry(const char* bus, const ssd_connector_geometry_t* geometry);
 oms_status_enu_t oms3_addTLMBus(const char* cref, const char* domain, const int dimensions, const oms_tlm_interpolation_t interpolation);
 oms_status_enu_t oms3_getTLMBus(const char* cref, oms3_tlmbusconnector_t** tlmBusConnector);
@@ -85,12 +87,19 @@ oms_status_enu_t oms3_addTLMConnection(const char* crefA, const char* crefB, dou
 oms_status_enu_t oms3_addExternalModel(const char* cref, const char* path, const char* startscript);
 oms_status_enu_t oms3_addSubModel(const char* cref, const char* fmuPath);
 oms_status_enu_t oms3_addExternalModel(const char* cref, const char* path, const char* startscript);
+oms_status_enu_t oms3_getSubModelPath(const char* cref, char** path);
+oms_status_enu_t oms3_getFMUInfo(const char* cref, const oms_fmu_info_t** fmuInfo);
+oms_status_enu_t oms3_instantiate(const char* cref);
+oms_status_enu_t oms3_initialize(const char* cref);
+oms_status_enu_t oms3_simulate(const char* cref);
+oms_status_enu_t oms3_terminate(const char* cref);
+oms_status_enu_t oms3_setTLMSocketData(const char* cref, const char* address, int managerPort, int monitorPort);
+oms_status_enu_t oms3_setTLMPositionAndOrientation(const char *cref, double x1, double x2, double x3, double A11, double A12, double A13, double A21, double A22, double A23, double A31, double A32, double A33);
+oms_status_enu_t oms3_exportDependencyGraphs(const char* cref, const char* initialization, const char* simulation);
 
 /* not implemented yet */
 oms_status_enu_t oms3_setSimulationInformation(const char* cref, ssd_simulation_information_t* info);
 oms_status_enu_t oms3_getSimulationInformation(const char* cref, ssd_simulation_information_t** info);
-oms_status_enu_t oms3_getSubModelPath(const char* cref, char** path);
-oms_status_enu_t oms3_getFMUInfo(const char* cref, const oms_fmu_info_t** fmuInfo);
 
 /* ************************************ */
 /* oms2                                 */

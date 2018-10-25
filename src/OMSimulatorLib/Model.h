@@ -41,6 +41,7 @@
 
 namespace oms3
 {
+  class Component;
   class System;
 
   class Model
@@ -53,8 +54,9 @@ namespace oms3
      * instances with valid names can be created.
      */
     static Model* NewModel(const ComRef& cref);
-    const ComRef& getName() const {return cref;}
+    const ComRef& getCref() const {return cref;}
     System* getSystem(const ComRef& cref);
+    Component* getComponent(const ComRef& cref);
     std::string getTempDirectory() const {return tempDir;}
     oms_status_enu_t rename(const ComRef& cref);
     oms_status_enu_t list(const ComRef& cref, char** contents);
@@ -67,6 +69,18 @@ namespace oms3
 
     oms3::Element** getElements() {return &elements[0];}
     oms_status_enu_t getAllResources(std::vector<std::string>& resources) const;
+
+    oms_status_enu_t instantiate();
+    oms_status_enu_t initialize();
+    oms_status_enu_t simulate();
+    oms_status_enu_t terminate();
+
+    oms_modelState_enu_t getModelState() const {return modelState;}
+
+    oms_status_enu_t setStartTime(double value);
+    double getStartTime() const {return startTime;}
+    oms_status_enu_t setStopTime(double value);
+    double getStopTime() const {return stopTime;}
 
   private:
     Model(const ComRef& cref, const std::string& tempDir);
@@ -82,6 +96,12 @@ namespace oms3
 
     std::vector<oms3::Element*> elements;
     bool copy_resources = true;
+
+    oms_modelState_enu_t modelState = oms_modelState_terminated;
+
+    // ssd:DefaultExperiment
+    double startTime = 0.0;
+    double stopTime = 1.0;
   };
 }
 
