@@ -17,6 +17,9 @@
 
 namespace oms3
 {
+class Component;
+class System;
+
 typedef struct  {
     int y = 0;
 } oms_tlm_sigrefs_signal_t;
@@ -94,7 +97,7 @@ typedef struct  {
   class TLMBusConnector : protected oms3_tlmbusconnector_t
   {
   public:
-    TLMBusConnector(const oms3::ComRef& name, const std::string domain, const int dimensions, const oms_tlm_interpolation_t interpolation);
+    TLMBusConnector(const oms3::ComRef& name, const std::string domain, const int dimensions, const oms_tlm_interpolation_t interpolation, System* parentSystem=nullptr);
     ~TLMBusConnector();
 
     oms_status_enu_t exportToSSD(pugi::xml_node& root) const;
@@ -113,6 +116,8 @@ typedef struct  {
     const oms_tlm_interpolation_t getInterpolation() const {return interpolation;}
     void setDelay(double delay) { this->delay = delay; }
     double getDelay() { return this->delay; }
+    oms3::ComRef getConnector(int id) const;
+    std::vector<oms3::ComRef> getConnectors(std::vector<int> ids) const;
     const oms2::ssd::ConnectorGeometry* getGeometry() const {return reinterpret_cast<oms2::ssd::ConnectorGeometry*>(geometry);}
 
     oms_status_enu_t addConnector(const oms3::ComRef& cref, std::string vartype);
@@ -120,13 +125,18 @@ typedef struct  {
     oms_status_enu_t registerToSockets(TLMPlugin *plugin);
     int getId() const {return id;}
 
+    oms3::Component* getComponent();
+
   private:
     void updateVariableTypes();
+    oms3::Component *getComponent(const ComRef &conA, System *system) const;
 
     oms_causality_enu_t causality;
     std::map<std::string, oms3::ComRef> connectors;
     std::vector<oms3::ComRef> sortedConnectors;
     std::vector<std::string> variableTypes; //Used to keep track of TLM variable types
+    System* parentSystem;
+    Component* component;
 
     int id;
   };
