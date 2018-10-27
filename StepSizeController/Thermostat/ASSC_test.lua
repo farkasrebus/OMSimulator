@@ -106,7 +106,7 @@ oms2_addConnection("MonitoredThermostat","CentralMonitor:termReply","ThermostatM
 oms2_addConnection("MonitoredThermostat","CentralMonitor:heatReply","HeatingMonitor:reply")
 oms2_addConnection("MonitoredThermostat","CentralMonitor:tempReply","TemperatureMonitor:reply")
 -- set result file
-oms2_setResultFile("MonitoredThermostat", "Test.mat")
+oms2_setResultFile("MonitoredThermostat", "Test.csv")
 oms2_addSignalsToResults("MonitoredThermostat","CentralMonitor:nextHeartBeat")
 oms2_addSignalsToResults("MonitoredThermostat","TemperatureMonitor:criticalScenarioLowerBound")
 oms2_addSignalsToResults("MonitoredThermostat","TemperatureMonitor:criticalScenarioUpperBound")
@@ -114,7 +114,7 @@ oms2_addSignalsToResults("MonitoredThermostat","TemperatureMonitor:expectedCriti
 oms2_addSignalsToResults("MonitoredThermostat","TemperatureMonitor:expectedCriticalScenarioUpperBound")
 -- configure simulation
 oms2_setCommunicationInterval("MonitoredThermostat", 10.0)
-oms2_setStopTime("MonitoredThermostat", 1000.0)
+oms2_setStopTime("MonitoredThermostat", 3000.0)
 oms2_setMasterAlgorithm("MonitoredThermostat","assc")
 -- configure assc
 oms2_addEventIndicator("MonitoredThermostat.Thermostat:Thermostat_HeatingControlPort_turn_heating_on")
