@@ -108,6 +108,10 @@ oms2_addConnection("MonitoredThermostat","CentralMonitor:tempReply","Temperature
 -- set result file
 oms2_setResultFile("MonitoredThermostat", "Test.mat")
 oms2_addSignalsToResults("MonitoredThermostat","CentralMonitor:nextHeartBeat")
+oms2_addSignalsToResults("MonitoredThermostat","TemperatureMonitor:criticalScenarioLowerBound")
+oms2_addSignalsToResults("MonitoredThermostat","TemperatureMonitor:criticalScenarioUpperBound")
+oms2_addSignalsToResults("MonitoredThermostat","TemperatureMonitor:expectedCriticalScenarioLowerBound")
+oms2_addSignalsToResults("MonitoredThermostat","TemperatureMonitor:expectedCriticalScenarioUpperBound")
 -- configure simulation
 oms2_setCommunicationInterval("MonitoredThermostat", 10.0)
 oms2_setStopTime("MonitoredThermostat", 1000.0)
@@ -121,9 +125,15 @@ oms2_addEventIndicator("MonitoredThermostat.ThermostatMonitor:reply")
 oms2_addEventIndicator("MonitoredThermostat.HeatingMonitor:reply")
 oms2_addEventIndicator("MonitoredThermostat.TemperatureMonitor:reply")
 oms2_addTimeIndicator("MonitoredThermostat.CentralMonitor:nextHeartBeat")
+oms2_addDynamicValueIndicator("MonitoredThermostat.Room:temperatureStreamPort1.measured_temperature1.measured_temperature[1]",
+	 "MonitoredThermostat.TemperatureMonitor:criticalScenarioLowerBound",
+	 "MonitoredThermostat.TemperatureMonitor:criticalScenarioUpperBound", 0.1);
+oms2_addDynamicValueIndicator("MonitoredThermostat.Room:temperatureStreamPort1.measured_temperature1.measured_temperature[1]",
+	 "MonitoredThermostat.TemperatureMonitor:expectedCriticalScenarioLowerBound",
+	 "MonitoredThermostat.TemperatureMonitor:expectedCriticalScenarioUpperBound", 1.0);
 
-oms2_setMinimalStepSize("MonitoredThermostat", 0.1)
-oms2_setMaximalStepSize("MonitoredThermostat", 1.0)
+oms2_setMinimalStepSize("MonitoredThermostat", 0.01)
+oms2_setMaximalStepSize("MonitoredThermostat", 10.0)
 -- simulate
 oms2_initialize("MonitoredThermostat")
 oms2_simulate("MonitoredThermostat")

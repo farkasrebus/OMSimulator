@@ -58,12 +58,23 @@ class CriticalTemperatureMonitor
     Boolean critical;
     Real currentTarget;
     Real currentBandWith;
+    Real criticalScenarioLowerBound;
+    Real criticalScenarioUpperBound;
+    Real expectedCriticalScenarioLowerBound;
+    Real expectedCriticalScenarioUpperBound;
   equation
     critical = (temperature < target - hysteresis);
     reply= if (request<0.5) then -1.0 elseif (critical) then 1.0 else 0.0;
     currentTarget = if (target<temperature) then target+hysteresis else target-hysteresis;
     currentBandWith=1.0;
+    criticalScenarioLowerBound=currentTarget - 0.02;
+    criticalScenarioUpperBound=currentTarget + 0.02;
+    expectedCriticalScenarioLowerBound = if (target<temperature) then currentTarget-0.1 else criticalScenarioUpperBound;
+    expectedCriticalScenarioUpperBound = if (target<temperature) then criticalScenarioLowerBound else currentTarget+0.1; 
+    
 end CriticalTemperatureMonitor;
+
+
 
 
 

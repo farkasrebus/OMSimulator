@@ -1,20 +1,24 @@
-Thu Oct 25 17:21:33 2018 | info:    Initializing logging (OMSimulator v2.0.0-dev-834-g7090a47-linux)
-Thu Oct 25 17:21:33 2018 | info:    New temp directory: "/home/farkasr/git/OMSimulator/StepSizeController/Thermostat/tmp"
-Thu Oct 25 17:21:33 2018 | error:   [fmiLogger] module FMI2XML: Initial 'approx' is not allowed for variability 'continuous' and causality 'input'. Setting initial to 'Undefined' for variable 'Thermostat_HeatingControlPort_set_hysteresis_intervallum'
-Thu Oct 25 17:21:33 2018 | error:   [fmiLogger] module FMI2XML: Initial 'approx' is not allowed for variability 'continuous' and causality 'input'. Setting initial to 'Undefined' for variable 'Thermostat_ThermostatControlPort_turn_thermostat_off'
-Thu Oct 25 17:21:33 2018 | error:   [fmiLogger] module FMI2XML: Initial 'approx' is not allowed for variability 'continuous' and causality 'input'. Setting initial to 'Undefined' for variable 'Thermostat_TemperatureStreamPort_measured_temperature'
-Thu Oct 25 17:21:33 2018 | error:   [fmiLogger] module FMI2XML: Initial 'approx' is not allowed for variability 'continuous' and causality 'input'. Setting initial to 'Undefined' for variable 'Thermostat_ThermostatControlPort_turn_thermostat_on'
-Thu Oct 25 17:21:33 2018 | error:   [fmiLogger] module FMI2XML: Initial 'approx' is not allowed for variability 'continuous' and causality 'input'. Setting initial to 'Undefined' for variable 'Thermostat_ThermostatControlPort_set_target_temperature'
-Thu Oct 25 17:21:33 2018 | error:   [fmiLogger] module FMI2XML: Initial 'approx' is not allowed for variability 'continuous' and causality 'input'. Setting initial to 'Undefined' for variable 'Thermostat_TemperatureStreamPort_measured_temperature_measured_temperature'
-Thu Oct 25 17:21:33 2018 | error:   [fmiLogger] module FMI2XML: Initial 'approx' is not allowed for variability 'continuous' and causality 'input'. Setting initial to 'Undefined' for variable 'Thermostat_TemperatureStreamPort_measured_temperature_measured_temperature1'
-Thu Oct 25 17:21:33 2018 | error:   [fmiLogger] module FMI2XML: Initial 'approx' is not allowed for variability 'continuous' and causality 'input'. Setting initial to 'Undefined' for variable 'Thermostat_TemperatureStreamPort_measured_temperature_measured_temperature2'
-Thu Oct 25 17:21:33 2018 | error:   [fmiLogger] module FMI2XML: Initial 'approx' is not allowed for variability 'continuous' and causality 'input'. Setting initial to 'Undefined' for variable 'Thermostat_ThermostatControlPort_set_target_temperature_target_temperature'
-Thu Oct 25 17:21:33 2018 | error:   [fmiLogger] module FMI2XML: Initial 'approx' is not allowed for variability 'continuous' and causality 'input'. Setting initial to 'Undefined' for variable 'Thermostat_ThermostatControlPort_set_target_temperature_target_temperature1'
-Thu Oct 25 17:21:33 2018 | error:   [fmiLogger] module FMI2XML: Initial 'approx' is not allowed for variability 'continuous' and causality 'input'. Setting initial to 'Undefined' for variable 'Thermostat_ThermostatControlPort_set_target_temperature_target_temperature2'
-Thu Oct 25 17:21:33 2018 | error:   [fmiLogger] module FMI2XML: Initial 'approx' is not allowed for variability 'continuous' and causality 'input'. Setting initial to 'Undefined' for variable 'Thermostat_HeatingControlPort_set_hysteresis_intervallum_hysteresis_intervallum'
-Thu Oct 25 17:21:33 2018 | error:   [fmiLogger] module FMI2XML: Initial 'approx' is not allowed for variability 'continuous' and causality 'input'. Setting initial to 'Undefined' for variable 'Thermostat_HeatingControlPort_set_hysteresis_intervallum_hysteresis_intervallum1'
-Thu Oct 25 17:21:33 2018 | error:   [fmiLogger] module FMI2XML: Initial 'approx' is not allowed for variability 'continuous' and causality 'input'. Setting initial to 'Undefined' for variable 'Thermostat_HeatingControlPort_set_hysteresis_intervallum_hysteresis_intervallum2'
-Thu Oct 25 17:21:33 2018 | info:    added "CentralMonitor:nextHeartBeat" to results
-Thu Oct 25 17:21:33 2018 | info:    Result file: Test.mat (bufferSize=1)
-Thu Oct 25 17:21:34 2018 | info:    Removed model from scope: MonitoredThermostat
-Thu Oct 25 17:21:34 2018 | info:    Logging completed properly
+Sat Oct 27 16:17:14 2018 | info:    Initializing logging (OMSimulator v2.0.0-dev-834-g7090a47-linux)
+Sat Oct 27 16:17:14 2018 | info:    New temp directory: "/home/farkasr/git/OMSimulator/StepSizeController/Thermostat/tmp"
+Sat Oct 27 16:17:14 2018 | error:   [fmiLogger] module FMI2XML: Initial 'approx' is not allowed for variability 'continuous' and causality 'input'. Setting initial to 'Undefined' for variable 'Thermostat_HeatingControlPort_set_hysteresis_intervallum'
+Sat Oct 27 16:17:14 2018 | error:   [fmiLogger] module FMI2XML: Initial 'approx' is not allowed for variability 'continuous' and causality 'input'. Setting initial to 'Undefined' for variable 'Thermostat_ThermostatControlPort_turn_thermostat_off'
+Sat Oct 27 16:17:14 2018 | error:   [fmiLogger] module FMI2XML: Initial 'approx' is not allowed for variability 'continuous' and causality 'input'. Setting initial to 'Undefined' for variable 'Thermostat_TemperatureStreamPort_measured_temperature'
+Sat Oct 27 16:17:14 2018 | error:   [fmiLogger] module FMI2XML: Initial 'approx' is not allowed for variability 'continuous' and causality 'input'. Setting initial to 'Undefined' for variable 'Thermostat_ThermostatControlPort_turn_thermostat_on'
+Sat Oct 27 16:17:14 2018 | error:   [fmiLogger] module FMI2XML: Initial 'approx' is not allowed for variability 'continuous' and causality 'input'. Setting initial to 'Undefined' for variable 'Thermostat_ThermostatControlPort_set_target_temperature'
+Sat Oct 27 16:17:14 2018 | error:   [fmiLogger] module FMI2XML: Initial 'approx' is not allowed for variability 'continuous' and causality 'input'. Setting initial to 'Undefined' for variable 'Thermostat_TemperatureStreamPort_measured_temperature_measured_temperature'
+Sat Oct 27 16:17:14 2018 | error:   [fmiLogger] module FMI2XML: Initial 'approx' is not allowed for variability 'continuous' and causality 'input'. Setting initial to 'Undefined' for variable 'Thermostat_TemperatureStreamPort_measured_temperature_measured_temperature1'
+Sat Oct 27 16:17:14 2018 | error:   [fmiLogger] module FMI2XML: Initial 'approx' is not allowed for variability 'continuous' and causality 'input'. Setting initial to 'Undefined' for variable 'Thermostat_TemperatureStreamPort_measured_temperature_measured_temperature2'
+Sat Oct 27 16:17:14 2018 | error:   [fmiLogger] module FMI2XML: Initial 'approx' is not allowed for variability 'continuous' and causality 'input'. Setting initial to 'Undefined' for variable 'Thermostat_ThermostatControlPort_set_target_temperature_target_temperature'
+Sat Oct 27 16:17:14 2018 | error:   [fmiLogger] module FMI2XML: Initial 'approx' is not allowed for variability 'continuous' and causality 'input'. Setting initial to 'Undefined' for variable 'Thermostat_ThermostatControlPort_set_target_temperature_target_temperature1'
+Sat Oct 27 16:17:14 2018 | error:   [fmiLogger] module FMI2XML: Initial 'approx' is not allowed for variability 'continuous' and causality 'input'. Setting initial to 'Undefined' for variable 'Thermostat_ThermostatControlPort_set_target_temperature_target_temperature2'
+Sat Oct 27 16:17:14 2018 | error:   [fmiLogger] module FMI2XML: Initial 'approx' is not allowed for variability 'continuous' and causality 'input'. Setting initial to 'Undefined' for variable 'Thermostat_HeatingControlPort_set_hysteresis_intervallum_hysteresis_intervallum'
+Sat Oct 27 16:17:14 2018 | error:   [fmiLogger] module FMI2XML: Initial 'approx' is not allowed for variability 'continuous' and causality 'input'. Setting initial to 'Undefined' for variable 'Thermostat_HeatingControlPort_set_hysteresis_intervallum_hysteresis_intervallum1'
+Sat Oct 27 16:17:14 2018 | error:   [fmiLogger] module FMI2XML: Initial 'approx' is not allowed for variability 'continuous' and causality 'input'. Setting initial to 'Undefined' for variable 'Thermostat_HeatingControlPort_set_hysteresis_intervallum_hysteresis_intervallum2'
+Sat Oct 27 16:17:14 2018 | info:    added "CentralMonitor:nextHeartBeat" to results
+Sat Oct 27 16:17:14 2018 | info:    added "TemperatureMonitor:criticalScenarioLowerBound" to results
+Sat Oct 27 16:17:14 2018 | info:    added "TemperatureMonitor:criticalScenarioUpperBound" to results
+Sat Oct 27 16:17:14 2018 | info:    added "TemperatureMonitor:expectedCriticalScenarioLowerBound" to results
+Sat Oct 27 16:17:14 2018 | info:    added "TemperatureMonitor:expectedCriticalScenarioUpperBound" to results
+Sat Oct 27 16:17:14 2018 | info:    Result file: Test.mat (bufferSize=1)
+Sat Oct 27 16:17:14 2018 | info:    Removed model from scope: MonitoredThermostat
+Sat Oct 27 16:17:14 2018 | info:    Logging completed properly

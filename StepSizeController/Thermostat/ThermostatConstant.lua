@@ -63,14 +63,16 @@ oms2_addConnection("ThermostatExample",
 	"Room:heatingControlPort1.turn_heating_on1.counter",
 	"Thermostat:Thermostat_HeatingControlPort_turn_heating_on")
 -- set result file
-oms2_setResultFile("ThermostatExample", "ThermostatConstant.mat")
+oms2_setResultFile("ThermostatExample", "ThermostatConstant4.mat")
 -- configure simulation
 oms2_setStopTime("ThermostatExample", 1000.0)
-oms2_setCommunicationInterval("ThermostatExample", 1.0)
 oms2_initialize("ThermostatExample")
 
-local x = os.clock()
+--local x = os.clock()
+oms2_setCommunicationInterval("ThermostatExample", 1.0)
+oms2_stepUntil("ThermostatExample", 0.1)
+oms2_setCommunicationInterval("ThermostatExample", 1.0)
 oms2_simulate("ThermostatExample")
-print(string.format("elapsed time: %.2f\n", os.clock() - x))
+--print(string.format("elapsed time: %.2f\n", os.clock() - x))
 --  terminate
 oms2_unloadModel("ThermostatExample")
