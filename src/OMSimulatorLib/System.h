@@ -82,6 +82,7 @@ namespace oms3
     Connection** getConnections(const ComRef &cref);
     oms_status_enu_t addConnection(const ComRef& crefA, const ComRef& crefB);
     oms_status_enu_t updateConnection(const ComRef& crefA, const ComRef& crefB, const oms3_connection_t* connection);
+    oms_status_enu_t deleteConnection(const ComRef& crefA, const ComRef& crefB);
     oms_status_enu_t addTLMConnection(const ComRef& crefA, const ComRef& crefB, double delay, double alpha, double linearimpedance, double angularimpedance);
     oms_status_enu_t setConnectorGeometry(const ComRef& cref, const oms2::ssd::ConnectorGeometry* geometry);
     oms_status_enu_t setConnectionGeometry(const ComRef &crefA, const ComRef &crefB, const oms2::ssd::ConnectionGeometry* geometry);
@@ -108,6 +109,12 @@ namespace oms3
     virtual oms_status_enu_t terminate() = 0;
     virtual oms_status_enu_t stepUntil(double stopTime) = 0;
 
+    oms_status_enu_t getReal(const ComRef& cref, double& value);
+    oms_status_enu_t setReal(const ComRef& cref, double value);
+    oms_status_enu_t getReals(const std::vector<ComRef> &crefs, std::vector<double> &values) const;
+    oms_status_enu_t setReals(const std::vector<ComRef> &crefs, std::vector<double> values);
+    oms_status_enu_t setRealInputDerivatives(const ComRef &cref, int order, double value);
+
   protected:
     System(const ComRef& cref, oms_system_enu_t type, Model* parentModel, System* parentSystem);
 
@@ -123,15 +130,19 @@ namespace oms3
     std::map<ComRef, System*> subsystems;
     std::map<ComRef, Component*> components;
 
+    std::map<ComRef, double> realValues;            ///< values of the connectors
+
     Element element;
-    std::vector<Connector*> connectors;   ///< last element is always NULL
-    std::vector<oms3_element_t*> subelements;   ///< last element is always NULL; don't free it
+    std::vector<Connector*> connectors;             ///< last element is always NULL
+    std::vector<oms3_element_t*> subelements;       ///< last element is always NULL; don't free it
     std::vector<BusConnector*> busconnectors;
     std::vector<TLMBusConnector*> tlmbusconnectors;
-    std::vector<Connection*> connections; ///< last element is always NULL
+    std::vector<Connection*> connections;           ///< last element is always NULL
 
     DirectedGraph initialUnknownsGraph;
     DirectedGraph outputsGraph;
+
+    oms_status_enu_t importFromSSD_ConnectionGeometry(const pugi::xml_node& node, const ComRef& crefA, const ComRef& crefB);
   };
 }
 

@@ -307,6 +307,29 @@ oms_status_enu_t oms3_updateConnection(const char *crefA, const char *crefB, con
   return system->updateConnection(tailA, tailB, connection);
 }
 
+oms_status_enu_t oms3_deleteConnection(const char *crefA, const char *crefB)
+{
+  oms3::ComRef tailA(crefA);
+  oms3::ComRef modelCref = tailA.pop_front();
+  oms3::ComRef systemCref = tailA.pop_front();
+
+  oms3::ComRef tailB(crefB);
+  tailB.pop_front();
+  tailB.pop_front();
+
+  oms3::Model* model = oms3::Scope::GetInstance().getModel(modelCref);
+  if (!model) {
+    return logError_ModelNotInScope(modelCref);
+  }
+
+  oms3::System* system = model->getSystem(systemCref);
+  if (!system) {
+    return logError_SystemNotInModel(modelCref, systemCref);
+  }
+
+  return system->deleteConnection(tailA,tailB);
+}
+
 oms_status_enu_t oms3_setConnectorGeometry(const char *cref, const ssd_connector_geometry_t *geometry)
 {
   oms3::ComRef tail(cref);
@@ -800,6 +823,40 @@ oms_status_enu_t oms3_setTLMInitialValues(const char *cref, const char *ifc, con
 
   oms3::SystemTLM* tlmsystem = reinterpret_cast<oms3::SystemTLM*>(system);
   return tlmsystem->setInitialValues(tail, std::vector<double>(values, values+nvalues));
+}
+
+oms_status_enu_t oms3_getReal(const char* cref, double* value)
+{
+  oms3::ComRef tail(cref);
+  oms3::ComRef front = tail.pop_front();
+
+  oms3::Model* model = oms3::Scope::GetInstance().getModel(front);
+  if (!model)
+    return logError_ModelNotInScope(front);
+
+  front = tail.pop_front();
+  oms3::System* system = model->getSystem(front);
+  if (!system)
+    return logError_SystemNotInModel(model->getCref(), front);
+
+  return system->getReal(tail, *value);
+}
+
+oms_status_enu_t oms3_setReal(const char* cref, double value)
+{
+  oms3::ComRef tail(cref);
+  oms3::ComRef front = tail.pop_front();
+
+  oms3::Model* model = oms3::Scope::GetInstance().getModel(front);
+  if (!model)
+    return logError_ModelNotInScope(front);
+
+  front = tail.pop_front();
+  oms3::System* system = model->getSystem(front);
+  if (!system)
+    return logError_SystemNotInModel(model->getCref(), front);
+
+  return system->setReal(tail, value);
 }
 
 /* ************************************ */

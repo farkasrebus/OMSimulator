@@ -433,5 +433,62 @@ oms_status_enu_t oms3::ComponentFMUCS::terminate()
 
 oms_status_enu_t oms3::ComponentFMUCS::stepUntil(double stopTime)
 {
-  return logError_NotImplemented;
+  fmi2_status_t fmistatus;
+  double hdef = (stopTime-time) / 1.0;
+
+  while (time < stopTime)
+  {
+    fmistatus = fmi2_import_do_step(fmu, time, hdef, fmi2_true);
+    time += hdef;
+  }
+  time = stopTime;
+  return oms_status_ok;
+}
+
+oms_status_enu_t oms3::ComponentFMUCS::getReal(const ComRef& cref, double& value) const
+{
+  int j=-1;
+  for (size_t i = 0; i < allVariables.size(); i++)
+  {
+    if (allVariables[i].getCref() == cref && allVariables[i].isTypeReal())
+    {
+      j = i;
+      break;
+    }
+  }
+
+  if (!fmu || j < 0)
+    return oms_status_error;
+
+  fmi2_value_reference_t vr = allVariables[j].getValueReference();
+  if (fmi2_status_ok != fmi2_import_get_real(fmu, &vr, 1, &value))
+    return oms_status_error;
+
+  if (std::isnan(value))
+    return logError("getReal returned NAN");
+  if (std::isinf(value))
+    return logError("getReal returned +/-inf");
+  return oms_status_ok;
+}
+
+oms_status_enu_t oms3::ComponentFMUCS::setReal(const ComRef& cref, double value)
+{
+  int j=-1;
+  for (size_t i = 0; i < allVariables.size(); i++)
+  {
+    if (allVariables[i].getCref() == cref && allVariables[i].isTypeReal())
+    {
+      j = i;
+      break;
+    }
+  }
+
+  if (!fmu || j < 0)
+    return oms_status_error;
+
+  fmi2_value_reference_t vr = allVariables[j].getValueReference();
+  if (fmi2_status_ok != fmi2_import_set_real(fmu, &vr, 1, &value))
+    return oms_status_error;
+
+  return oms_status_ok;
 }

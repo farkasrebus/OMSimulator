@@ -104,9 +104,10 @@ private:
 // Common error messages
 #define logError_ComponentNotInSystem(system, component)     logError("System \"" + std::string(system->getFullCref()) + "\" does not contain component \"" + std::string(component) + "\"")
 #define logError_ConnectionNotInSystem(crefA, crefB, system) logError("Connection <\"" + std::string(crefA) + "\", \"" + std::string(crefB) + "\"> not found in system \"" + std::string(system->getFullCref()) + "\"")
+#define logError_ConnectionExistsAlready(crefA, crefB, system) logError("Connection <\"" + std::string(crefA) + "\", \"" + std::string(crefB) + "\"> exists already in system \"" + std::string(system->getFullCref()) + "\"")
 #define logError_ConnectorNotInSystem(cref, system)          logError("Connector \"" + std::string(cref) + "\" not found in system \"" + std::string(system->getFullCref()) + "\"")
 #define logError_Initialization(system)                      logError("Initialization of system \"" + std::string(system) + "\" failed")
-#define logError_ModelInWrongState(cref)                     logError("Model \"" + std::string(cref) + "\" is in wrong model state")
+#define logError_ModelInWrongState(model)                    logError("Model \"" + std::string(model->getCref()) + "\" is in wrong model state")
 #define logError_ModelNotInScope(cref)                       logError("Model \"" + std::string(cref) + "\" does not exist in the scope")
 #define logError_NotForScSystem                              logError("Not available for strongly coupled systems")
 #define logError_NotForTlmSystem                             logError("Not available for TLM systems");

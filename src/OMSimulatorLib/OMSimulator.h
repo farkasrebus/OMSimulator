@@ -74,6 +74,7 @@ oms_status_enu_t oms3_setConnectionGeometry(const char* crefA, const char* crefB
 oms_status_enu_t oms3_getConnections(const char* cref, oms3_connection_t*** connections);
 oms_status_enu_t oms3_addConnection(const char* crefA, const char* crefB);
 oms_status_enu_t oms3_updateConnection(const char* crefA, const char* crefB, const oms3_connection_t* connection);
+oms_status_enu_t oms3_deleteConnection(const char* crefA, const char* crefB);
 oms_status_enu_t oms3_addBus(const char* cref);
 oms_status_enu_t oms3_getBus(const char* cref, oms3_busconnector_t** busConnector);
 oms_status_enu_t oms3_addConnectorToBus(const char* busCref, const char* connectorCref);
@@ -97,6 +98,8 @@ oms_status_enu_t oms3_setTLMSocketData(const char* cref, const char* address, in
 oms_status_enu_t oms3_setTLMPositionAndOrientation(const char *cref, double x1, double x2, double x3, double A11, double A12, double A13, double A21, double A22, double A23, double A31, double A32, double A33);
 oms_status_enu_t oms3_exportDependencyGraphs(const char* cref, const char* initialization, const char* simulation);
 oms_status_enu_t oms3_setTLMInitialValues(const char *cref, const char *ifc, const double values[], int nvalues);
+oms_status_enu_t oms3_getReal(const char* cref, double* value);
+oms_status_enu_t oms3_setReal(const char* cref, double value);
 
 /* not implemented yet */
 oms_status_enu_t oms3_setSimulationInformation(const char* cref, ssd_simulation_information_t* info);

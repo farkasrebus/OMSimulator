@@ -144,6 +144,7 @@ oms_status_enu_t oms3::SystemWC::stepUntil(double stopTime)
         return oms_status_error;
     }
 
+    time = tNext;
     updateInputs(outputsGraph, false);
   }
 
@@ -176,29 +177,4 @@ oms_status_enu_t oms3::SystemWC::updateInputs(oms3::DirectedGraph& graph, bool d
     }
   }
   return oms_status_ok;
-}
-
-oms_status_enu_t oms3::SystemWC::setReal(const oms3::ComRef& cref, double value)
-{
-  return logError_NotImplemented;
-}
-
-oms_status_enu_t oms3::SystemWC::getReal(const oms3::ComRef& cref, double& value)
-{
-  return logError_NotImplemented;
-}
-
-oms_status_enu_t oms3::SystemWC::setReals(const std::vector<oms3::ComRef> &crefs, std::vector<double> values)
-{
-  return logError_NotImplemented;
-}
-
-oms_status_enu_t oms3::SystemWC::getReals(const std::vector<oms3::ComRef> &sr, std::vector<double> &values)
-{
-  return logError_NotImplemented;
-}
-
-oms_status_enu_t oms3::SystemWC::setRealInputDerivatives(const oms3::ComRef &cref, int order, double value)
-{
-  return logError_NotImplemented;
 }
