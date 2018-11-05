@@ -32,18 +32,19 @@
 #ifndef _OMS_SYSTEM_H_
 #define _OMS_SYSTEM_H_
 
-#include "ComRef.h"
-#include "DirectedGraph.h"
-#include "Types.h"
-#include "Element.h"
-#include "Connection.h"
-#include "ssd/ConnectorGeometry.h"
 #include "BusConnector.h"
-#include "TLMBusConnector.h"
+#include "ComRef.h"
+#include "Connection.h"
+#include "DirectedGraph.h"
+#include "Element.h"
 #include "ExternalModel.h"
-
-#include <pugixml.hpp>
+#include "ResultWriter.h"
+#include "ssd/ConnectorGeometry.h"
+#include "TLMBusConnector.h"
+#include "Types.h"
 #include <map>
+#include <pugixml.hpp>
+#include <unordered_map>
 
 namespace oms3
 {
@@ -91,6 +92,7 @@ namespace oms3
     oms_status_enu_t addConnectorToBus(const ComRef& busCref, const ComRef& connectorCref);
     oms_status_enu_t deleteConnectorFromBus(const ComRef& busCref, const ComRef& connectorCref);
     oms_status_enu_t addConnectorToTLMBus(const ComRef& busCref, const ComRef& connectorCref, const std::string type);
+    oms_status_enu_t deleteConnectorFromTLMBus(const ComRef& busCref, const ComRef& connectorCref);
     oms_status_enu_t setBusGeometry(const ComRef& cref, const oms2::ssd::ConnectorGeometry* geometry);
     oms_status_enu_t setTLMBusGeometry(const ComRef& cref, const oms2::ssd::ConnectorGeometry* geometry);
     oms_status_enu_t addExternalModel(const ComRef &cref, std::string path, std::string startscript);
@@ -109,11 +111,23 @@ namespace oms3
     virtual oms_status_enu_t terminate() = 0;
     virtual oms_status_enu_t stepUntil(double stopTime) = 0;
 
+    oms_status_enu_t getBoolean(const ComRef& cref, bool& value);
+    oms_status_enu_t getInteger(const ComRef& cref, int& value);
     oms_status_enu_t getReal(const ComRef& cref, double& value);
+    oms_status_enu_t setBoolean(const ComRef& cref, bool value);
+    oms_status_enu_t setInteger(const ComRef& cref, int value);
     oms_status_enu_t setReal(const ComRef& cref, double value);
+
     oms_status_enu_t getReals(const std::vector<ComRef> &crefs, std::vector<double> &values) const;
     oms_status_enu_t setReals(const std::vector<ComRef> &crefs, std::vector<double> values);
     oms_status_enu_t setRealInputDerivatives(const ComRef &cref, int order, double value);
+
+    bool isTopLevelSystem() const {return (parentSystem == NULL);}
+
+    oms_status_enu_t registerSignalsForResultFile(ResultWriter& resultFile);
+    oms_status_enu_t updateSignals(ResultWriter& resultFile, double time);
+
+    virtual oms_status_enu_t setFixedStepSize(double stepSize) {return oms_status_error;}
 
   protected:
     System(const ComRef& cref, oms_system_enu_t type, Model* parentModel, System* parentSystem);
@@ -121,6 +135,9 @@ namespace oms3
     // stop the compiler generating methods copying the object
     System(System const& copy);            ///< not implemented
     System& operator=(System const& copy); ///< not implemented
+
+    DirectedGraph initialUnknownsGraph;
+    DirectedGraph outputsGraph;
 
   private:
     ComRef cref;
@@ -130,7 +147,9 @@ namespace oms3
     std::map<ComRef, System*> subsystems;
     std::map<ComRef, Component*> components;
 
-    std::map<ComRef, double> realValues;            ///< values of the connectors
+    std::map<ComRef, double> realValues;            ///< values of the real connectors
+    std::map<ComRef, int> integerValues;            ///< values of the integer connectors
+    std::map<ComRef, bool> booleanValues;           ///< values of the boolean connectors
 
     Element element;
     std::vector<Connector*> connectors;             ///< last element is always NULL
@@ -139,8 +158,7 @@ namespace oms3
     std::vector<TLMBusConnector*> tlmbusconnectors;
     std::vector<Connection*> connections;           ///< last element is always NULL
 
-    DirectedGraph initialUnknownsGraph;
-    DirectedGraph outputsGraph;
+    std::unordered_map<unsigned int /*result file var ID*/, unsigned int /*allVariables ID*/> resultFileMapping;
 
     oms_status_enu_t importFromSSD_ConnectionGeometry(const pugi::xml_node& node, const ComRef& crefA, const ComRef& crefB);
   };

@@ -35,6 +35,7 @@
 #include "Component.h"
 #include "ComRef.h"
 #include "Option.h"
+#include "ResultWriter.h"
 #include "Variable.h"
 #include <fmilib.h>
 #include <map>
@@ -66,8 +67,15 @@ namespace oms3
     oms_status_enu_t initializeDependencyGraph_initialUnknowns();
     oms_status_enu_t initializeDependencyGraph_outputs();
 
-    oms_status_enu_t getReal(const ComRef& cref, double& value) const;
+    oms_status_enu_t getBoolean(const ComRef& cref, bool& value);
+    oms_status_enu_t getInteger(const ComRef& cref, int& value);
+    oms_status_enu_t getReal(const ComRef& cref, double& value);
+    oms_status_enu_t setBoolean(const ComRef& cref, bool value);
+    oms_status_enu_t setInteger(const ComRef& cref, int value);
     oms_status_enu_t setReal(const ComRef& cref, double value);
+
+    oms_status_enu_t registerSignalsForResultFile(ResultWriter& resultFile);
+    oms_status_enu_t updateSignals(ResultWriter& resultWriter, double time);
 
   protected:
     ComponentFMUCS(const ComRef& cref, System* parentSystem, const std::string& fmuPath);
@@ -92,6 +100,8 @@ namespace oms3
     std::map<std::string, Option<double>> realParameters;
     std::map<std::string, Option<int>> integerParameters;
     std::map<std::string, Option<bool>> booleanParameters;
+
+    std::unordered_map<unsigned int /*result file var ID*/, unsigned int /*allVariables ID*/> resultFileMapping;
 
     FMUInfo fmuInfo;
 

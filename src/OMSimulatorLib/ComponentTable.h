@@ -35,6 +35,7 @@
 #include "Component.h"
 #include "ComRef.h"
 #include "ResultReader.h"
+#include "ResultWriter.h"
 #include <fmilib.h>
 #include <map>
 #include <pugixml.hpp>
@@ -57,8 +58,10 @@ namespace oms3
     oms_status_enu_t initialize();
     oms_status_enu_t terminate();
 
-    oms_status_enu_t getReal(const ComRef& cref, double& value) const;
-    oms_status_enu_t setReal(const ComRef& cref, double value);
+    oms_status_enu_t getReal(const ComRef& cref, double& value);
+
+    oms_status_enu_t registerSignalsForResultFile(ResultWriter& resultFile);
+    oms_status_enu_t updateSignals(ResultWriter& resultWriter, double time);
 
   protected:
     ComponentTable(const ComRef& cref, System* parentSystem, const std::string& path);
@@ -69,7 +72,9 @@ namespace oms3
 
   private:
     ResultReader* resultReader;
-    std::unordered_map<std::string, ResultReader::Series*> series;
+    std::unordered_map<ComRef, ResultReader::Series*> series;
+    std::unordered_map<unsigned int /*result file var ID*/, unsigned int /*allVariables ID*/> resultFileMapping;
+    double time;
   };
 }
 

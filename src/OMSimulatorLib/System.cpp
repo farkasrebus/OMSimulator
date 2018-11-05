@@ -37,6 +37,7 @@
 #include "ComponentTable.h"
 #include "ExternalModel.h"
 #include "Model.h"
+#include "ResultWriter.h"
 #include "ssd/Tags.h"
 #include "SystemSC.h"
 #include "SystemTLM.h"
@@ -90,7 +91,7 @@ oms3::System* oms3::System::NewSystem(const oms3::ComRef& cref, oms_system_enu_t
 {
   if (!cref.isValidIdent())
   {
-    logError("\"" + std::string(cref) + "\" is not a valid ident");
+    logError_InvalidIdent(cref);
     return NULL;
   }
 
@@ -173,11 +174,20 @@ oms3::System* oms3::System::getSystem(const oms3::ComRef& cref)
 
 oms3::Component* oms3::System::getComponent(const oms3::ComRef& cref)
 {
-  auto it = components.find(cref);
-  if (it == components.end())
+  oms3::System* system = NULL;
+
+  oms3::ComRef tail(cref);
+  oms3::ComRef front = tail.pop_front();
+
+  auto subsystem = subsystems.find(front);
+  if (subsystem != subsystems.end())
+    return subsystem->second->getComponent(tail);
+
+  auto component = components.find(cref);
+  if (component == components.end())
     return NULL;
 
-  return it->second;
+  return component->second;
 }
 
 oms3::System *oms3::System::getSubSystem(const oms3::ComRef &cref)
@@ -598,7 +608,7 @@ oms_status_enu_t oms3::System::addConnector(const oms3::ComRef& cref, oms_causal
   if (this->type == oms_system_tlm)
     return logError_NotForTlmSystem;
   if (!cref.isValidIdent())
-    return logError("Not a valid ident: " + std::string(cref));
+    return logError_InvalidIdent(cref);
 
   connectors.back() = new oms3::Connector(causality, type, cref);
   connectors.push_back(NULL);
@@ -637,7 +647,7 @@ oms3::BusConnector* oms3::System::getBusConnector(const oms3::ComRef& cref)
 
   if (!cref.isValidIdent())
   {
-    logError("Not a valid ident: " + std::string(cref));
+    logError_InvalidIdent(cref);
     return NULL;
   }
 
@@ -650,6 +660,18 @@ oms3::BusConnector* oms3::System::getBusConnector(const oms3::ComRef& cref)
 
 oms3::TLMBusConnector* oms3::System::getTLMBusConnector(const oms3::ComRef& cref)
 {
+  oms3::ComRef tail(cref);
+  oms3::ComRef head = tail.pop_front();
+  auto subsystem = subsystems.find(head);
+  if (subsystem != subsystems.end())
+    return subsystem->second->getTLMBusConnector(tail);
+
+  if (!cref.isValidIdent())
+  {
+    logError_InvalidIdent(cref);
+    return NULL;
+  }
+
   for(auto& tlmbusconnector : tlmbusconnectors)
     if (tlmbusconnector && tlmbusconnector->getName() == cref)
       return tlmbusconnector;
@@ -735,18 +757,22 @@ oms_status_enu_t oms3::System::addConnection(const oms3::ComRef& crefA, const om
   else if (crefA.isValidIdent() || crefB.isValidIdent())
   {
     // flipped causality check
-    if ((conA->getCausality() == oms_causality_output && conB->getCausality() != oms_causality_output) ||
-      (conB->getCausality() == oms_causality_input && conA->getCausality() != oms_causality_input))
+    if (!((conA->getCausality() == oms_causality_output && conB->getCausality() == oms_causality_output) ||
+      (conB->getCausality() == oms_causality_input && conA->getCausality() == oms_causality_input)))
       return logError("Causality mismatch in connection: " + std::string(crefA) + " -> " + std::string(crefB));
   }
   else
   {
-    if ((conA->getCausality() == oms_causality_output && conB->getCausality() != oms_causality_input) ||
-      (conB->getCausality() == oms_causality_output && conA->getCausality() != oms_causality_input))
+    if (!((conA->getCausality() == oms_causality_output && conB->getCausality() == oms_causality_input) ||
+      (conB->getCausality() == oms_causality_output && conA->getCausality() == oms_causality_input)))
       return logError("Causality mismatch in connection: " + std::string(crefA) + " -> " + std::string(crefB));
   }
+  if ((crefA.isValidIdent() && conA->getCausality() == oms_causality_input) ||
+      (!crefA.isValidIdent() && conA->getCausality() == oms_causality_output))
+    connections.back() = new oms3::Connection(crefA, crefB);
+  else
+    connections.back() = new oms3::Connection(crefB, crefA);
 
-  connections.back() = new oms3::Connection(crefA,crefB);
   connections.push_back(NULL);
   return oms_status_ok;
 }
@@ -852,14 +878,19 @@ oms_status_enu_t oms3::System::addBus(const oms3::ComRef& cref)
 {
   oms3::ComRef tail(cref);
   oms3::ComRef head = tail.pop_front();
+
   auto subsystem = subsystems.find(head);
   if (subsystem != subsystems.end())
     return subsystem->second->addBus(tail);
 
+  auto component = components.find(head);
+  if (component != components.end())
+    return logError("Bus connectors cannot be added to components"); ///< TODO: Implement bus connectors for components
+
   if (type == oms_system_tlm)
     return logError_NotForTlmSystem;
   if (!cref.isValidIdent())
-    return logError("Not a valid ident: " + std::string(cref));
+    return logError_InvalidIdent(cref);
 
   oms3::BusConnector* bus = new oms3::BusConnector(cref);
   busconnectors.back() = bus;
@@ -888,7 +919,7 @@ oms_status_enu_t oms3::System::addTLMBus(const oms3::ComRef& cref, const std::st
   if (type == oms_system_tlm)
     return logError_NotForTlmSystem;
   if (!cref.isValidIdent())
-    return logError("Not a valid ident: " + std::string(cref));
+    return logError_InvalidIdent(cref);
 
   oms3::TLMBusConnector* bus = new oms3::TLMBusConnector(cref, domain, dimensions, interpolation, this);
   tlmbusconnectors.back() = bus;
@@ -912,7 +943,7 @@ oms_status_enu_t oms3::System::addConnectorToBus(const oms3::ComRef& busCref, co
   }
 
   if (!busTail.isEmpty() && !connectorTail.isEmpty() && busHead != connectorHead)
-    return logError("Connector and bus must belong to the same system");
+    return logError_BusAndConnectorNotSameSystem;
   if (type == oms_system_tlm)
     return logError_NotForTlmSystem;
 
@@ -938,14 +969,14 @@ oms_status_enu_t oms3::System::deleteConnectorFromBus(const oms3::ComRef& busCre
   }
 
   if(!busTail.isEmpty() && !connectorTail.isEmpty() && busHead != connectorHead)
-    return logError("Connector and bus must belong to the same system");
+    return logError_BusAndConnectorNotSameSystem;
   if(type == oms_system_tlm)
     return logError_NotForTlmSystem;
 
   for(auto& bus : busconnectors)
     if(bus && bus->getName() == busCref)
       if (oms_status_ok != bus->deleteConnector(connectorCref))
-        return logError("Connector not found: "+std::string(connectorCref));
+        return logError_ConnectorNotInSystem(connectorCref, this);
 
   return oms_status_ok;
 }
@@ -973,7 +1004,7 @@ oms_status_enu_t oms3::System::addConnectorToTLMBus(const oms3::ComRef& busCref,
     if (connector && connector->getName() == connectorCref)
       found = true;
   if (!found)
-    return logError("Connector not found in system: " + std::string(connectorCref));
+    return logError_ConnectorNotInSystem(connectorCref, this);
 
   for(auto& bus : tlmbusconnectors)
   {
@@ -984,6 +1015,33 @@ oms_status_enu_t oms3::System::addConnectorToTLMBus(const oms3::ComRef& busCref,
         return status;
     }
   }
+  return oms_status_ok;
+}
+
+oms_status_enu_t oms3::System::deleteConnectorFromTLMBus(const oms3::ComRef& busCref, const oms3::ComRef& connectorCref)
+{
+  oms3::ComRef busTail(busCref);
+  oms3::ComRef busHead = busTail.pop_front();
+  oms3::ComRef connectorTail(connectorCref);
+  oms3::ComRef connectorHead = connectorTail.pop_front();
+  //If both bus and connector references the same subsystem, recurse into that subsystem
+  if(busHead == connectorHead)
+  {
+    auto subsystem = subsystems.find(busHead);
+    if(subsystem != subsystems.end())
+      return subsystem->second->deleteConnectorFromTLMBus(busTail,connectorTail);
+  }
+
+  if(!busTail.isEmpty() && !connectorTail.isEmpty() && busHead != connectorHead)
+    return logError_BusAndConnectorNotSameSystem;
+  if(type == oms_system_tlm)
+    return logError_NotForTlmSystem;
+
+  for(auto& bus : tlmbusconnectors)
+    if(bus && bus->getName() == busCref)
+      if (oms_status_ok != bus->deleteConnector(connectorCref))
+        return logError_ConnectorNotInSystem(connectorCref, this);
+
   return oms_status_ok;
 }
 
@@ -1101,7 +1159,7 @@ oms_status_enu_t oms3::System::setTLMBusGeometry(const oms3::ComRef& cref, const
 oms3::Connection* oms3::System::getConnection(const oms3::ComRef& crefA, const oms3::ComRef& crefB)
 {
   for (auto& connection : connections)
-    if (connection && ((connection->getSignalA() == crefA && connection->getSignalB() == crefB) || (connection->getSignalA() == crefB && connection->getSignalB() == crefA)))
+    if (connection && connection->isEqual(crefA, crefB))
       return connection;
   return NULL;
 }
@@ -1172,7 +1230,11 @@ oms_status_enu_t oms3::System::updateDependencyGraphs()
     Connector* varB = getConnector(connection->getSignalB());
     if (varA && varB)
     {
-      if (varA->isOutput() && varB->isInput())
+      // flip causality checks for connectors (top-level crefs)
+      bool outA = connection->getSignalA().isValidIdent() ? varA->isInput() : varA->isOutput();
+      bool inB = connection->getSignalB().isValidIdent() ? varB->isOutput() : varB->isInput();
+
+      if (outA && inB)
       {
         initialUnknownsGraph.addEdge(Connector(varA->getCausality(), varA->getType(), connection->getSignalA()), Connector(varB->getCausality(), varB->getType(), connection->getSignalB()));
         outputsGraph.addEdge(Connector(varA->getCausality(), varA->getType(), connection->getSignalA()), Connector(varB->getCausality(), varB->getType(), connection->getSignalB()));
@@ -1187,11 +1249,90 @@ oms_status_enu_t oms3::System::updateDependencyGraphs()
   return oms_status_ok;
 }
 
+oms_status_enu_t oms3::System::getBoolean(const ComRef& cref, bool& value)
+{
+  switch (getModel()->getModelState())
+  {
+    case oms_modelState_instantiated:
+    case oms_modelState_initialization:
+    case oms_modelState_simulation:
+      break;
+    default:
+      return logError_ModelInWrongState(getModel());
+  }
+
+  oms3::ComRef tail(cref);
+  oms3::ComRef head = tail.pop_front();
+
+  auto subsystem = subsystems.find(head);
+  if (subsystem != subsystems.end())
+    return subsystem->second->getBoolean(tail, value);
+
+  auto component = components.find(head);
+  if (component != components.end())
+    return component->second->getBoolean(tail, value);
+
+  for (auto& connector : connectors)
+  {
+    if (connector && connector->getName() == cref && connector->isTypeBoolean())
+    {
+      auto booleanValue = booleanValues.find(cref);
+      if (booleanValue != booleanValues.end())
+        value = booleanValue->second;
+      else
+        value = 0; // default value
+      return oms_status_ok;
+    }
+  }
+
+  return oms_status_error;
+}
+
+oms_status_enu_t oms3::System::getInteger(const ComRef& cref, int& value)
+{
+  switch (getModel()->getModelState())
+  {
+    case oms_modelState_instantiated:
+    case oms_modelState_initialization:
+    case oms_modelState_simulation:
+      break;
+    default:
+      return logError_ModelInWrongState(getModel());
+  }
+
+  oms3::ComRef tail(cref);
+  oms3::ComRef head = tail.pop_front();
+
+  auto subsystem = subsystems.find(head);
+  if (subsystem != subsystems.end())
+    return subsystem->second->getInteger(tail, value);
+
+  auto component = components.find(head);
+  if (component != components.end())
+    return component->second->getInteger(tail, value);
+
+  for (auto& connector : connectors)
+  {
+    if (connector && connector->getName() == cref && connector->isTypeInteger())
+    {
+      auto integerValue = integerValues.find(cref);
+      if (integerValue != integerValues.end())
+        value = integerValue->second;
+      else
+        value = 0; // default value
+      return oms_status_ok;
+    }
+  }
+
+  return oms_status_error;
+}
+
 oms_status_enu_t oms3::System::getReal(const ComRef& cref, double& value)
 {
   switch (getModel()->getModelState())
   {
     case oms_modelState_instantiated:
+    case oms_modelState_initialization:
     case oms_modelState_simulation:
       break;
     default:
@@ -1225,11 +1366,78 @@ oms_status_enu_t oms3::System::getReal(const ComRef& cref, double& value)
   return oms_status_error;
 }
 
+oms_status_enu_t oms3::System::setBoolean(const ComRef& cref, bool value)
+{
+  switch (getModel()->getModelState())
+  {
+    case oms_modelState_instantiated:
+    case oms_modelState_initialization:
+    case oms_modelState_simulation:
+      break;
+    default:
+      return logError_ModelInWrongState(getModel());
+  }
+
+  oms3::ComRef tail(cref);
+  oms3::ComRef head = tail.pop_front();
+
+  auto subsystem = subsystems.find(head);
+  if (subsystem != subsystems.end())
+    return subsystem->second->setBoolean(tail, value);
+
+  auto component = components.find(head);
+  if (component != components.end())
+    return component->second->setBoolean(tail, value);
+
+  for (auto& connector : connectors)
+    if (connector && connector->getName() == cref && connector->isTypeBoolean())
+    {
+      booleanValues[cref] = value;
+      return oms_status_ok;
+    }
+
+  return oms_status_error;
+}
+
+oms_status_enu_t oms3::System::setInteger(const ComRef& cref, int value)
+{
+  switch (getModel()->getModelState())
+  {
+    case oms_modelState_instantiated:
+    case oms_modelState_initialization:
+    case oms_modelState_simulation:
+      break;
+    default:
+      return logError_ModelInWrongState(getModel());
+  }
+
+  oms3::ComRef tail(cref);
+  oms3::ComRef head = tail.pop_front();
+
+  auto subsystem = subsystems.find(head);
+  if (subsystem != subsystems.end())
+    return subsystem->second->setInteger(tail, value);
+
+  auto component = components.find(head);
+  if (component != components.end())
+    return component->second->setInteger(tail, value);
+
+  for (auto& connector : connectors)
+    if (connector && connector->getName() == cref && connector->isTypeInteger())
+    {
+      integerValues[cref] = value;
+      return oms_status_ok;
+    }
+
+  return oms_status_error;
+}
+
 oms_status_enu_t oms3::System::setReal(const ComRef& cref, double value)
 {
   switch (getModel()->getModelState())
   {
     case oms_modelState_instantiated:
+    case oms_modelState_initialization:
     case oms_modelState_simulation:
       break;
     default:
@@ -1289,5 +1497,84 @@ oms_status_enu_t oms3::System::importFromSSD_ConnectionGeometry(const pugi::xml_
       return oms_status_error;
     }
   }
+  return oms_status_ok;
+}
+
+oms_status_enu_t oms3::System::registerSignalsForResultFile(ResultWriter& resultFile)
+{
+  for (const auto& component : components)
+    if (oms_status_ok != component.second->registerSignalsForResultFile(resultFile))
+      return oms_status_error;
+
+  for (const auto& subsystem : subsystems)
+    if (oms_status_ok != subsystem.second->registerSignalsForResultFile(resultFile))
+      return oms_status_error;
+
+  resultFileMapping.clear();
+  for (unsigned int i=0; i<connectors.size(); ++i)
+  {
+    //if (!exportVariables[i])
+    //  continue;
+
+    if (!connectors[i])
+      continue;
+
+    auto const& connector = connectors[i];
+
+    if (oms_signal_type_real == connector->getType())
+    {
+      unsigned int ID = resultFile.addSignal(std::string(getFullCref() + connector->getName()), "connector", SignalType_REAL);
+      resultFileMapping[ID] = i;
+    }
+    else if (oms_signal_type_integer == connector->getType())
+    {
+      unsigned int ID = resultFile.addSignal(std::string(connector->getName()), "connector", SignalType_INT);
+      resultFileMapping[ID] = i;
+    }
+    else if (oms_signal_type_boolean == connector->getType())
+    {
+      unsigned int ID = resultFile.addSignal(std::string(connector->getName()), "connector", SignalType_BOOL);
+      resultFileMapping[ID] = i;
+    }
+  }
+
+  return oms_status_ok;
+}
+
+oms_status_enu_t oms3::System::updateSignals(ResultWriter& resultFile, double time)
+{
+  for (const auto& component : components)
+    if (oms_status_ok != component.second->updateSignals(resultFile, time))
+      return oms_status_error;
+
+  for (const auto& subsystem : subsystems)
+    if (oms_status_ok != subsystem.second->updateSignals(resultFile, time))
+      return oms_status_error;
+
+  for (auto const &it : resultFileMapping)
+  {
+    unsigned int ID = it.first;
+    auto const& connector = connectors[it.second];
+    SignalValue_t value;
+    if (oms_signal_type_real == connector->getType())
+    {
+      if (oms_status_ok != getReal(connector->getName(), value.realValue))
+        return logError("failed to fetch connector " + std::string(connector->getName()));
+      resultFile.updateSignal(ID, value);
+    }
+    else if (oms_signal_type_integer == connector->getType())
+    {
+      if (oms_status_ok != getInteger(connector->getName(), value.intValue))
+        return logError("failed to fetch variable " + std::string(connector->getName()));
+      resultFile.updateSignal(ID, value);
+    }
+    else if (oms_signal_type_boolean == connector->getType())
+    {
+      if (oms_status_ok != getBoolean(connector->getName(), value.boolValue))
+        return logError("failed to fetch variable " + std::string(connector->getName()));
+      resultFile.updateSignal(ID, value);
+    }
+  }
+
   return oms_status_ok;
 }

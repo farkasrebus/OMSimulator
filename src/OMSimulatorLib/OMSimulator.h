@@ -83,6 +83,7 @@ oms_status_enu_t oms3_setBusGeometry(const char* bus, const ssd_connector_geomet
 oms_status_enu_t oms3_addTLMBus(const char* cref, const char* domain, const int dimensions, const oms_tlm_interpolation_t interpolation);
 oms_status_enu_t oms3_getTLMBus(const char* cref, oms3_tlmbusconnector_t** tlmBusConnector);
 oms_status_enu_t oms3_addConnectorToTLMBus(const char* busCref, const char* connectorCref, const char *type);
+oms_status_enu_t oms3_deleteConnectorFromTLMBus(const char* busCref, const char* connectorCref);
 oms_status_enu_t oms3_setTLMBusGeometry(const char* bus, const ssd_connector_geometry_t* geometry);
 oms_status_enu_t oms3_addTLMConnection(const char* crefA, const char* crefB, double delay, double alpha, double linearimpedance, double angularimpedance);
 oms_status_enu_t oms3_addExternalModel(const char* cref, const char* path, const char* startscript);
@@ -100,6 +101,14 @@ oms_status_enu_t oms3_exportDependencyGraphs(const char* cref, const char* initi
 oms_status_enu_t oms3_setTLMInitialValues(const char *cref, const char *ifc, const double values[], int nvalues);
 oms_status_enu_t oms3_getReal(const char* cref, double* value);
 oms_status_enu_t oms3_setReal(const char* cref, double value);
+oms_status_enu_t oms3_setResultFile(const char* cref, const char* filename, int bufferSize);
+oms_status_enu_t oms3_addSignalsToResults(const char* cref, const char* regex);
+oms_status_enu_t oms3_removeSignalsFromResults(const char* cref, const char* regex);
+oms_status_enu_t oms3_getStartTime(const char* cref, double* startTime);
+oms_status_enu_t oms3_setStartTime(const char* cref, double startTime);
+oms_status_enu_t oms3_getStopTime(const char* cref, double* stopTime);
+oms_status_enu_t oms3_setStopTime(const char* cref, double stopTime);
+oms_status_enu_t oms3_setFixedStepSize(const char* cref, double stepSize);
 
 /* not implemented yet */
 oms_status_enu_t oms3_setSimulationInformation(const char* cref, ssd_simulation_information_t* info);

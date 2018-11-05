@@ -97,6 +97,8 @@ oms_status_enu_t oms3::SystemWC::instantiate()
 
 oms_status_enu_t oms3::SystemWC::initialize()
 {
+  time = getModel()->getStartTime();
+
   for (const auto& subsystem : getSubSystems())
     if (oms_status_ok != subsystem.second->initialize())
       return oms_status_error;
@@ -104,6 +106,12 @@ oms_status_enu_t oms3::SystemWC::initialize()
   for (const auto& component : getComponents())
     if (oms_status_ok != component.second->initialize())
       return oms_status_error;
+
+  if (oms_status_ok != updateDependencyGraphs())
+    return oms_status_error;
+
+  if (oms_status_ok != updateInputs(initialUnknownsGraph))
+    return oms_status_error;
 
   return oms_status_ok;
 }
@@ -137,21 +145,28 @@ oms_status_enu_t oms3::SystemWC::stepUntil(double stopTime)
 
     for (const auto& component : getComponents())
     {
-      if (component.second->getType() != oms_component_fmu)
-        return logError("Unexpected component type");
+      oms_status_enu_t status = oms_status_ok;
+      if (oms_component_fmu == component.second->getType())
+        status = dynamic_cast<ComponentFMUCS*>(component.second)->stepUntil(tNext);
+      else if (oms_component_table == component.second->getType())
+        status = oms_status_ok;
 
-      if (oms_status_ok != dynamic_cast<ComponentFMUCS*>(component.second)->stepUntil(tNext))
-        return oms_status_error;
+      if (oms_status_ok != status)
+        return status;
     }
 
     time = tNext;
-    updateInputs(outputsGraph, false);
+    if (isTopLevelSystem())
+      getModel()->emit(time);
+    updateInputs(outputsGraph);
+    if (isTopLevelSystem())
+      getModel()->emit(time);
   }
 
   return oms_status_ok;
 }
 
-oms_status_enu_t oms3::SystemWC::updateInputs(oms3::DirectedGraph& graph, bool discrete)
+oms_status_enu_t oms3::SystemWC::updateInputs(oms3::DirectedGraph& graph)
 {
   // input := output
   const std::vector< std::vector< std::pair<int, int> > >& sortedConnections = graph.getSortedConnections();

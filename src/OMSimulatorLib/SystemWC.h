@@ -58,9 +58,9 @@ namespace oms3
     double getTolerance() const {return tolerance;}
     double getTime() const {return time;}
     double getStepSize() const {return stepSize;}
-    void setStepSize(double stepSize) {this->stepSize=stepSize;}
+    oms_status_enu_t setFixedStepSize(double stepSize) {this->stepSize=stepSize; return oms_status_ok;}
 
-    oms_status_enu_t updateInputs(DirectedGraph& graph, bool discrete);
+    oms_status_enu_t updateInputs(DirectedGraph& graph);
 
   protected:
     SystemWC(const ComRef& cref, Model* parentModel, System* parentSystem);
@@ -74,9 +74,6 @@ namespace oms3
     double time;
     double stepSize = 1e-1;
     double tolerance = 1e-4;
-
-    DirectedGraph initialUnknownsGraph;
-    DirectedGraph outputsGraph;
   };
 }
 

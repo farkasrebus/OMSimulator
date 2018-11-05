@@ -110,7 +110,7 @@ private:
 #define logError_ModelInWrongState(model)                    logError("Model \"" + std::string(model->getCref()) + "\" is in wrong model state")
 #define logError_ModelNotInScope(cref)                       logError("Model \"" + std::string(cref) + "\" does not exist in the scope")
 #define logError_NotForScSystem                              logError("Not available for strongly coupled systems")
-#define logError_NotForTlmSystem                             logError("Not available for TLM systems");
+#define logError_NotForTlmSystem                             logError("Not available for TLM systems")
 #define logError_NotImplemented                              logError("Not implemented")
 #define logError_OnlyForExternalModels                       logError("Only available for TLM sub models (aka external models)")
 #define logError_OnlyForModel                                logError("Only implemented for model identifiers")
@@ -119,4 +119,7 @@ private:
 #define logError_SystemNotInModel(model, system)             logError("Model \"" + std::string(model) + "\" does not contain system \"" + std::string(system) + "\"")
 #define logError_Termination(system)                         logError("Termination of system \"" + std::string(system) + "\" failed")
 #define logError_WrongSchema(name)                           logError("Wrong xml schema detected. Unexpected tag \"" + name + "\"")
+#define logError_InvalidIdent(cref)                          logError("\"" + std::string(cref) + "\" is not a valid ident")
+#define logError_BusAndConnectorNotSameModel                 logError("Bus and connector must belong to same model")
+#define logError_BusAndConnectorNotSameSystem                logError("Bus and connector must belong to same system")
 #endif

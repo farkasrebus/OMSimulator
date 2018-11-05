@@ -36,6 +36,8 @@
 #include "DirectedGraph.h"
 #include "Element.h"
 #include "FMUInfo.h"
+#include "Logging.h"
+#include "ResultWriter.h"
 #include "Types.h"
 #include <fmilib.h>
 #include <pugixml.hpp>
@@ -43,6 +45,7 @@
 namespace oms3
 {
   class System;
+  class Model;
 
   void fmiLogger(jm_callbacks* c, jm_string module, jm_log_level_enu_t log_level, jm_string message);
   void fmi2logger(fmi2_component_environment_t env, fmi2_string_t instanceName, fmi2_status_t status, fmi2_string_t category, fmi2_string_t message, ...);
@@ -62,6 +65,8 @@ namespace oms3
     oms_component_enu_t getType() const {return type;}
     virtual const oms3::FMUInfo* getFMUInfo() const {return NULL;}
     System* getParentSystem() const {return parentSystem;}
+    Model* getModel() const;
+    void setGeometry(const ssd::ElementGeometry& geometry) {element.setGeometry(&geometry);}
 
     virtual oms_status_enu_t exportToSSD(pugi::xml_node& node) const = 0;
     virtual oms_status_enu_t instantiate() = 0;
@@ -71,8 +76,15 @@ namespace oms3
     const DirectedGraph& getInitialUnknownsGraph() {return initialUnknownsGraph;}
     const DirectedGraph& getOutputsGraph() {return outputsGraph;}
 
-    virtual oms_status_enu_t getReal(const ComRef& cref, double& value) const = 0;
-    virtual oms_status_enu_t setReal(const ComRef& cref, double value) = 0;
+    virtual oms_status_enu_t getBoolean(const ComRef& cref, bool& value) {return logError_NotImplemented;}
+    virtual oms_status_enu_t getInteger(const ComRef& cref, int& value) {return logError_NotImplemented;}
+    virtual oms_status_enu_t getReal(const ComRef& cref, double& value) {return logError_NotImplemented;}
+    virtual oms_status_enu_t setBoolean(const ComRef& cref, bool value) {return logError_NotImplemented;}
+    virtual oms_status_enu_t setInteger(const ComRef& cref, int value) {return logError_NotImplemented;}
+    virtual oms_status_enu_t setReal(const ComRef& cref, double value) {return logError_NotImplemented;}
+
+    virtual oms_status_enu_t registerSignalsForResultFile(ResultWriter& resultFile) = 0;
+    virtual oms_status_enu_t updateSignals(ResultWriter& resultWriter, double time) = 0;
 
   protected:
     Component(const ComRef& cref, oms_component_enu_t type, System* parentSystem, const std::string& path);
