@@ -210,11 +210,17 @@ bool oms3::System::validCref(const oms3::ComRef& cref)
   if (getComponent(cref))
     return false;
 
+  if (getConnector(cref))
+    return false;
+
   return true;
 }
 
 oms_status_enu_t oms3::System::addSubSystem(const oms3::ComRef& cref, oms_system_enu_t type)
 {
+  if (cref.isEmpty())
+    return logError_AlreadyInScope(getFullCref());
+
   if (cref.isValidIdent())
   {
     if (this->type == oms_system_sc)
@@ -246,6 +252,9 @@ oms_status_enu_t oms3::System::addSubModel(const oms3::ComRef& cref, const std::
 {
   if (cref.isValidIdent())
   {
+    if (!validCref(cref))
+      return logError_AlreadyInScope(getFullCref() + cref);
+
     Component* component = NULL;
 
     std::string extension = "";
@@ -392,12 +401,12 @@ oms_status_enu_t oms3::System::importFromSSD(const pugi::xml_node& node)
         ComRef startConnector = ComRef(itConnectors->attribute("startConnector").as_string());
         ComRef endElement = ComRef(itConnectors->attribute("endElement").as_string());
         ComRef endConnector = ComRef(itConnectors->attribute("endConnector").as_string());
-        ComRef crefA = startElement;
-        if (!startConnector.isEmpty())
-          crefA = crefA + startConnector;
-        ComRef crefB = endElement;
-        if (!endConnector.isEmpty())
-          crefB = crefB + endConnector;
+        ComRef crefA = startConnector;
+        if (!startElement.isEmpty())
+          crefA = startElement + startConnector;
+        ComRef crefB = endConnector;
+        if (!endElement.isEmpty())
+          crefB = endElement + endConnector;
         if (oms_status_ok != addConnection(crefA, crefB))
           return logError("Failed to import " + std::string(oms2::ssd::ssd_connection));
         else
@@ -609,6 +618,8 @@ oms_status_enu_t oms3::System::addConnector(const oms3::ComRef& cref, oms_causal
     return logError_NotForTlmSystem;
   if (!cref.isValidIdent())
     return logError_InvalidIdent(cref);
+  if (!validCref(cref))
+    return logError_AlreadyInScope(getFullCref() + cref);
 
   connectors.back() = new oms3::Connector(causality, type, cref);
   connectors.push_back(NULL);
@@ -779,6 +790,13 @@ oms_status_enu_t oms3::System::addConnection(const oms3::ComRef& crefA, const om
 
 oms_status_enu_t oms3::System::updateConnection(const oms3::ComRef& crefA, const oms3::ComRef& crefB, const oms3_connection_t* connection)
 {
+  oms3::Connection *connection_ = getConnection(crefA, crefB);
+  if (connection_)
+  {
+    *connection_ = *(reinterpret_cast<const oms3::Connection*>(connection));
+    return oms_status_ok;
+  }
+
   oms3::ComRef tailA(crefA);
   oms3::ComRef headA = tailA.pop_front();
 
@@ -793,32 +811,11 @@ oms_status_enu_t oms3::System::updateConnection(const oms3::ComRef& crefA, const
       return subsystem->second->updateConnection(tailA, tailB, connection);
   }
 
-  oms3::Connection *connection_ = getConnection(crefA, crefB);
-  if (connection_)
-  {
-    *connection_ = *(reinterpret_cast<const oms3::Connection*>(connection));
-    return oms_status_ok;
-  }
-
   return logError_ConnectionNotInSystem(crefA, crefB, this);
 }
 
 oms_status_enu_t oms3::System::deleteConnection(const oms3::ComRef& crefA, const oms3::ComRef& crefB)
 {
-  oms3::ComRef tailA(crefA);
-  oms3::ComRef headA = tailA.pop_front();
-
-  oms3::ComRef tailB(crefB);
-  oms3::ComRef headB = tailB.pop_front();
-
-  //If both A and B references the same subsystem, recurse into that subsystem
-  if (headA == headB)
-  {
-    auto subsystem = subsystems.find(headA);
-    if (subsystem != subsystems.end())
-      return subsystem->second->deleteConnection(tailA, tailB);
-  }
-
   for (auto& connection : connections)
   {
     if (connection && connection->isEqual(crefA, crefB))
@@ -831,6 +828,20 @@ oms_status_enu_t oms3::System::deleteConnection(const oms3::ComRef& crefA, const
 
       return oms_status_ok;
     }
+  }
+
+  oms3::ComRef tailA(crefA);
+  oms3::ComRef headA = tailA.pop_front();
+
+  oms3::ComRef tailB(crefB);
+  oms3::ComRef headB = tailB.pop_front();
+
+  //If both A and B references the same subsystem, recurse into that subsystem
+  if (headA == headB)
+  {
+    auto subsystem = subsystems.find(headA);
+    if (subsystem != subsystems.end())
+      return subsystem->second->deleteConnection(tailA, tailB);
   }
 
   return logError_ConnectionNotInSystem(crefA, crefB, this);
@@ -1096,7 +1107,7 @@ oms_status_enu_t oms3::System::setConnectorGeometry(const oms3::ComRef& cref, co
   return logError("Connector " + std::string(cref) + " not found in system " + std::string(getCref()));
 }
 
-oms_status_enu_t oms3::System::setConnectionGeometry(const oms3::ComRef& crefA, const oms3::ComRef& crefB, const oms2::ssd::ConnectionGeometry *geometry)
+oms_status_enu_t oms3::System::setConnectionGeometry(const oms3::ComRef& crefA, const oms3::ComRef& crefB, const oms3::ssd::ConnectionGeometry *geometry)
 {
   oms3::ComRef tailA(crefA);
   oms3::ComRef headA = tailA.pop_front();
@@ -1169,6 +1180,68 @@ oms3::Model* oms3::System::getModel()
   if (parentSystem)
     return parentSystem->getModel();
   return parentModel;
+}
+
+oms_status_enu_t oms3::System::deleteAllConectionsTo(const oms3::ComRef& cref)
+{
+  for (int i=0; i<connections.size(); ++i)
+  {
+    while (connections[i] && connections[i]->containsSignal(cref))
+    {
+      delete connections[i];
+
+      connections.pop_back();   // last element is always NULL
+      connections[i] = connections.back();
+      connections.back() = NULL;
+    }
+  }
+
+  return oms_status_ok;
+}
+
+oms_status_enu_t oms3::System::delete_(const oms3::ComRef& cref)
+{
+  oms3::ComRef tail(cref);
+  oms3::ComRef front = tail.pop_front();
+
+  if (tail.isEmpty())
+  {
+    auto subsystem = subsystems.find(front);
+    if (subsystem != subsystems.end())
+    {
+      deleteAllConectionsTo(front);
+      delete subsystem->second;
+      subsystems.erase(subsystem);
+      return oms_status_ok;
+    }
+
+    auto component = components.find(front);
+    if (component != components.end())
+    {
+      deleteAllConectionsTo(front);
+      delete component->second;
+      components.erase(component);
+      return oms_status_ok;
+    }
+
+    for (int i=0; i<connectors.size()-1; ++i)
+      if (connectors[i]->getName() == front)
+      {
+        delete connectors[i];
+        connectors.pop_back();   // last element is always NULL
+        connectors[i] = connectors.back();
+        connectors.back() = NULL;
+        return oms_status_ok;
+      }
+  }
+  else
+  {
+    auto subsystem = subsystems.find(front);
+    if (subsystem != subsystems.end())
+      return subsystem->second->delete_(tail);
+  }
+
+  return oms_status_error;
 }
 
 bool oms3::System::copyResources()
@@ -1488,7 +1561,7 @@ oms_status_enu_t oms3::System::importFromSSD_ConnectionGeometry(const pugi::xml_
     oms3::Connection *connection = getConnection(crefA, crefB);
     if (connection)
     {
-      oms2::ssd::ConnectionGeometry geometry;
+      oms3::ssd::ConnectionGeometry geometry;
       geometry.importFromSSD(connectionGeometryNode);
       connection->setGeometry(&geometry);
     }
