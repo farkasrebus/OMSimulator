@@ -172,7 +172,7 @@ namespace oms2
     void setMasterAlgorithm(MasterAlgorithm value) {masterAlgorithm = value;}
     MasterAlgorithm getMasterAlgorithm() const {return masterAlgorithm;}
     //
-    StepSizeConfiguration* getStepSizeConfiguration() {return stepSizeConfiguration;};
+    StepSizeConfiguration getStepSizeConfiguration() {return stepSizeConfiguration;};
     //
     void setTolerance(double value) {tolerance = value;}
     double getTolerance() const {return tolerance;}
@@ -221,7 +221,7 @@ namespace oms2
     unsigned int bufferSize = 1;
     ResultWriter *resultFile = NULL;
     MasterAlgorithm masterAlgorithm = MasterAlgorithm::STANDARD;  ///< master algorithm for FMI co-simulation, default MasterAlgorithm::STANDARD
-    StepSizeConfiguration* stepSizeConfiguration;
+    StepSizeConfiguration stepSizeConfiguration;
 
     oms_modelState_enu_t modelState;  ///< internal model state, e.g. initialization state
   };

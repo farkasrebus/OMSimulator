@@ -1150,29 +1150,31 @@ oms_status_enu_t oms2::FMICompositeModel::stepUntilASSC(ResultWriter& resultWrit
   logTrace();
   auto start = std::chrono::steady_clock::now();
 
-  StepSizeConfiguration* ssc=oms2::Scope::GetInstance().getModel(getName())->getStepSizeConfiguration();
-  //store previous values of eventIndicators
-  std::vector<std::pair<oms2::SignalRef,double>> prevValues;
+  StepSizeConfiguration ssc=oms2::Scope::GetInstance().getModel(getName())->getStepSizeConfiguration();
+  //store previous values of eventIndicators by type
+  std::vector<std::pair<oms2::SignalRef,double>> prevDoubleValues;
+  std::vector<std::pair<oms2::SignalRef,int>> prevIntValues;
+  std::vector<std::pair<oms2::SignalRef,bool>> prevBoolValues;
   //get inital values of eventIndicators
-  for (auto const& sr: ssc -> getEventIndicators()) {
-    double value;
+  for (auto const& sr: ssc.getEventIndicators()) {
     oms2::Variable* var = getVariable(sr);
     if (var->isTypeReal()) {
+      double value;
       this -> getReal(sr,value);
+      prevDoubleValues.push_back(std::pair<oms2::SignalRef,double>(sr, value));
     } else if (var->isTypeInteger()) {
-      int intval;
-      this -> getInteger(sr,intval);
-      value=(double)intval;
+      int value;
+      this -> getInteger(sr,value);
+      prevIntValues.push_back(std::pair<oms2::SignalRef,int>(sr, value));
     } else {//if its a bool value
-      bool boolval;
-      this -> getBoolean(sr,boolval);
-      if (boolval) value=1.0; else value=0.0;
+      bool value;
+      this -> getBoolean(sr,value);
+      prevBoolValues.push_back(std::pair<oms2::SignalRef,bool>(sr, value));
     }
-    prevValues.push_back(std::pair<oms2::SignalRef,double>(sr, value));
   }
-  //general bounds
-  double min=ssc -> getMinimalStepSize();
-  double max=ssc -> getMaximalStepSize();
+  //lower and upper bound
+  double min=ssc.getMinimalStepSize();
+  double max=ssc.getMaximalStepSize();
 
   while (time<stopTime) {
     //This is a minimal step size controller to provide a skeleton for integration
@@ -1180,20 +1182,27 @@ oms_status_enu_t oms2::FMICompositeModel::stepUntilASSC(ResultWriter& resultWrit
     
     //Check if event occurred
     bool event=false;
-    for (auto& pair:prevValues) {
+    for (auto& pair:prevDoubleValues) {
       double currVal;
-      oms2::Variable* var = getVariable(pair.first);
-      if (var -> isTypeReal()) {
-        this -> getReal(pair.first,currVal);
-      } else if (var -> isTypeInteger()) {
-        int intval;
-        this -> getInteger(pair.first,intval);
-        currVal=(double)intval;
-      } else {//if its a bool value
-        bool boolval;
-        this -> getBoolean(pair.first,boolval);
-        if (boolval) currVal=1.0; else currVal=0.0;
+      this -> getReal(pair.first,currVal);
+      if (currVal != pair.second)
+      {
+        event=true;
+        pair.second=currVal;
       }
+    }
+    for (auto& pair:prevIntValues) {
+      int currVal;
+      this -> getInteger(pair.first,currVal);
+      if (currVal != pair.second)
+      {
+        event=true;
+        pair.second=currVal;
+      }
+    }
+    for (auto& pair:prevBoolValues) {
+      bool currVal;
+      this -> getBoolean(pair.first,currVal);
       if (currVal != pair.second)
       {
         event=true;
@@ -1207,7 +1216,7 @@ oms_status_enu_t oms2::FMICompositeModel::stepUntilASSC(ResultWriter& resultWrit
       nextStepSize=min;
     } else {
       //check the next timed event
-      for (const auto& var:ssc -> getTimeIndicators()) {
+      for (const auto& var:ssc.getTimeIndicators()) {
         double nextEvent;
         this -> getReal(var,nextEvent);
         if (nextEvent>time) //smaller values indicate inactivity
@@ -1220,7 +1229,7 @@ oms_status_enu_t oms2::FMICompositeModel::stepUntilASSC(ResultWriter& resultWrit
 
       //check values for threshold crossing detection
 
-      for (const auto& pair:ssc -> getStaticThresholds())
+      for (const auto& pair:ssc.getStaticThresholds())
       {
         double sigval;
         this -> getReal(pair.first,sigval);
@@ -1236,7 +1245,7 @@ oms_status_enu_t oms2::FMICompositeModel::stepUntilASSC(ResultWriter& resultWrit
         }
       }
 
-      for (const auto& pair:ssc -> getDynamicThresholds())
+      for (const auto& pair:ssc.getDynamicThresholds())
       {
         double sigval;
         this -> getReal(pair.first,sigval);

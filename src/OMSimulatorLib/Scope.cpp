@@ -1986,7 +1986,7 @@ oms_status_enu_t oms2::Scope::addEventIndicator(const oms2::SignalRef& signal)
       logError("[oms2::Scope::addEventIndicator] failed");
       return oms_status_error;
     }
-    model -> getStepSizeConfiguration()->addEventIndicator(signal);
+    model -> getStepSizeConfiguration().addEventIndicator(signal);
     
     return oms_status_ok;
   }
@@ -2007,7 +2007,7 @@ oms_status_enu_t oms2::Scope::addTimeIndicator(const oms2::SignalRef& signal)
       logError("[oms2::Scope::addTimeIndicator] failed");
       return oms_status_error;
     }
-    model -> getStepSizeConfiguration()->addTimeIndicator(signal);
+    model -> getStepSizeConfiguration().addTimeIndicator(signal);
     
     return oms_status_ok;
   }
@@ -2028,7 +2028,7 @@ oms_status_enu_t oms2::Scope::addStaticValueIndicator(const oms2::SignalRef& sig
       logError("[oms2::Scope::addStaticValueIndicator] failed");
       return oms_status_error;
     }
-    model -> getStepSizeConfiguration()->addStaticValueIndicator(signal,lower,upper,stepSize);
+    model -> getStepSizeConfiguration().addStaticValueIndicator(signal,lower,upper,stepSize);
     
     return oms_status_ok;
   }
@@ -2049,7 +2049,7 @@ oms_status_enu_t oms2::Scope::addDynamicValueIndicator(const oms2::SignalRef& si
       logError("[oms2::Scope::addDynamicValueIndicator] failed");
       return oms_status_error;
     }
-    model -> getStepSizeConfiguration()->addDynamicValueIndicator(signal,lower,upper,stepSize);
+    model -> getStepSizeConfiguration().addDynamicValueIndicator(signal,lower,upper,stepSize);
     
     return oms_status_ok;
   }
@@ -2070,7 +2070,7 @@ oms_status_enu_t oms2::Scope::setMinimalStepSize(const ComRef& cref, double min)
       return oms_status_error;
     }
 
-    model -> getStepSizeConfiguration() -> setMinimalStepSize(min);
+    model -> getStepSizeConfiguration().setMinimalStepSize(min);
 
     return oms_status_ok;
   }
@@ -2090,78 +2090,13 @@ oms_status_enu_t oms2::Scope::setMaximalStepSize(const ComRef& cref, double max)
       return oms_status_error;
     }
 
-    model -> getStepSizeConfiguration() -> setMaximalStepSize(max);
+    model -> getStepSizeConfiguration().setMaximalStepSize(max);
 
     return oms_status_ok;
   }
 
   return oms_status_error;
 }
-
-/*oms_status_enu_t oms2::Scope::setCriticalVariable(const oms2::SignalRef& signal)
-{
-  logTrace();
-  ComRef cref = signal.getCref();
-
-  if (!cref.isIdent())
-  {
-    // Sub-model
-    ComRef modelCref = cref.first();
-    Model* model = getModel(modelCref);
-    if (!model)
-    {
-      logError("[oms2::Scope::setCriticalVariable] failed");
-      return oms_status_error;
-    }
-    model -> setCriticalVariable(signal);
-    
-    return oms_status_ok;
-  }
-
-  return oms_status_error;
-}
-
-oms_status_enu_t oms2::Scope::getCriticalVariable(const ComRef& cref, char** signal){
-  if (!cref.isIdent()) {
-    // Sub-model
-    ComRef modelCref = cref.first();
-    Model* model = getModel(modelCref);
-    if (!model)
-    {
-      logError("[oms2::Scope::setActivationRatio] failed");
-      return oms_status_error;
-    }
-    SignalRef* critSignal= model-> getStepSizeConfiguration()->getCriticalVariable();
-    std::string name=critSignal->toString();
-    if (!name.empty())
-    {
-      *signal = (char*) malloc(strlen(name.c_str()) + 1);
-      strcpy(*signal, name.c_str());
-    }
-    //*signal=const_cast<char*>(critSignal->toString().c_str());
-
-    return oms_status_ok;
-  } else {
-    Model* model = getModel(cref);
-    if (!model)
-    {
-      logError("[oms2::Scope::setActivationRatio] failed");
-      return oms_status_error;
-    }
-
-    SignalRef* critSignal= model-> getStepSizeConfiguration()->getCriticalVariable();
-    std::string name=critSignal->toString();
-    if (!name.empty())
-    {
-      *signal = (char*) malloc(strlen(name.c_str()) + 1);
-      strcpy(*signal, name.c_str());
-    }
-
-    return oms_status_ok;
-  }
-
-  return oms_status_error;
-}*/
 
 oms_status_enu_t oms2::Scope::setActivationRatio(const ComRef& cref, int k)
 {
