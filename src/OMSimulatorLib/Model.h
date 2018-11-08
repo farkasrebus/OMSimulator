@@ -171,7 +171,7 @@ namespace oms2
     ResultWriter *getResultWriter() const {return resultFile;}
     void setMasterAlgorithm(MasterAlgorithm value) {masterAlgorithm = value;}
     MasterAlgorithm getMasterAlgorithm() const {return masterAlgorithm;}
-    //
+    //Functions for configuring adaptive step size control
     StepSizeConfiguration getStepSizeConfiguration() {return stepSizeConfiguration;};
     void setMinimalStepSize(double min) {stepSizeConfiguration.setMinimalStepSize(min);}
     void setMaximalStepSize(double max) {stepSizeConfiguration.setMaximalStepSize(max);}
@@ -229,7 +229,7 @@ namespace oms2
     unsigned int bufferSize = 1;
     ResultWriter *resultFile = NULL;
     MasterAlgorithm masterAlgorithm = MasterAlgorithm::STANDARD;  ///< master algorithm for FMI co-simulation, default MasterAlgorithm::STANDARD
-    StepSizeConfiguration stepSizeConfiguration;
+    StepSizeConfiguration stepSizeConfiguration;//Configuration data structure for step size control
 
     oms_modelState_enu_t modelState;  ///< internal model state, e.g. initialization state
   };

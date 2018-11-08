@@ -5,6 +5,7 @@
 
 #include <vector>
 
+//auxiliary data structures
 struct staticBound {
     double lower;
     double upper;
@@ -21,7 +22,8 @@ class StepSizeConfiguration {
     public:
         StepSizeConfiguration();
         ~StepSizeConfiguration();
-
+        
+        //data structure class - only getters and setters
         void setMinimalStepSize(double min) {minimalStepSize=min;};
         double getMinimalStepSize() {return minimalStepSize;};
         void setMaximalStepSize(double max) {maximalStepSize=max;};
@@ -43,7 +45,5 @@ class StepSizeConfiguration {
         std::vector<std::pair<const oms2::SignalRef,std::vector<staticBound>>> staticIntervals;
         std::vector<std::pair<const oms2::SignalRef,std::vector<dynamicBound>>> dynamicIntervals;
 };
-
-//TODO: fix initialization
 
 #endif

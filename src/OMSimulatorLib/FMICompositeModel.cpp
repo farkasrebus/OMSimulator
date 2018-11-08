@@ -1176,10 +1176,10 @@ oms_status_enu_t oms2::FMICompositeModel::stepUntilASSC(ResultWriter& resultWrit
   double min=ssc.getMinimalStepSize();
   double max=ssc.getMaximalStepSize();
 
+  //start simulation
   while (time<stopTime) {
-    //This is a minimal step size controller to provide a skeleton for integration
     double nextStepSize=max;
-    //Check if event occurred
+    //detect events
     bool event=false;
     for (auto& pair:prevDoubleValues) {
       double currVal;
@@ -1209,7 +1209,7 @@ oms_status_enu_t oms2::FMICompositeModel::stepUntilASSC(ResultWriter& resultWrit
       }
     }
 
-    //if event occurred change step size to minimal otherwise see other configuration parameters
+    //if event was detected change step size to minimal, otherwise see other configuration parameters
     if (event)
     {
       nextStepSize=min;
@@ -1265,7 +1265,7 @@ oms_status_enu_t oms2::FMICompositeModel::stepUntilASSC(ResultWriter& resultWrit
       }
 
 
-      //ensure bounds
+      //ensure global bounds
       if (nextStepSize<min) nextStepSize=min;
       if (nextStepSize>max) nextStepSize=max;
     }
@@ -1275,7 +1275,7 @@ oms_status_enu_t oms2::FMICompositeModel::stepUntilASSC(ResultWriter& resultWrit
       time=stopTime;
     }
   
-    //After this point everything is copied from standard algorithm
+    //copied from standard algorithm
     for (const auto& it : subModels)
       if (oms_component_fmu_old != it.second->getType())
         it.second->doStep(time);
