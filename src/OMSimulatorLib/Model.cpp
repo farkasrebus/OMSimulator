@@ -50,9 +50,7 @@
 oms3::Model::Model(const oms3::ComRef& cref, const std::string& tempDir)
   : cref(cref), tempDir(tempDir), resultFilename(std::string(cref) + "_res.mat")
 {
-  if (Flags::SuppressPath())
-    logInfo("New model \"" + std::string(cref) + "\" with corresponding temp directory <suppressed>");
-  else
+  if (!Flags::SuppressPath())
     logInfo("New model \"" + std::string(cref) + "\" with corresponding temp directory \"" + tempDir + "\"");
 
   elements.push_back(NULL);
@@ -400,6 +398,8 @@ oms_status_enu_t oms3::Model::initialize()
   clock.reset();
   clock.tic();
 
+  cancelSim = false;
+
   if (!resultFilename.empty())
   {
     std::string resulttype;
@@ -458,6 +458,27 @@ oms_status_enu_t oms3::Model::initialize()
   return oms_status_ok;
 }
 
+oms_status_enu_t oms3::Model::simulate_asynchronous(void (*cb)(const char* cref, double time, oms_status_enu_t status))
+{
+  clock.tic();
+  if (oms_modelState_simulation != modelState)
+  {
+    clock.toc();
+    return logError_ModelInWrongState(this);
+  }
+
+  if (!system)
+  {
+    clock.toc();
+    return logError("Model doesn't contain a system");
+  }
+
+  std::thread([=]{system->stepUntil(stopTime, cb);}).detach();
+  clock.toc();
+
+  return oms_status_ok;
+}
+
 oms_status_enu_t oms3::Model::simulate()
 {
   clock.tic();
@@ -473,7 +494,7 @@ oms_status_enu_t oms3::Model::simulate()
     return logError("Model doesn't contain a system");
   }
 
-  oms_status_enu_t status = system->stepUntil(stopTime);
+  oms_status_enu_t status = system->stepUntil(stopTime, NULL);
   clock.toc();
   return status;
 }
@@ -574,6 +595,15 @@ oms_status_enu_t oms3::Model::addSignalsToResults(const char* regex)
 oms_status_enu_t oms3::Model::removeSignalsFromResults(const char* regex)
 {
   return logError_NotImplemented;
+}
+
+oms_status_enu_t oms3::Model::cancelSimulation_asynchronous()
+{
+  if (oms_modelState_simulation != modelState)
+    return logError_ModelInWrongState(this);
+
+  cancelSim = true;
+  return oms_status_ok;
 }
 
 /* ************************************ */

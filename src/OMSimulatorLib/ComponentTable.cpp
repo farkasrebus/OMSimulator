@@ -130,6 +130,12 @@ oms3::Component* oms3::ComponentTable::NewComponent(const pugi::xml_node& node, 
       for(pugi::xml_node_iterator itConnectors = (*it).begin(); itConnectors != (*it).end(); ++itConnectors)
         component->connectors.push_back(oms3::Connector::NewConnector(*itConnectors));
     }
+    else if(name == oms2::ssd::ssd_element_geometry)
+    {
+      oms3::ssd::ElementGeometry geometry;
+      geometry.importFromSSD(*it);
+      component->setGeometry(geometry);
+    }
     else
     {
       logError_WrongSchema(name);
@@ -150,6 +156,9 @@ oms_status_enu_t oms3::ComponentTable::exportToSSD(pugi::xml_node& node) const
   node.append_attribute("type") = "application/table";
   node.append_attribute("source") = getPath().c_str();
   pugi::xml_node node_connectors = node.append_child(oms2::ssd::ssd_connectors);
+
+  if (element.getGeometry())
+    element.getGeometry()->exportToSSD(node);
 
   for (const auto& connector : connectors)
     if (connector)

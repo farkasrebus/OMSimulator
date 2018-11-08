@@ -82,11 +82,11 @@ namespace oms3
     TLMBusConnector **getTLMBusConnectors() {return &tlmbusconnectors[0];}
     Connection** getConnections(const ComRef &cref);
     oms_status_enu_t addConnection(const ComRef& crefA, const ComRef& crefB);
-    oms_status_enu_t updateConnection(const ComRef& crefA, const ComRef& crefB, const oms3_connection_t* connection);
     oms_status_enu_t deleteConnection(const ComRef& crefA, const ComRef& crefB);
     oms_status_enu_t addTLMConnection(const ComRef& crefA, const ComRef& crefB, double delay, double alpha, double linearimpedance, double angularimpedance);
     oms_status_enu_t setConnectorGeometry(const ComRef& cref, const oms2::ssd::ConnectorGeometry* geometry);
     oms_status_enu_t setConnectionGeometry(const ComRef &crefA, const ComRef &crefB, const oms3::ssd::ConnectionGeometry* geometry);
+    oms_status_enu_t setTLMConnectionParameters(const ComRef &crefA, const ComRef &crefB, const oms3_tlm_connection_parameters_t* parameters);
     oms_status_enu_t addBus(const ComRef& cref);
     oms_status_enu_t addTLMBus(const ComRef& cref, const std::string domain, const int dimensions, const oms_tlm_interpolation_t interpolation);
     oms_status_enu_t addConnectorToBus(const ComRef& busCref, const ComRef& connectorCref);
@@ -99,6 +99,7 @@ namespace oms3
     oms_status_enu_t delete_(const ComRef& cref);
     oms_status_enu_t deleteAllConectionsTo(const ComRef& cref);
     Model* getModel();
+    System* getParentSystem() const {return parentSystem;}
     bool copyResources();
     oms_status_enu_t getAllResources(std::vector<std::string>& resources);
     const std::map<ComRef, System*>& getSubSystems() {return subsystems;}
@@ -111,7 +112,7 @@ namespace oms3
     virtual oms_status_enu_t instantiate() = 0;
     virtual oms_status_enu_t initialize() = 0;
     virtual oms_status_enu_t terminate() = 0;
-    virtual oms_status_enu_t stepUntil(double stopTime) = 0;
+    virtual oms_status_enu_t stepUntil(double stopTime, void (*cb)(const char* ident, double time, oms_status_enu_t status)) = 0;
 
     oms_status_enu_t getBoolean(const ComRef& cref, bool& value);
     oms_status_enu_t getInteger(const ComRef& cref, int& value);

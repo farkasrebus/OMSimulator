@@ -56,7 +56,7 @@ namespace oms3
     oms_status_enu_t instantiate();
     oms_status_enu_t initialize();
     oms_status_enu_t terminate();
-    oms_status_enu_t stepUntil(double stopTime);
+    oms_status_enu_t stepUntil(double stopTime, void (*cb)(const char* ident, double time, oms_status_enu_t status));
 
     oms_status_enu_t connectToSockets(const oms3::ComRef cref, std::string server);
     void disconnectFromSockets(const oms3::ComRef cref);
@@ -78,13 +78,18 @@ namespace oms3
   private:
     void* model;
     std::string address = "";
-    int managerPort=0;
-    int monitorPort=0;
+    int desiredManagerPort=0;
+    int desiredMonitorPort=0;
+    int actualManagerPort=0;
+    int actualMonitorPort=0;
 
     std::vector<ComRef> connectedsubsystems;
     std::map<System*, TLMPlugin*> plugins;
     std::vector<ComRef> initializedsubsystems;
     std::map<ComRef, std::vector<double> > initialValues;
+    std::mutex setConnectedMutex;
+    std::mutex setInitializedMutex;
+    std::map<System*, std::mutex> socketMutexes;
 
     // simulation information
   };

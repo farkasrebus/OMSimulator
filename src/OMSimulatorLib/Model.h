@@ -60,6 +60,7 @@ namespace oms3
     System* getSystem(const ComRef& cref);
     oms_status_enu_t delete_(const ComRef& cref);
     Component* getComponent(const ComRef& cref);
+    System* getTopLevelSystem() const {return system;}
     std::string getTempDirectory() const {return tempDir;}
     oms_status_enu_t rename(const ComRef& cref);
     oms_status_enu_t list(const ComRef& cref, char** contents);
@@ -75,6 +76,7 @@ namespace oms3
 
     oms_status_enu_t instantiate();
     oms_status_enu_t initialize();
+    oms_status_enu_t simulate_asynchronous(void (*cb)(const char* cref, double time, oms_status_enu_t status));
     oms_status_enu_t simulate();
     oms_status_enu_t terminate();
 
@@ -89,6 +91,9 @@ namespace oms3
     oms_status_enu_t emit(double time);
     oms_status_enu_t addSignalsToResults(const char* regex);
     oms_status_enu_t removeSignalsFromResults(const char* regex);
+
+    oms_status_enu_t cancelSimulation_asynchronous();
+    bool cancelSimulation() const {return cancelSim;}
 
   private:
     Model(const ComRef& cref, const std::string& tempDir);
@@ -118,6 +123,8 @@ namespace oms3
     std::string resultFilename;             ///< experiment, default <name>_res.mat
     Clock clock;
     unsigned int clock_id;
+
+    bool cancelSim;
   };
 }
 

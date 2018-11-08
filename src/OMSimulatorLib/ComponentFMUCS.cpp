@@ -36,6 +36,7 @@
 #include "ssd/Tags.h"
 #include "System.h"
 #include "SystemWC.h"
+#include "SystemTLM.h"
 #include <fmilib.h>
 #include <JM/jm_portability.h>
 #include <OMSBoost.h>
@@ -269,6 +270,12 @@ oms3::Component* oms3::ComponentFMUCS::NewComponent(const pugi::xml_node& node, 
         component->connectors.push_back(oms3::Connector::NewConnector(*itConnectors));
       }
     }
+    else if(name == oms2::ssd::ssd_element_geometry)
+    {
+      oms3::ssd::ElementGeometry geometry;
+      geometry.importFromSSD(*it);
+      component->setGeometry(geometry);
+    }
     else
     {
       logError_WrongSchema(name);
@@ -289,6 +296,9 @@ oms_status_enu_t oms3::ComponentFMUCS::exportToSSD(pugi::xml_node& node) const
   node.append_attribute("type") = "application/x-fmu-sharedlibrary";
   node.append_attribute("source") = getPath().c_str();
   pugi::xml_node node_connectors = node.append_child(oms2::ssd::ssd_connectors);
+
+  if (element.getGeometry())
+    element.getGeometry()->exportToSSD(node);
 
   for (const auto& connector : connectors)
     if (connector)
@@ -428,18 +438,31 @@ oms_status_enu_t oms3::ComponentFMUCS::terminate()
   fmi2_status_t fmistatus = fmi2_import_terminate(fmu);
   if (fmi2_status_ok != fmistatus)
     return logError_Termination(getCref());
+
+  fmi2_import_free_instance(fmu);
+  fmi2_import_destroy_dllfmu(fmu);
   return oms_status_ok;
 }
 
 oms_status_enu_t oms3::ComponentFMUCS::stepUntil(double stopTime)
 {
+  System *topLevelSystem = getModel()->getTopLevelSystem();
+
   fmi2_status_t fmistatus;
   double hdef = (stopTime-time) / 1.0;
 
   while (time < stopTime)
   {
+    //Read from TLM sockets if top level system is of TLM type
+    if(topLevelSystem->getType() == oms_system_tlm)
+      reinterpret_cast<SystemTLM*>(topLevelSystem)->readFromSockets(reinterpret_cast<SystemWC*>(getParentSystem()),time,this);
+
     fmistatus = fmi2_import_do_step(fmu, time, hdef, fmi2_true);
     time += hdef;
+
+    //Write to TLM sockets if top level system is of TLM type
+    if(topLevelSystem->getType() == oms_system_tlm)
+      reinterpret_cast<SystemTLM*>(topLevelSystem)->writeToSockets(reinterpret_cast<SystemWC*>(getParentSystem()),time,this);
   }
   time = stopTime;
   return oms_status_ok;
