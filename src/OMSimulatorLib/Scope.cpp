@@ -1986,7 +1986,7 @@ oms_status_enu_t oms2::Scope::addEventIndicator(const oms2::SignalRef& signal)
       logError("[oms2::Scope::addEventIndicator] failed");
       return oms_status_error;
     }
-    model -> getStepSizeConfiguration().addEventIndicator(signal);
+    model -> addEventIndicator(signal);
     
     return oms_status_ok;
   }
@@ -2007,7 +2007,7 @@ oms_status_enu_t oms2::Scope::addTimeIndicator(const oms2::SignalRef& signal)
       logError("[oms2::Scope::addTimeIndicator] failed");
       return oms_status_error;
     }
-    model -> getStepSizeConfiguration().addTimeIndicator(signal);
+    model -> addTimeIndicator(signal);
     
     return oms_status_ok;
   }
@@ -2028,7 +2028,7 @@ oms_status_enu_t oms2::Scope::addStaticValueIndicator(const oms2::SignalRef& sig
       logError("[oms2::Scope::addStaticValueIndicator] failed");
       return oms_status_error;
     }
-    model -> getStepSizeConfiguration().addStaticValueIndicator(signal,lower,upper,stepSize);
+    model -> addStaticValueIndicator(signal,lower,upper,stepSize);
     
     return oms_status_ok;
   }
@@ -2049,7 +2049,7 @@ oms_status_enu_t oms2::Scope::addDynamicValueIndicator(const oms2::SignalRef& si
       logError("[oms2::Scope::addDynamicValueIndicator] failed");
       return oms_status_error;
     }
-    model -> getStepSizeConfiguration().addDynamicValueIndicator(signal,lower,upper,stepSize);
+    model -> addDynamicValueIndicator(signal,lower,upper,stepSize);
     
     return oms_status_ok;
   }
@@ -2070,7 +2070,7 @@ oms_status_enu_t oms2::Scope::setMinimalStepSize(const ComRef& cref, double min)
       return oms_status_error;
     }
 
-    model -> getStepSizeConfiguration().setMinimalStepSize(min);
+    model -> setMinimalStepSize(min);
 
     return oms_status_ok;
   }
@@ -2090,7 +2090,7 @@ oms_status_enu_t oms2::Scope::setMaximalStepSize(const ComRef& cref, double max)
       return oms_status_error;
     }
 
-    model -> getStepSizeConfiguration().setMaximalStepSize(max);
+    model -> setMaximalStepSize(max);
 
     return oms_status_ok;
   }

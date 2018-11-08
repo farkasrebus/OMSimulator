@@ -1172,14 +1172,13 @@ oms_status_enu_t oms2::FMICompositeModel::stepUntilASSC(ResultWriter& resultWrit
       prevBoolValues.push_back(std::pair<oms2::SignalRef,bool>(sr, value));
     }
   }
-  //lower and upper bound
+  //global lower and upper bound
   double min=ssc.getMinimalStepSize();
   double max=ssc.getMaximalStepSize();
 
   while (time<stopTime) {
     //This is a minimal step size controller to provide a skeleton for integration
-    double nextStepSize=communicationInterval;
-    
+    double nextStepSize=max;
     //Check if event occurred
     bool event=false;
     for (auto& pair:prevDoubleValues) {
@@ -1219,7 +1218,7 @@ oms_status_enu_t oms2::FMICompositeModel::stepUntilASSC(ResultWriter& resultWrit
       for (const auto& var:ssc.getTimeIndicators()) {
         double nextEvent;
         this -> getReal(var,nextEvent);
-        if (nextEvent>time) //smaller values indicate inactivity
+        if (nextEvent>=time) //smaller values indicate inactivity
         {
           if (nextEvent-time<nextStepSize) {
             nextStepSize=nextEvent-time;
