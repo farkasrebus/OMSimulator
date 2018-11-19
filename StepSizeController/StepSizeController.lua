@@ -180,6 +180,7 @@ function getNextStepSize(prevValues,zeroCrossings,timedIndicators,communicationI
 	end
 end
 
+--[[
 function oms2_simulateWithASSC(model,communicationInterval,sensitivityModel,imin,tmax)
 	local tcur=0.0
 	--print(dump(sensitivityModel))
@@ -193,3 +194,32 @@ function oms2_simulateWithASSC(model,communicationInterval,sensitivityModel,imin
 		tcur=tcur+nextStepSize
 	end
 end
+]]
+
+function oms2_simulateWithASSC(model,communicationInterval,sensitivityModel,imin,tmax)
+    local start = os.clock()
+    local steps= {}
+    local tcur=0.0
+    --print(dump(sensitivityModel))
+    local prevValues=getValues(sensitivityModel.events)
+    --print(dump(prevValues))
+    while (tcur<tmax)
+    do
+        local nextStepSize = getNextStepSize(prevValues,sensitivityModel.zeroCrossings,sensitivityModel.timeIndicators,communicationInterval,imin,tcur)
+        oms2_setCommunicationInterval(model, nextStepSize)
+        oms2_stepUntil(model,tcur+nextStepSize)
+        tcur=tcur+nextStepSize
+        -- statistics
+        if (steps[nextStepSize]==nil) then steps[nextStepSize]=0 end
+        steps[nextStepSize]=steps[nextStepSize]+1
+    end
+    print(string.format("elapsed time: %.2f\n", os.clock() - start))
+    local sum=0
+    for s,n in pairs(steps)
+    do
+        print("Size: "..s.." Number: "..n)
+        sum=sum+n
+    end
+    print(sum.." steps in total")
+end
+

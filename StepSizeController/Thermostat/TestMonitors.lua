@@ -34,7 +34,7 @@ oms2_addConnection("HeatSystem","CentralMonitor:tempReply","TemperatureMonitor:r
 
 oms2_setResultFile("HeatSystem", "MonitorTest.mat")
 -- configure simulation
-oms2_setStopTime("HeatSystem", 200.0)
+oms2_setStopTime("HeatSystem", 3000.0)
 oms2_setCommunicationInterval("HeatSystem", 1.0)
 oms2_initialize("HeatSystem")
 

@@ -114,7 +114,7 @@ oms2_addSignalsToResults("MonitoredThermostat","TemperatureMonitor:expectedCriti
 oms2_addSignalsToResults("MonitoredThermostat","TemperatureMonitor:expectedCriticalScenarioUpperBound")
 -- configure simulation
 oms2_setCommunicationInterval("MonitoredThermostat", 10.0)
-oms2_setStopTime("MonitoredThermostat", 1000.0)
+oms2_setStopTime("MonitoredThermostat", 3000.0)
 oms2_setMasterAlgorithm("MonitoredThermostat","assc")
 -- configure assc
 oms2_addEventIndicator("MonitoredThermostat.Thermostat:Thermostat_HeatingControlPort_turn_heating_on")
@@ -136,6 +136,7 @@ oms2_setMinimalStepSize("MonitoredThermostat", 0.01)
 oms2_setMaximalStepSize("MonitoredThermostat", 10.0)
 -- simulate
 oms2_initialize("MonitoredThermostat")
+
 oms2_simulate("MonitoredThermostat")
 -- terminate
 oms2_unloadModel("MonitoredThermostat")

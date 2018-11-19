@@ -109,7 +109,7 @@ oms2_addConnection("MonitoredThermostat","CentralMonitor:termReply","ThermostatM
 oms2_addConnection("MonitoredThermostat","CentralMonitor:heatReply","HeatingMonitor:reply")
 oms2_addConnection("MonitoredThermostat","CentralMonitor:tempReply","TemperatureMonitor:reply")
 
-oms2_setResultFile("MonitoredThermostat", "MonitoredThermostat.mat")
+oms2_setResultFile("MonitoredThermostat", "MonitoredThermostat_ssc.mat")
 
 --oms2_setStopTime("MonitoredThermostat", 500.0)
 --oms2_setCommunicationInterval("MonitoredThermostat", 1.0)
@@ -140,7 +140,7 @@ sm.events["MonitoredThermostat.CentralMonitor:tempReq"]="real"
 sm.events["MonitoredThermostat.ThermostatMonitor:reply"]="real"
 sm.events["MonitoredThermostat.HeatingMonitor:reply"]="real"
 sm.events["MonitoredThermostat.TemperatureMonitor:reply"]="real"
--- sm.events["CentralMonitor:heatOnGrant"]=real -- it is possible to include it but useless
+--sm.events["CentralMonitor:heatOnGrant"]=real -- it is possible to include it but useless
 sm.timeIndicators["MonitoredThermostat.CentralMonitor:nextHeartBeat"]=true;
 
 oms2_simulateWithASSC("MonitoredThermostat",10.0,sm,0.01,3000.0)
