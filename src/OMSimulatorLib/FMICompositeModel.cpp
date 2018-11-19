@@ -1145,7 +1145,7 @@ oms_status_enu_t oms2::FMICompositeModel::stepUntilPCTPL(oms3::ResultWriter& res
 
 #endif // #if !defined(__arm__)
 
-oms_status_enu_t oms2::FMICompositeModel::stepUntilASSC(ResultWriter& resultWriter, double stopTime, double communicationInterval, double loggingInterval, bool realtime_sync)
+oms_status_enu_t oms2::FMICompositeModel::stepUntilASSC(oms3::ResultWriter& resultWriter, double stopTime, double communicationInterval, double loggingInterval, bool realtime_sync)
 {
   logTrace();
   auto start = std::chrono::steady_clock::now();
