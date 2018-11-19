@@ -40,7 +40,9 @@
 #include "ExternalModel.h"
 #include "ResultWriter.h"
 #include "ssd/ConnectorGeometry.h"
+#if !defined(NO_TLM)
 #include "TLMBusConnector.h"
+#endif
 #include "Types.h"
 #include <map>
 #include <pugixml.hpp>
@@ -65,6 +67,7 @@ namespace oms3
     ComRef getFullCref() const;
     Element* getElement() {return &element;}
     oms_status_enu_t list(const ComRef& cref, char** contents);
+    oms_status_enu_t listUnconnectedConnectors(char** contents) const;
     oms_system_enu_t getType() const {return type;}
     oms_status_enu_t addSubSystem(const ComRef& cref, oms_system_enu_t type);
     oms_status_enu_t addSubModel(const ComRef& cref, const std::string& fmuPath);
@@ -77,27 +80,30 @@ namespace oms3
     oms_status_enu_t addConnector(const ComRef& cref, oms_causality_enu_t causality, oms_signal_type_enu_t type);
     Connector* getConnector(const ComRef& cref);
     BusConnector* getBusConnector(const ComRef& cref);
+    oms_status_enu_t addTLMConnection(const ComRef& crefA, const ComRef& crefB, double delay, double alpha, double linearimpedance, double angularimpedance);
+    oms_status_enu_t setTLMConnectionParameters(const ComRef &crefA, const ComRef &crefB, const oms3_tlm_connection_parameters_t* parameters);
+    oms_status_enu_t addTLMBus(const ComRef& cref, const std::string domain, const int dimensions, const oms_tlm_interpolation_t interpolation);
+    oms_status_enu_t addConnectorToTLMBus(const ComRef& busCref, const ComRef& connectorCref, const std::string type);
+    oms_status_enu_t deleteConnectorFromTLMBus(const ComRef& busCref, const ComRef& connectorCref);
+    oms_status_enu_t setTLMBusGeometry(const ComRef& cref, const oms2::ssd::ConnectorGeometry* geometry);
+#if !defined(NO_TLM)
     TLMBusConnector *getTLMBusConnector(const ComRef& cref);
-    Connection* getConnection(const ComRef& crefA, const ComRef& crefB);
     TLMBusConnector **getTLMBusConnectors() {return &tlmbusconnectors[0];}
+#endif
+    Connection* getConnection(const ComRef& crefA, const ComRef& crefB);
     Connection** getConnections(const ComRef &cref);
     oms_status_enu_t addConnection(const ComRef& crefA, const ComRef& crefB);
     oms_status_enu_t deleteConnection(const ComRef& crefA, const ComRef& crefB);
-    oms_status_enu_t addTLMConnection(const ComRef& crefA, const ComRef& crefB, double delay, double alpha, double linearimpedance, double angularimpedance);
     oms_status_enu_t setConnectorGeometry(const ComRef& cref, const oms2::ssd::ConnectorGeometry* geometry);
     oms_status_enu_t setConnectionGeometry(const ComRef &crefA, const ComRef &crefB, const oms3::ssd::ConnectionGeometry* geometry);
-    oms_status_enu_t setTLMConnectionParameters(const ComRef &crefA, const ComRef &crefB, const oms3_tlm_connection_parameters_t* parameters);
     oms_status_enu_t addBus(const ComRef& cref);
-    oms_status_enu_t addTLMBus(const ComRef& cref, const std::string domain, const int dimensions, const oms_tlm_interpolation_t interpolation);
     oms_status_enu_t addConnectorToBus(const ComRef& busCref, const ComRef& connectorCref);
     oms_status_enu_t deleteConnectorFromBus(const ComRef& busCref, const ComRef& connectorCref);
-    oms_status_enu_t addConnectorToTLMBus(const ComRef& busCref, const ComRef& connectorCref, const std::string type);
-    oms_status_enu_t deleteConnectorFromTLMBus(const ComRef& busCref, const ComRef& connectorCref);
     oms_status_enu_t setBusGeometry(const ComRef& cref, const oms2::ssd::ConnectorGeometry* geometry);
-    oms_status_enu_t setTLMBusGeometry(const ComRef& cref, const oms2::ssd::ConnectorGeometry* geometry);
     oms_status_enu_t addExternalModel(const ComRef &cref, std::string path, std::string startscript);
     oms_status_enu_t delete_(const ComRef& cref);
     oms_status_enu_t deleteAllConectionsTo(const ComRef& cref);
+    bool isConnected(const ComRef& cref) const;
     Model* getModel();
     System* getParentSystem() const {return parentSystem;}
     bool copyResources();
@@ -112,6 +118,7 @@ namespace oms3
     virtual oms_status_enu_t instantiate() = 0;
     virtual oms_status_enu_t initialize() = 0;
     virtual oms_status_enu_t terminate() = 0;
+    virtual oms_status_enu_t reset() = 0;
     virtual oms_status_enu_t stepUntil(double stopTime, void (*cb)(const char* ident, double time, oms_status_enu_t status)) = 0;
 
     oms_status_enu_t getBoolean(const ComRef& cref, bool& value);
@@ -121,16 +128,19 @@ namespace oms3
     oms_status_enu_t setInteger(const ComRef& cref, int value);
     oms_status_enu_t setReal(const ComRef& cref, double value);
 
-    oms_status_enu_t getReals(const std::vector<ComRef> &crefs, std::vector<double> &values) const;
+    oms_status_enu_t getReals(const std::vector<ComRef> &crefs, std::vector<double> &values);
     oms_status_enu_t setReals(const std::vector<ComRef> &crefs, std::vector<double> values);
     oms_status_enu_t setRealInputDerivatives(const ComRef &cref, int order, double value);
 
     bool isTopLevelSystem() const {return (parentSystem == NULL);}
 
     oms_status_enu_t registerSignalsForResultFile(ResultWriter& resultFile);
-    oms_status_enu_t updateSignals(ResultWriter& resultFile, double time);
+    oms_status_enu_t updateSignals(ResultWriter& resultFile);
+    oms_status_enu_t addSignalsToResults(const char* regex);
+    oms_status_enu_t removeSignalsFromResults(const char* regex);
 
     virtual oms_status_enu_t setFixedStepSize(double stepSize) {return oms_status_error;}
+    virtual oms_status_enu_t setTolerance(double tolerance) {return oms_status_error;}
 
   protected:
     System(const ComRef& cref, oms_system_enu_t type, Model* parentModel, System* parentSystem);
@@ -158,10 +168,13 @@ namespace oms3
     std::vector<Connector*> connectors;             ///< last element is always NULL
     std::vector<oms3_element_t*> subelements;       ///< last element is always NULL; don't free it
     std::vector<BusConnector*> busconnectors;
+#if !defined(NO_TLM)
     std::vector<TLMBusConnector*> tlmbusconnectors;
+#endif
     std::vector<Connection*> connections;           ///< last element is always NULL
 
     std::unordered_map<unsigned int /*result file var ID*/, unsigned int /*allVariables ID*/> resultFileMapping;
+    std::unordered_map<ComRef, bool> exportConnectors;
 
     oms_status_enu_t importFromSSD_ConnectionGeometry(const pugi::xml_node& node, const ComRef& crefA, const ComRef& crefB);
   };

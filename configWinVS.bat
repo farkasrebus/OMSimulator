@@ -1,6 +1,6 @@
 @ECHO off
 REM run this on wsl using:
-REM cmd.exe /C configWinVS.bat VS15-Win64
+REM cmd.exe /C "SET CMAKE_BUILD_TYPE=Debug && configWinVS.bat VS15-Win64"
 
 SET OMS_VS_TARGET=%~1
 SET TARGET=%~2
@@ -8,10 +8,10 @@ IF NOT DEFINED TARGET SET TARGET=all
 
 echo # Target: %TARGET%
 
-IF ["%OMS_VS_TARGET%"]==["VS14-Win32"] SET OMS_VS_PLATFORM=32 && SET OMS_VS_VERSION="Visual Studio 14 2015"
-IF ["%OMS_VS_TARGET%"]==["VS14-Win64"] SET OMS_VS_PLATFORM=64 && SET OMS_VS_VERSION="Visual Studio 14 2015 Win64"
-IF ["%OMS_VS_TARGET%"]==["VS15-Win32"] SET OMS_VS_PLATFORM=32 && SET OMS_VS_VERSION="Visual Studio 15 2017"
-IF ["%OMS_VS_TARGET%"]==["VS15-Win64"] SET OMS_VS_PLATFORM=64 && SET OMS_VS_VERSION="Visual Studio 15 2017 Win64"
+IF ["%OMS_VS_TARGET%"]==["VS14-Win32"] SET OMS_VS_PLATFORM=32&& SET OMS_VS_VERSION="Visual Studio 14 2015"
+IF ["%OMS_VS_TARGET%"]==["VS14-Win64"] SET OMS_VS_PLATFORM=64&& SET OMS_VS_VERSION="Visual Studio 14 2015 Win64"
+IF ["%OMS_VS_TARGET%"]==["VS15-Win32"] SET OMS_VS_PLATFORM=32&& SET OMS_VS_VERSION="Visual Studio 15 2017"
+IF ["%OMS_VS_TARGET%"]==["VS15-Win64"] SET OMS_VS_PLATFORM=64&& SET OMS_VS_VERSION="Visual Studio 15 2017 Win64"
 
 IF NOT DEFINED OMS_VS_VERSION (
   ECHO No argument or unsupported argument given. Use one of the following VS version strings:
@@ -267,7 +267,7 @@ ECHO # copy boost
 IF NOT EXIST "install\win\bin" MKDIR install\win\bin
 SET CRD=%CD%
 CD %BOOST_ROOT%
-FOR /d %%d in (lib%OMS_VS_PLATFORM%*-msvc-*) do (
+FOR /d %%d in (lib%OMS_VS_PLATFORM%-msvc-*) do (
   CD %%d
   FOR /r %%e in (boost_system*,boost_filesystem*) do (
     XCOPY /Y /F %%e %CRD%\install\win\bin

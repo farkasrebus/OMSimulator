@@ -49,7 +49,6 @@ private:
 
 public:
   bool validOptions;
-  bool describe;
   bool help;
   bool version;
   double startTime;
@@ -58,8 +57,8 @@ public:
   bool useStopTime;
   double tolerance;
   bool useTolerance;
-  double communicationInterval;
-  bool useCommunicationInterval;
+  int intervals;
+  bool useIntervals;
   std::string filename;
   std::string resultFile;
   std::string tempDir;
@@ -68,6 +67,7 @@ public:
   std::string solver;
   double timeout;
   int logLevel;
+  bool cs;
 
 private:
   int argi;

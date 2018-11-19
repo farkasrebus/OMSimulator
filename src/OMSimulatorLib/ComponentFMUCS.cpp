@@ -35,11 +35,12 @@
 #include "Model.h"
 #include "ssd/Tags.h"
 #include "System.h"
-#include "SystemWC.h"
 #include "SystemTLM.h"
+#include "SystemWC.h"
 #include <fmilib.h>
 #include <JM/jm_portability.h>
 #include <OMSBoost.h>
+#include <RegEx.h>
 
 oms3::ComponentFMUCS::ComponentFMUCS(const ComRef& cref, System* parentSystem, const std::string& fmuPath)
   : oms3::Component(cref, oms_component_fmu, parentSystem, fmuPath), fmuInfo(fmuPath, oms_fmi_kind_cs)
@@ -64,13 +65,13 @@ oms3::Component* oms3::ComponentFMUCS::NewComponent(const oms3::ComRef& cref, om
 {
   if (!cref.isValidIdent())
   {
-    logError("\"" + std::string(cref) + "\" is not a valid ident");
+    logError_InvalidIdent(cref);
     return NULL;
   }
 
   if (!parentSystem)
   {
-    logError("Internal error");
+    logError_InternalError;
     return NULL;
   }
 
@@ -123,6 +124,14 @@ oms3::Component* oms3::ComponentFMUCS::NewComponent(const oms3::ComRef& cref, om
     return NULL;
   }
 
+  fmi2_fmu_kind_enu_t fmuKind = fmi2_import_get_fmu_kind(component->fmu);
+  if (!(fmi2_fmu_kind_cs == fmuKind || fmi2_fmu_kind_me_and_cs == fmuKind))
+  {
+    logError("FMU \"" + std::string(cref) + "\" doesn't support co-simulation mode.");
+    delete component;
+    return NULL;
+  }
+
   // update FMU info
   if (oms_status_ok != component->fmuInfo.update(version, component->fmu))
   {
@@ -142,11 +151,13 @@ oms3::Component* oms3::ComponentFMUCS::NewComponent(const oms3::ComRef& cref, om
   size_t varListSize = fmi2_import_get_variable_list_size(varList);
   logDebug(std::to_string(varListSize) + " variables");
   component->allVariables.reserve(varListSize);
+  component->exportVariables.reserve(varListSize);
   for (size_t i = 0; i < varListSize; ++i)
   {
     fmi2_import_variable_t* var = fmi2_import_get_variable(varList, i);
     oms3::Variable v(var, i + 1);
     component->allVariables.push_back(v);
+    component->exportVariables.push_back(true);
   }
   fmi2_import_free_variable_list(varList);
 
@@ -292,6 +303,18 @@ oms3::Component* oms3::ComponentFMUCS::NewComponent(const pugi::xml_node& node, 
 
 oms_status_enu_t oms3::ComponentFMUCS::exportToSSD(pugi::xml_node& node) const
 {
+#if !defined(NO_TLM)
+  if (tlmbusconnectors[0])
+  {
+    pugi::xml_node annotations_node = node.append_child(oms2::ssd::ssd_annotations);
+    pugi::xml_node annotation_node = annotations_node.append_child(oms2::ssd::ssd_annotation);
+    annotation_node.append_attribute("type") = oms::annotation_type;
+    for (const auto& tlmbusconnector : tlmbusconnectors)
+      if (tlmbusconnector)
+        tlmbusconnector->exportToSSD(annotation_node);
+  }
+#endif
+
   node.append_attribute("name") = this->getCref().c_str();
   node.append_attribute("type") = "application/x-fmu-sharedlibrary";
   node.append_attribute("source") = getPath().c_str();
@@ -408,16 +431,16 @@ oms_status_enu_t oms3::ComponentFMUCS::instantiate()
 
   jmstatus = fmi2_import_instantiate(fmu, getCref().c_str(), fmi2_cosimulation, NULL, fmi2_false);
   if (jm_status_error == jmstatus)
-    return logError("fmi2_import_instantiate failed");
+    return logError_FMUCall("fmi2_import_instantiate", this);
 
   // enterInitialization
   time = getParentSystem()->getModel()->getStartTime();
   double tolerance = dynamic_cast<SystemWC*>(getParentSystem())->getTolerance();
   fmistatus = fmi2_import_setup_experiment(fmu, fmi2_true, tolerance, time, fmi2_false, 1.0);
-  if (fmi2_status_ok != fmistatus) return logError("fmi2_import_setup_experiment failed");
+  if (fmi2_status_ok != fmistatus) return logError_FMUCall("fmi2_import_setup_experiment", this);
 
   fmistatus = fmi2_import_enter_initialization_mode(fmu);
-  if (fmi2_status_ok != fmistatus) return logError("fmi2_import_enter_initialization_mode failed");
+  if (fmi2_status_ok != fmistatus) return logError_FMUCall("fmi2_import_enter_initialization_mode", this);
 
   return oms_status_ok;
 }
@@ -428,7 +451,7 @@ oms_status_enu_t oms3::ComponentFMUCS::initialize()
 
   // exitInitialization
   fmistatus = fmi2_import_exit_initialization_mode(fmu);
-  if (fmi2_status_ok != fmistatus) return logError("fmi2_import_exit_initialization_mode failed");
+  if (fmi2_status_ok != fmistatus) return logError_FMUCall("fmi2_import_exit_initialization_mode", this);
 
   return oms_status_ok;
 }
@@ -444,6 +467,24 @@ oms_status_enu_t oms3::ComponentFMUCS::terminate()
   return oms_status_ok;
 }
 
+oms_status_enu_t oms3::ComponentFMUCS::reset()
+{
+  fmi2_status_t fmistatus = fmi2_import_reset(fmu);
+  if (fmi2_status_ok != fmistatus)
+    return logError_ResetFailed(getCref());
+
+  // enterInitialization
+  time = getParentSystem()->getModel()->getStartTime();
+  double tolerance = dynamic_cast<SystemWC*>(getParentSystem())->getTolerance();
+  fmistatus = fmi2_import_setup_experiment(fmu, fmi2_true, tolerance, time, fmi2_false, 1.0);
+  if (fmi2_status_ok != fmistatus) return logError_FMUCall("fmi2_import_setup_experiment", this);
+
+  fmistatus = fmi2_import_enter_initialization_mode(fmu);
+  if (fmi2_status_ok != fmistatus) return logError_FMUCall("fmi2_import_enter_initialization_mode", this);
+
+  return oms_status_ok;
+}
+
 oms_status_enu_t oms3::ComponentFMUCS::stepUntil(double stopTime)
 {
   System *topLevelSystem = getModel()->getTopLevelSystem();
@@ -453,16 +494,20 @@ oms_status_enu_t oms3::ComponentFMUCS::stepUntil(double stopTime)
 
   while (time < stopTime)
   {
+#if !defined(NO_TLM)
     //Read from TLM sockets if top level system is of TLM type
     if(topLevelSystem->getType() == oms_system_tlm)
       reinterpret_cast<SystemTLM*>(topLevelSystem)->readFromSockets(reinterpret_cast<SystemWC*>(getParentSystem()),time,this);
+#endif
 
     fmistatus = fmi2_import_do_step(fmu, time, hdef, fmi2_true);
     time += hdef;
 
+#if !defined(NO_TLM)
     //Write to TLM sockets if top level system is of TLM type
     if(topLevelSystem->getType() == oms_system_tlm)
       reinterpret_cast<SystemTLM*>(topLevelSystem)->writeToSockets(reinterpret_cast<SystemWC*>(getParentSystem()),time,this);
+#endif
   }
   time = stopTime;
   return oms_status_ok;
@@ -613,8 +658,8 @@ oms_status_enu_t oms3::ComponentFMUCS::registerSignalsForResultFile(ResultWriter
 
   for (unsigned int i=0; i<allVariables.size(); ++i)
   {
-    //if (!exportVariables[i])
-    //  continue;
+    if (!exportVariables[i])
+      continue;
 
     auto const &var = allVariables[i];
     std::string name = std::string(getFullCref() + var.getCref());
@@ -665,7 +710,7 @@ oms_status_enu_t oms3::ComponentFMUCS::registerSignalsForResultFile(ResultWriter
   return oms_status_ok;
 }
 
-oms_status_enu_t oms3::ComponentFMUCS::updateSignals(ResultWriter& resultWriter, double time)
+oms_status_enu_t oms3::ComponentFMUCS::updateSignals(ResultWriter& resultWriter)
 {
   for (auto const &it : resultFileMapping)
   {
@@ -689,6 +734,44 @@ oms_status_enu_t oms3::ComponentFMUCS::updateSignals(ResultWriter& resultWriter,
       if (oms_status_ok != getBoolean(var.getCref(), value.boolValue))
         return logError("failed to fetch variable " + std::string(var.getCref()));
       resultWriter.updateSignal(ID, value);
+    }
+  }
+
+  return oms_status_ok;
+}
+
+oms_status_enu_t oms3::ComponentFMUCS::addSignalsToResults(const char* regex)
+{
+  oms_regex exp(regex);
+  for (unsigned int i=0; i<allVariables.size(); ++i)
+  {
+    if (exportVariables[i])
+      continue;
+
+    auto const &var = allVariables[i];
+    if(regex_match(std::string(getFullCref() + var.getCref()), exp))
+    {
+      //logInfo("added \"" + std::string(getFullCref() + var.getCref()) + "\" to results");
+      exportVariables[i] = true;
+    }
+  }
+
+  return oms_status_ok;
+}
+
+oms_status_enu_t oms3::ComponentFMUCS::removeSignalsFromResults(const char* regex)
+{
+  oms_regex exp(regex);
+  for (unsigned int i=0; i<allVariables.size(); ++i)
+  {
+    if (!exportVariables[i])
+      continue;
+
+    auto const &var = allVariables[i];
+    if(regex_match(std::string(getFullCref() + var.getCref()), exp))
+    {
+      //logInfo("removed \"" + std::string(getFullCref() + var.getCref()) + "\" from results");
+      exportVariables[i] = false;
     }
   }
 

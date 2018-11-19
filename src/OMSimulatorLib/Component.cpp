@@ -34,6 +34,7 @@
 #include "Model.h"
 #include "System.h"
 #include <OMSBoost.h>
+#include "TLMBusConnector.h"
 
 
 void oms3::fmiLogger(jm_callbacks* c, jm_string module, jm_log_level_enu_t log_level, jm_string message)
@@ -88,6 +89,11 @@ oms3::Component::Component(const ComRef& cref, oms_component_enu_t type, System*
 {
   connectors.push_back(NULL);
   element.setConnectors(&connectors[0]);
+
+#if !defined(NO_TLM)
+  tlmbusconnectors.push_back(NULL);
+  element.setTLMBusConnectors(&tlmbusconnectors[0]);
+#endif
 }
 
 oms3::Component::~Component()
@@ -95,6 +101,12 @@ oms3::Component::~Component()
   for (const auto& connector : connectors)
     if (connector)
       delete connector;
+
+#if !defined(NO_TLM)
+  for (const auto tlmbusconnector : tlmbusconnectors)
+    if(tlmbusconnector)
+      delete tlmbusconnector;
+#endif
 }
 
 oms3::ComRef oms3::Component::getFullCref() const
@@ -107,13 +119,106 @@ oms3::Model* oms3::Component::getModel() const
   return parentSystem ? parentSystem->getModel() : NULL;
 }
 
-oms3::Connector* oms3::Component::getConnector(const oms3::ComRef &cref)
+oms_status_enu_t oms3::Component::addTLMBus(const oms3::ComRef &cref, const std::string domain, const int dimensions, const oms_tlm_interpolation_t interpolation)
 {
-  for(auto &connector : connectors) {
-    if(connector && connector->getName() == cref)
-      return connector;
+#if !defined(NO_TLM)
+  if(!cref.isValidIdent()) {
+    return logError("Not a valid ident: "+std::string(cref));
+  }
+  oms3::TLMBusConnector* bus = new oms3::TLMBusConnector(cref, domain, dimensions, interpolation,nullptr,this);
+  tlmbusconnectors.back() = bus;
+  tlmbusconnectors.push_back(NULL);
+  element.setTLMBusConnectors(&tlmbusconnectors[0]);
+  return oms_status_ok;
+#else
+  return LOG_NO_TLM();
+#endif
+}
+
+#if !defined(NO_TLM)
+oms3::TLMBusConnector *oms3::Component::getTLMBusConnector(const oms3::ComRef &cref)
+{
+  for(auto &tlmbusconnector : tlmbusconnectors) {
+    if(tlmbusconnector && tlmbusconnector->getName() == cref)
+      return tlmbusconnector;
   }
   return NULL;
+}
+#endif
+
+oms_status_enu_t oms3::Component::addConnectorToTLMBus(const oms3::ComRef& busCref, const oms3::ComRef& connectorCref, const std::string type)
+{
+#if !defined(NO_TLM)
+  if (this->type == oms_component_external)
+    return logError_NotForExternalModels;
+
+  //Check that connector exists in component
+  bool found = false;
+  for(auto& connector : connectors)
+    if (connector && connector->getName() == connectorCref)
+      found = true;
+  if (!found)
+    return logError_ConnectorNotInComponent(connectorCref, this);
+
+  for(auto& bus : tlmbusconnectors)
+  {
+    if (bus && bus->getName() == busCref)
+    {
+      oms_status_enu_t status = bus->addConnector(connectorCref,type);
+      if (oms_status_ok != status)
+        return status;
+    }
+  }
+  return oms_status_ok;
+#else
+  return LOG_NO_TLM();
+#endif
+}
+
+oms_status_enu_t oms3::Component::deleteConnectorFromTLMBus(const oms3::ComRef& busCref, const oms3::ComRef& connectorCref)
+{
+#if !defined(NO_TLM)
+  if(type == oms_component_external)
+    return logError_NotForExternalModels;
+
+  for(auto& bus : tlmbusconnectors)
+    if(bus && bus->getName() == busCref)
+      if (oms_status_ok != bus->deleteConnector(connectorCref))
+        return logError_ConnectorNotInComponent(connectorCref, this);
+
+  return oms_status_ok;
+#else
+  return LOG_NO_TLM();
+#endif
+}
+
+oms3::Connector* oms3::Component::getConnector(const ComRef& cref)
+{
+  for (auto &connector : connectors)
+  {
+    if (connector && connector->getName() == cref)
+      return connector;
+  }
+
+  return NULL;
+}
+
+oms_status_enu_t oms3::Component::deleteConnector(const ComRef& cref)
+{
+  for (int i=0; i<connectors.size(); ++i)
+  {
+    if (connectors[i] && connectors[i]->getName() == cref)
+    {
+      delete connectors[i];
+      connectors.pop_back();
+      connectors[i] = connectors.back();
+      connectors.back() = NULL;
+      element.setConnectors(&connectors[0]);
+      return oms_status_ok;
+    }
+  }
+
+  return oms_status_error;
 }
 
 oms_status_enu_t oms3::Component::deleteResources()

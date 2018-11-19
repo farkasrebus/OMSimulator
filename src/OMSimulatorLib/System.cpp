@@ -43,6 +43,7 @@
 #include "SystemTLM.h"
 #include "SystemWC.h"
 #include "Types.h"
+#include <RegEx.h>
 
 oms3::System::System(const oms3::ComRef& cref, oms_system_enu_t type, oms3::Model* parentModel, oms3::System* parentSystem)
   : element(oms_element_system, cref), cref(cref), type(type), parentModel(parentModel), parentSystem(parentSystem)
@@ -55,8 +56,10 @@ oms3::System::System(const oms3::ComRef& cref, oms_system_enu_t type, oms3::Mode
   busconnectors.push_back(NULL);
   element.setBusConnectors(&busconnectors[0]);
 
+#if !defined(NO_TLM)
   tlmbusconnectors.push_back(NULL);
   element.setTLMBusConnectors(&tlmbusconnectors[0]);
+#endif
 
   subelements.push_back(NULL);
   element.setSubElements(&subelements[0]);
@@ -82,9 +85,11 @@ oms3::System::~System()
     if (busconnector)
       delete busconnector;
 
+#if !defined(NO_TLM)
   for (const auto tlmbusconnector : tlmbusconnectors)
     if (tlmbusconnector)
       delete tlmbusconnector;
+#endif
 }
 
 oms3::System* oms3::System::NewSystem(const oms3::ComRef& cref, oms_system_enu_t type, oms3::Model* parentModel, oms3::System* parentSystem)
@@ -109,7 +114,7 @@ oms3::System* oms3::System::NewSystem(const oms3::ComRef& cref, oms_system_enu_t
 
   if ((parentModel && parentSystem) || (!parentModel && !parentSystem))
   {
-    logError("Internal error");
+    logError_InternalError;
     return NULL;
   }
 
@@ -121,7 +126,11 @@ oms3::System* oms3::System::NewSystem(const oms3::ComRef& cref, oms_system_enu_t
       logError("A TLM system must be the the root system of a model.");
       return NULL;
     }
+#if !defined(NO_TLM)
     return SystemTLM::NewSystem(cref, parentModel, parentSystem);
+#else
+    return nullptr;
+#endif
 
   case oms_system_wc:
     if (parentSystem && oms_system_tlm != parentSystem->getType())
@@ -140,7 +149,7 @@ oms3::System* oms3::System::NewSystem(const oms3::ComRef& cref, oms_system_enu_t
     return SystemSC::NewSystem(cref, parentModel, parentSystem);
   }
 
-  logError("Internal error");
+  logError_InternalError;
   return NULL;
 }
 
@@ -151,7 +160,7 @@ oms3::ComRef oms3::System::getFullCref() const
   if (parentModel)
     return ComRef(parentModel->getCref()) + this->getCref();
 
-  logError("Internal error");
+  logError_InternalError;
   return this->getCref();
 }
 
@@ -213,6 +222,14 @@ bool oms3::System::validCref(const oms3::ComRef& cref)
   if (getConnector(cref))
     return false;
 
+  if (getBusConnector(cref))
+    return false;
+
+#if !defined(NO_TLM)
+  if (getTLMBusConnector(cref))
+    return false;
+#endif
+
   return true;
 }
 
@@ -258,7 +275,7 @@ oms_status_enu_t oms3::System::addSubModel(const oms3::ComRef& cref, const std::
     Component* component = NULL;
 
     std::string extension = "";
-    if (path.length() > 5)
+    if (path.length() > 4)
       extension = path.substr(path.length() - 4);
 
     if (extension == ".fmu" && oms_system_wc == type)
@@ -293,6 +310,73 @@ oms_status_enu_t oms3::System::addSubModel(const oms3::ComRef& cref, const std::
 oms_status_enu_t oms3::System::list(const oms3::ComRef& cref, char** contents)
 {
   return logError("not implemented");
+}
+
+oms_status_enu_t oms3::System::listUnconnectedConnectors(char** contents) const
+{
+  if (!contents)
+    return oms_status_error;
+
+  std::vector<ComRef> unconnectedInputs;
+  std::vector<ComRef> unconnectedOutputs;
+  std::vector<ComRef> unconnectedBuses;
+
+  for (const auto& component : components)
+  {
+    Element* element = component.second->getElement();
+    Connector** connectors = element->getConnectors();
+    for (int i=0; connectors[i]; ++i)
+    {
+      ComRef cref(component.second->getCref() + connectors[i]->getName());
+      if (!isConnected(cref))
+      {
+        if (connectors[i]->isInput())
+          unconnectedInputs.push_back(getFullCref() + cref);
+        if (connectors[i]->isOutput())
+          unconnectedOutputs.push_back(getFullCref() + cref);
+      }
+    }
+  }
+
+  for (const auto& connector : connectors)
+  {
+    if (connector && !isConnected(connector->getName()))
+    {
+      const ComRef& cref = connector->getName();
+      if (!isConnected(cref))
+      {
+        if (connector->isInput())
+          unconnectedInputs.push_back(getFullCref() + cref);
+        if (connector->isOutput())
+          unconnectedOutputs.push_back(getFullCref() + cref);
+      }
+    }
+  }
+
+  for (const auto& busconnector : busconnectors)
+    if (busconnector && !isConnected(busconnector->getName()))
+      unconnectedBuses.push_back(getFullCref() + busconnector->getName());
+
+#if !defined(NO_TLM)
+  for (const auto& tlmbusconnector : tlmbusconnectors)
+    if (tlmbusconnector && !isConnected(tlmbusconnector->getName()))
+      unconnectedBuses.push_back(getFullCref() + tlmbusconnector->getName());
+#endif
+
+  std::string msg;
+  for (const auto& unconnectedInput : unconnectedInputs)
+    msg += "input " + std::string(unconnectedInput) + "\n";
+  for (const auto& unconnectedOutput : unconnectedOutputs)
+    msg += "output " + std::string(unconnectedOutput) + "\n";
+  for (const auto& unconnectedBus : unconnectedBuses)
+    msg += "bus " + std::string(unconnectedBus) + "\n";
+
+  if (!msg.empty())
+  {
+    *contents = (char*) malloc(msg.length() + 1);
+    strcpy(*contents, msg.c_str());
+  }
+  return oms_status_ok;
 }
 
 oms_status_enu_t oms3::System::exportToSSD(pugi::xml_node& node) const
@@ -335,7 +419,11 @@ oms_status_enu_t oms3::System::exportToSSD(pugi::xml_node& node) const
     else if (connection)
       busconnections.push_back(connection);
 
+#if !defined(NO_TLM)
   if (busconnectors[0] || tlmbusconnectors[0] || !busconnections.empty())
+#else
+  if (busconnectors[0] || !busconnections.empty())
+#endif
   {
     pugi::xml_node annotations_node = node.append_child(oms2::ssd::ssd_annotations);
     pugi::xml_node annotation_node = annotations_node.append_child(oms2::ssd::ssd_annotation);
@@ -343,9 +431,11 @@ oms_status_enu_t oms3::System::exportToSSD(pugi::xml_node& node) const
     for (const auto& busconnector : busconnectors)
       if (busconnector)
         busconnector->exportToSSD(annotation_node);
+#if !defined(NO_TLM)
     for (const auto& tlmbusconnector : tlmbusconnectors)
       if (tlmbusconnector)
         tlmbusconnector->exportToSSD(annotation_node);
+#endif
     if (!busconnections.empty())
     {
       pugi::xml_node busconnections_node = annotation_node.append_child(oms::bus_connections);
@@ -403,7 +493,10 @@ oms_status_enu_t oms3::System::importFromSSD(const pugi::xml_node& node)
       {
         connectors.back() = oms3::Connector::NewConnector(*itConnectors);
         if (connectors.back())
+        {
+          exportConnectors[getFullCref() + connectors.back()->getName()] = true;
           connectors.push_back(NULL);
+        }
         else
           return logError("Failed to import ssd:connector");
         element.setConnectors(&connectors[0]);
@@ -526,9 +619,13 @@ oms_status_enu_t oms3::System::importFromSSD(const pugi::xml_node& node)
               geometry.setPosition(connectorGeometryNode.attribute("x").as_double(), connectorGeometryNode.attribute("y").as_double());
               if (std::string(itAnnotations->attribute("type").as_string()) == "tlm")
               {
+#if !defined(NO_TLM)
                 oms3::TLMBusConnector* tlmBusConnector = getTLMBusConnector(busname);
                 if (tlmBusConnector)
                   tlmBusConnector->setGeometry(&geometry);
+#else
+                return LOG_NO_TLM();
+#endif
               }
               else
               {
@@ -554,12 +651,16 @@ oms_status_enu_t oms3::System::importFromSSD(const pugi::xml_node& node)
               if (itConnection->attribute("delay") || itConnection->attribute("alpha")
                   || itConnection->attribute("linearimpedance") || itConnection->attribute("angularimpedance"))
               {
+#if !defined(NO_TLM)
                 double delay = itConnection->attribute("delay").as_double();
                 double alpha = itConnection->attribute("alpha").as_double();
                 double linearimpedance = itConnection->attribute("linearimpedance").as_double();
                 double angularimpedance = itConnection->attribute("angularimpedance").as_double();
 
                 status = addTLMConnection(element1+connector1, element2+connector2, delay, alpha, linearimpedance, angularimpedance);
+#else
+                return LOG_NO_TLM();
+#endif
               }
               else  // Load bus connection
               {
@@ -602,6 +703,7 @@ oms_status_enu_t oms3::System::addConnector(const oms3::ComRef& cref, oms_causal
     return logError_AlreadyInScope(getFullCref() + cref);
 
   connectors.back() = new oms3::Connector(causality, type, cref);
+  exportConnectors[getFullCref() + connectors.back()->getName()] = true;
   connectors.push_back(NULL);
   element.setConnectors(&connectors[0]);
 
@@ -649,6 +751,7 @@ oms3::BusConnector* oms3::System::getBusConnector(const oms3::ComRef& cref)
   return NULL;
 }
 
+#if !defined(NO_TLM)
 oms3::TLMBusConnector* oms3::System::getTLMBusConnector(const oms3::ComRef& cref)
 {
   oms3::ComRef tail(cref);
@@ -656,6 +759,9 @@ oms3::TLMBusConnector* oms3::System::getTLMBusConnector(const oms3::ComRef& cref
   auto subsystem = subsystems.find(head);
   if (subsystem != subsystems.end())
     return subsystem->second->getTLMBusConnector(tail);
+  auto component = components.find(head);
+  if (component != components.end())
+    return component->second->getTLMBusConnector(tail);
 
   if (!cref.isValidIdent())
   {
@@ -669,6 +775,7 @@ oms3::TLMBusConnector* oms3::System::getTLMBusConnector(const oms3::ComRef& cref
 
   return NULL;
 }
+#endif
 
 oms3::Connection** oms3::System::getConnections(const oms3::ComRef& cref)
 {
@@ -699,6 +806,22 @@ oms_status_enu_t oms3::System::addConnection(const oms3::ComRef& crefA, const om
     if (subsystem != subsystems.end())
       return subsystem->second->addConnection(tailA,tailB);
   }
+
+#if !defined(NO_TLM)
+  // check if it is an internal connection between TLM buses
+  TLMBusConnector* tlmA = getTLMBusConnector(crefA);
+  TLMBusConnector* tlmB = getTLMBusConnector(crefB);
+  if(tlmA && tlmB)
+  {
+    if (getConnection(crefA, crefB))
+      return logError_ConnectionExistsAlready(crefA, crefB, this);
+
+    // create connection between TLM buses (NOT a TLM connection)
+    connections.back() = new oms3::Connection(crefA, crefB, oms3_connection_bus);
+    connections.push_back(NULL);
+    return oms_status_ok;
+  }
+#endif
 
   // first check if it is a bus connection
   BusConnector* busA = NULL;
@@ -803,6 +926,7 @@ oms_status_enu_t oms3::System::deleteConnection(const oms3::ComRef& crefA, const
 
 oms_status_enu_t oms3::System::addTLMConnection(const oms3::ComRef& crefA, const oms3::ComRef& crefB, double delay, double alpha, double linearimpedance, double angularimpedance)
 {
+#if !defined(NO_TLM)
   if (type != oms_system_tlm)
     return logError_OnlyForTlmSystem;
 
@@ -839,6 +963,9 @@ oms_status_enu_t oms3::System::addTLMConnection(const oms3::ComRef& crefA, const
   }
 
   return logError("TLM bus connector(s) not found in system");
+#else
+    return LOG_NO_TLM();
+#endif
 }
 
 oms_status_enu_t oms3::System::addBus(const oms3::ComRef& cref)
@@ -858,6 +985,8 @@ oms_status_enu_t oms3::System::addBus(const oms3::ComRef& cref)
     return logError_NotForTlmSystem;
   if (!cref.isValidIdent())
     return logError_InvalidIdent(cref);
+  if (!validCref(cref))
+    return logError_AlreadyInScope(getFullCref() + cref);
 
   oms3::BusConnector* bus = new oms3::BusConnector(cref);
   busconnectors.back() = bus;
@@ -868,6 +997,7 @@ oms_status_enu_t oms3::System::addBus(const oms3::ComRef& cref)
 
 oms_status_enu_t oms3::System::addTLMBus(const oms3::ComRef& cref, const std::string domain, const int dimensions, const oms_tlm_interpolation_t interpolation)
 {
+#if !defined(NO_TLM)
   oms3::ComRef tail(cref);
   oms3::ComRef head = tail.pop_front();
 
@@ -875,24 +1005,27 @@ oms_status_enu_t oms3::System::addTLMBus(const oms3::ComRef& cref, const std::st
   if (subsystem != subsystems.end())
     return subsystem->second->addTLMBus(tail, domain, dimensions, interpolation);
 
-  auto externalmodel = components.find(head);
-  if (externalmodel != components.end())
+  auto component = components.find(head);
+  if (component != components.end())
   {
-    if (oms_component_external != externalmodel->second->getType())
-      return logError_OnlyForExternalModels;
-    return dynamic_cast<ExternalModel*>(externalmodel->second)->addTLMBus(tail, domain, dimensions, interpolation);
+    return component->second->addTLMBus(tail, domain, dimensions, interpolation);
   }
 
   if (type == oms_system_tlm)
     return logError_NotForTlmSystem;
   if (!cref.isValidIdent())
     return logError_InvalidIdent(cref);
+  if (!validCref(cref))
+    return logError_AlreadyInScope(getFullCref() + cref);
 
   oms3::TLMBusConnector* bus = new oms3::TLMBusConnector(cref, domain, dimensions, interpolation, this);
   tlmbusconnectors.back() = bus;
   tlmbusconnectors.push_back(NULL);
   element.setTLMBusConnectors(&tlmbusconnectors[0]);
   return oms_status_ok;
+#else
+    return LOG_NO_TLM();
+#endif
 }
 
 oms_status_enu_t oms3::System::addConnectorToBus(const oms3::ComRef& busCref, const oms3::ComRef& connectorCref)
@@ -950,6 +1083,7 @@ oms_status_enu_t oms3::System::deleteConnectorFromBus(const oms3::ComRef& busCre
 
 oms_status_enu_t oms3::System::addConnectorToTLMBus(const oms3::ComRef& busCref, const oms3::ComRef& connectorCref, const std::string type)
 {
+#if !defined(NO_TLM)
   oms3::ComRef busTail(busCref);
   oms3::ComRef busHead = busTail.pop_front();
   oms3::ComRef connectorTail(connectorCref);
@@ -960,6 +1094,10 @@ oms_status_enu_t oms3::System::addConnectorToTLMBus(const oms3::ComRef& busCref,
     auto subsystem = subsystems.find(busHead);
     if (subsystem != subsystems.end())
       return subsystem->second->addConnectorToTLMBus(busTail,connectorTail,type);
+
+    auto component = components.find(busHead);
+    if (component != components.end())
+      return component->second->addConnectorToTLMBus(busTail,connectorTail,type);
   }
 
   if (this->type == oms_system_tlm)
@@ -983,10 +1121,14 @@ oms_status_enu_t oms3::System::addConnectorToTLMBus(const oms3::ComRef& busCref,
     }
   }
   return oms_status_ok;
+#else
+    return LOG_NO_TLM();
+#endif
 }
 
 oms_status_enu_t oms3::System::deleteConnectorFromTLMBus(const oms3::ComRef& busCref, const oms3::ComRef& connectorCref)
 {
+#if !defined(NO_TLM)
   oms3::ComRef busTail(busCref);
   oms3::ComRef busHead = busTail.pop_front();
   oms3::ComRef connectorTail(connectorCref);
@@ -997,6 +1139,10 @@ oms_status_enu_t oms3::System::deleteConnectorFromTLMBus(const oms3::ComRef& bus
     auto subsystem = subsystems.find(busHead);
     if(subsystem != subsystems.end())
       return subsystem->second->deleteConnectorFromTLMBus(busTail,connectorTail);
+
+    auto component = components.find(busHead);
+    if(component != components.end())
+      return component->second->deleteConnectorFromTLMBus(busTail,connectorTail);
   }
 
   if(!busTail.isEmpty() && !connectorTail.isEmpty() && busHead != connectorHead)
@@ -1010,10 +1156,14 @@ oms_status_enu_t oms3::System::deleteConnectorFromTLMBus(const oms3::ComRef& bus
         return logError_ConnectorNotInSystem(connectorCref, this);
 
   return oms_status_ok;
+#else
+    return LOG_NO_TLM();
+#endif
 }
 
 oms_status_enu_t oms3::System::addExternalModel(const oms3::ComRef& cref, std::string path, std::string startscript)
 {
+#if !defined(NO_TLM)
   if (type != oms_system_tlm)
     return logError_OnlyForTlmSystem;
 
@@ -1030,6 +1180,9 @@ oms_status_enu_t oms3::System::addExternalModel(const oms3::ComRef& cref, std::s
   element.setSubElements(&subelements[0]);
 
   return oms_status_ok;
+#else
+    return LOG_NO_TLM();
+#endif
 }
 
 oms_status_enu_t oms3::System::setConnectorGeometry(const oms3::ComRef& cref, const oms2::ssd::ConnectorGeometry *geometry)
@@ -1092,6 +1245,7 @@ oms_status_enu_t oms3::System::setConnectionGeometry(const oms3::ComRef& crefA, 
 
 oms_status_enu_t oms3::System::setTLMConnectionParameters(const ComRef &crefA, const ComRef &crefB, const oms3_tlm_connection_parameters_t* parameters)
 {
+#if !defined(NO_TLM)
   oms3::ComRef tailA(crefA);
   oms3::ComRef headA = tailA.pop_front();
 
@@ -1114,6 +1268,9 @@ oms_status_enu_t oms3::System::setTLMConnectionParameters(const ComRef &crefA, c
     }
 
   return logError_ConnectionNotInSystem(crefA, crefB, this);
+#else
+    return LOG_NO_TLM();
+#endif
 }
 
 oms_status_enu_t oms3::System::setBusGeometry(const oms3::ComRef& cref, const oms2::ssd::ConnectorGeometry *geometry)
@@ -1135,6 +1292,7 @@ oms_status_enu_t oms3::System::setBusGeometry(const oms3::ComRef& cref, const om
 
 oms_status_enu_t oms3::System::setTLMBusGeometry(const oms3::ComRef& cref, const oms2::ssd::ConnectorGeometry *geometry)
 {
+#if !defined(NO_TLM)
   oms3::ComRef tail(cref);
   oms3::ComRef head = tail.pop_front();
   auto subsystem = subsystems.find(head);
@@ -1148,6 +1306,9 @@ oms_status_enu_t oms3::System::setTLMBusGeometry(const oms3::ComRef& cref, const
     return oms_status_ok;
   }
   return logError("TLM Bus " + std::string(cref)+" not found in system " + std::string(getCref()));
+#else
+    return LOG_NO_TLM();
+#endif
 }
 
 oms3::Connection* oms3::System::getConnection(const oms3::ComRef& crefA, const oms3::ComRef& crefB)
@@ -1182,6 +1343,15 @@ oms_status_enu_t oms3::System::deleteAllConectionsTo(const oms3::ComRef& cref)
   return oms_status_ok;
 }
 
+bool oms3::System::isConnected(const ComRef& cref) const
+{
+  for (int i=0; i<connections.size(); ++i)
+    if (connections[i] && connections[i]->containsSignal(cref))
+      return true;
+
+  return false;
+}
+
 oms_status_enu_t oms3::System::delete_(const oms3::ComRef& cref)
 {
   oms3::ComRef tail(cref);
@@ -1210,6 +1380,7 @@ oms_status_enu_t oms3::System::delete_(const oms3::ComRef& cref)
     for (int i=0; i<connectors.size()-1; ++i)
       if (connectors[i]->getName() == front)
       {
+        exportConnectors.erase(getFullCref() + front);
         delete connectors[i];
         connectors.pop_back();   // last element is always NULL
         connectors[i] = connectors.back();
@@ -1222,6 +1393,10 @@ oms_status_enu_t oms3::System::delete_(const oms3::ComRef& cref)
     auto subsystem = subsystems.find(front);
     if (subsystem != subsystems.end())
       return subsystem->second->delete_(tail);
+
+    auto component = components.find(front);
+    if (component != components.end())
+      return component->second->deleteConnector(tail);
   }
 
   return oms_status_error;
@@ -1521,14 +1696,26 @@ oms_status_enu_t oms3::System::setReal(const ComRef& cref, double value)
   return oms_status_error;
 }
 
-oms_status_enu_t oms3::System::getReals(const std::vector<oms3::ComRef> &sr, std::vector<double> &values) const
+oms_status_enu_t oms3::System::getReals(const std::vector<oms3::ComRef> &sr, std::vector<double> &values)
 {
-  return logError_NotImplemented;
+  oms_status_enu_t status;
+  for(int i=0; i<sr.size(); ++i) {
+    status = getReal(sr[i],values[i]);
+    if(status != oms_status_ok)
+      break;
+  }
+  return status;
 }
 
 oms_status_enu_t oms3::System::setReals(const std::vector<oms3::ComRef> &crefs, std::vector<double> values)
 {
-  return logError_NotImplemented;
+  oms_status_enu_t status;
+  for(int i=0; i<crefs.size(); ++i) {
+    status = setReal(crefs[i],values[i]);
+    if(status != oms_status_ok)
+      break;
+  }
+  return status;
 }
 
 oms_status_enu_t oms3::System::setRealInputDerivatives(const oms3::ComRef &cref, int order, double value)
@@ -1569,10 +1756,9 @@ oms_status_enu_t oms3::System::registerSignalsForResultFile(ResultWriter& result
   resultFileMapping.clear();
   for (unsigned int i=0; i<connectors.size(); ++i)
   {
-    //if (!exportVariables[i])
-    //  continue;
-
     if (!connectors[i])
+      continue;
+    if (!exportConnectors[connectors[i]->getName()])
       continue;
 
     auto const& connector = connectors[i];
@@ -1597,14 +1783,14 @@ oms_status_enu_t oms3::System::registerSignalsForResultFile(ResultWriter& result
   return oms_status_ok;
 }
 
-oms_status_enu_t oms3::System::updateSignals(ResultWriter& resultFile, double time)
+oms_status_enu_t oms3::System::updateSignals(ResultWriter& resultFile)
 {
   for (const auto& component : components)
-    if (oms_status_ok != component.second->updateSignals(resultFile, time))
+    if (oms_status_ok != component.second->updateSignals(resultFile))
       return oms_status_error;
 
   for (const auto& subsystem : subsystems)
-    if (oms_status_ok != subsystem.second->updateSignals(resultFile, time))
+    if (oms_status_ok != subsystem.second->updateSignals(resultFile))
       return oms_status_error;
 
   for (auto const &it : resultFileMapping)
@@ -1629,6 +1815,58 @@ oms_status_enu_t oms3::System::updateSignals(ResultWriter& resultFile, double ti
       if (oms_status_ok != getBoolean(connector->getName(), value.boolValue))
         return logError("failed to fetch variable " + std::string(connector->getName()));
       resultFile.updateSignal(ID, value);
+    }
+  }
+
+  return oms_status_ok;
+}
+
+oms_status_enu_t oms3::System::addSignalsToResults(const char* regex)
+{
+  for (const auto& component : components)
+    if (oms_status_ok != component.second->addSignalsToResults(regex))
+      return oms_status_error;
+
+  for (const auto& subsystem : subsystems)
+    if (oms_status_ok != subsystem.second->addSignalsToResults(regex))
+      return oms_status_error;
+
+  oms_regex exp(regex);
+  for (auto& x: exportConnectors)
+  {
+    if (x.second)
+      continue;
+
+    if (regex_match(std::string(x.first), exp))
+    {
+      //logInfo("added \"" + std::string(x.first) + "\" to results");
+      x.second = true;
+    }
+  }
+
+  return oms_status_ok;
+}
+
+oms_status_enu_t oms3::System::removeSignalsFromResults(const char* regex)
+{
+  for (const auto& component : components)
+    if (oms_status_ok != component.second->removeSignalsFromResults(regex))
+      return oms_status_error;
+
+  for (const auto& subsystem : subsystems)
+    if (oms_status_ok != subsystem.second->removeSignalsFromResults(regex))
+      return oms_status_error;
+
+  oms_regex exp(regex);
+  for (auto& x: exportConnectors)
+  {
+    if (!x.second)
+      continue;
+
+    if (regex_match(std::string(x.first), exp))
+    {
+      //logInfo("removed \"" + std::string(x.first) + "\" from results");
+      x.second = false;
     }
   }
 

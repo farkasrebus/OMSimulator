@@ -78,7 +78,9 @@ namespace oms3
     oms_status_enu_t initialize();
     oms_status_enu_t simulate_asynchronous(void (*cb)(const char* cref, double time, oms_status_enu_t status));
     oms_status_enu_t simulate();
+    oms_status_enu_t stepUntil(double stopTime);
     oms_status_enu_t terminate();
+    oms_status_enu_t reset();
 
     oms_modelState_enu_t getModelState() const {return modelState;}
 
@@ -87,8 +89,9 @@ namespace oms3
     oms_status_enu_t setStopTime(double value);
     double getStopTime() const {return stopTime;}
 
+    oms_status_enu_t setLoggingInterval(double loggingInterval);
     oms_status_enu_t setResultFile(const std::string& filename, int bufferSize);
-    oms_status_enu_t emit(double time);
+    oms_status_enu_t emit(double time, bool force=false);
     oms_status_enu_t addSignalsToResults(const char* regex);
     oms_status_enu_t removeSignalsFromResults(const char* regex);
 
@@ -119,8 +122,10 @@ namespace oms3
     double stopTime = 1.0;
 
     ResultWriter* resultFile = NULL;
+    double lastEmit;
+    double loggingInterval = 0.0;
     int bufferSize = 10;
-    std::string resultFilename;             ///< experiment, default <name>_res.mat
+    std::string resultFilename;             ///< default <name>_res.mat
     Clock clock;
     unsigned int clock_id;
 
@@ -168,7 +173,7 @@ namespace oms2
     double getCommunicationInterval() const {return communicationInterval;}
     void setResultFile(const std::string& value, unsigned int bufferSize);
     const std::string& getResultFile() const {return resultFilename;}
-    ResultWriter *getResultWriter() const {return resultFile;}
+    oms3::ResultWriter *getResultWriter() const {return resultFile;}
     void setMasterAlgorithm(MasterAlgorithm value) {masterAlgorithm = value;}
     MasterAlgorithm getMasterAlgorithm() const {return masterAlgorithm;}
     //Functions for configuring adaptive step size control
@@ -227,7 +232,7 @@ namespace oms2
     double loggingInterval = 0.0;           ///< experiment, default 0.0
     std::string resultFilename;             ///< experiment, default <name>_res.mat
     unsigned int bufferSize = 1;
-    ResultWriter *resultFile = NULL;
+    oms3::ResultWriter *resultFile = NULL;
     MasterAlgorithm masterAlgorithm = MasterAlgorithm::STANDARD;  ///< master algorithm for FMI co-simulation, default MasterAlgorithm::STANDARD
     StepSizeConfiguration stepSizeConfiguration;//Configuration data structure for step size control
 

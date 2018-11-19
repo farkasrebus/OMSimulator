@@ -761,7 +761,7 @@ oms_status_enu_t oms2::FMICompositeModel::exportCompositeStructure(const std::st
    * }
    */
 
-  if (!(filename.length() > 5 && filename.substr(filename.length() - 4) == ".dot"))
+  if (!(filename.length() > 4 && filename.substr(filename.length() - 4) == ".dot"))
   {
     logError("[oms2::FMICompositeModel::exportCompositeStructure] The filename must have .dot as extension.");
     return oms_status_error;
@@ -945,7 +945,7 @@ oms_status_enu_t oms2::FMICompositeModel::reset(bool terminate)
   return oms_status_ok;
 }
 
-oms_status_enu_t oms2::FMICompositeModel::stepUntil(ResultWriter& resultWriter, double stopTime, double communicationInterval, double loggingInterval, MasterAlgorithm masterAlgorithm, bool realtime_sync)
+oms_status_enu_t oms2::FMICompositeModel::stepUntil(oms3::ResultWriter& resultWriter, double stopTime, double communicationInterval, double loggingInterval, MasterAlgorithm masterAlgorithm, bool realtime_sync)
 {
   logTrace();
   clock.tic();
@@ -987,7 +987,7 @@ oms_status_enu_t oms2::FMICompositeModel::stepUntil(ResultWriter& resultWriter, 
   return status;
 }
 
-oms_status_enu_t oms2::FMICompositeModel::doSteps(ResultWriter& resultWriter, const int numberOfSteps, double communicationInterval, double loggingInterval)
+oms_status_enu_t oms2::FMICompositeModel::doSteps(oms3::ResultWriter& resultWriter, const int numberOfSteps, double communicationInterval, double loggingInterval)
 {
   logTrace();
   clock.tic();
@@ -1021,7 +1021,7 @@ oms_status_enu_t oms2::FMICompositeModel::doSteps(ResultWriter& resultWriter, co
 }
 
 
-oms_status_enu_t oms2::FMICompositeModel::stepUntilStandard(ResultWriter& resultWriter, double stopTime, double communicationInterval, double loggingInterval, bool realtime_sync)
+oms_status_enu_t oms2::FMICompositeModel::stepUntilStandard(oms3::ResultWriter& resultWriter, double stopTime, double communicationInterval, double loggingInterval, bool realtime_sync)
 {
   logTrace();
   auto start = std::chrono::steady_clock::now();
@@ -1075,7 +1075,7 @@ oms_status_enu_t oms2::FMICompositeModel::stepUntilStandard(ResultWriter& result
 /**
  * \brief Parallel "doStep(..)" execution using task pool CTPL library (https://github.com/vit-vit/CTPL).
  */
-oms_status_enu_t oms2::FMICompositeModel::stepUntilPCTPL(ResultWriter& resultWriter, double stopTime, double communicationInterval, double loggingInterval, bool realtime_sync)
+oms_status_enu_t oms2::FMICompositeModel::stepUntilPCTPL(oms3::ResultWriter& resultWriter, double stopTime, double communicationInterval, double loggingInterval, bool realtime_sync)
 {
   logTrace();
 
@@ -1312,7 +1312,7 @@ oms_status_enu_t oms2::FMICompositeModel::stepUntilASSC(ResultWriter& resultWrit
   return oms_status_ok;
 }
 
-void oms2::FMICompositeModel::simulate_asynchronous(ResultWriter& resultWriter, double stopTime, double communicationInterval, double loggingInterval, void (*cb)(const char* ident, double time, oms_status_enu_t status))
+void oms2::FMICompositeModel::simulate_asynchronous(oms3::ResultWriter& resultWriter, double stopTime, double communicationInterval, double loggingInterval, void (*cb)(const char* ident, double time, oms_status_enu_t status))
 {
   logTrace();
   oms_status_enu_t statusSubModel;
@@ -1383,7 +1383,7 @@ oms_status_enu_t oms2::FMICompositeModel::simulateTLM(double stopTime, double lo
   logTrace();
 
   Model *model = oms2::Scope::GetInstance().getModel(getName());
-  ResultWriter *resultWriter = model->getResultWriter();
+  oms3::ResultWriter *resultWriter = model->getResultWriter();
 
   logInfo("Starting simulation loop.");
 
@@ -1981,9 +1981,9 @@ oms_status_enu_t oms2::FMICompositeModel::solveAlgLoop(oms2::DirectedGraph& grap
   return oms_status_ok;
 }
 
-oms_status_enu_t oms2::FMICompositeModel::registerSignalsForResultFile(ResultWriter& resultWriter)
+oms_status_enu_t oms2::FMICompositeModel::registerSignalsForResultFile(oms3::ResultWriter& resultWriter)
 {
-  clock_id = resultWriter.addSignal("wallTime", "wall-clock time [s]", SignalType_REAL);
+  clock_id = resultWriter.addSignal("wallTime", "wall-clock time [s]", oms3::SignalType_REAL);
 
   for (const auto& it : subModels)
     it.second->registerSignalsForResultFile(resultWriter);
@@ -1991,9 +1991,9 @@ oms_status_enu_t oms2::FMICompositeModel::registerSignalsForResultFile(ResultWri
   return oms_status_ok;
 }
 
-oms_status_enu_t oms2::FMICompositeModel::emit(ResultWriter& resultWriter)
+oms_status_enu_t oms2::FMICompositeModel::emit(oms3::ResultWriter& resultWriter)
 {
-  SignalValue_t wallTime;
+  oms3::SignalValue_t wallTime;
   wallTime.realValue = clock.getElapsedWallTime();
   resultWriter.updateSignal(clock_id, wallTime);
 

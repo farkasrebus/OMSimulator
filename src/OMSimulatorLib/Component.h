@@ -57,21 +57,33 @@ namespace oms3
 
     const ComRef& getCref() const {return cref;}
     ComRef getFullCref() const;
-    oms3::Element* getElement() {return &element;}
-    oms3::Connector* getConnector(const ComRef &cref);
+    Element* getElement() {return &element;}
+    Connector* getConnector(const ComRef& cref);
+    oms_status_enu_t deleteConnector(const ComRef& cref);
     oms_status_enu_t deleteResources();
     oms_status_enu_t getAllResources(std::vector<std::string>& resources) const {resources.push_back(path); return oms_status_ok;}
     const std::string& getPath() const {return path;}
     oms_component_enu_t getType() const {return type;}
-    virtual const oms3::FMUInfo* getFMUInfo() const {return NULL;}
+    virtual const FMUInfo* getFMUInfo() const {return NULL;}
     System* getParentSystem() const {return parentSystem;}
     Model* getModel() const;
     void setGeometry(const ssd::ElementGeometry& geometry) {element.setGeometry(&geometry);}
+
+    oms_status_enu_t addTLMBus(const oms3::ComRef& cref, const std::string domain, const int dimensions, const oms_tlm_interpolation_t interpolation);
+#if !defined(NO_TLM)
+    oms3::TLMBusConnector *getTLMBusConnector(const oms3::ComRef &cref);
+    TLMBusConnector **getTLMBusConnectors() {return &tlmbusconnectors[0];}
+#endif
+    oms_status_enu_t addConnectorToTLMBus(const ComRef& busCref, const ComRef& connectorCref, const std::string type);
+    oms_status_enu_t deleteConnectorFromTLMBus(const ComRef& busCref, const ComRef& connectorCref);
 
     virtual oms_status_enu_t exportToSSD(pugi::xml_node& node) const = 0;
     virtual oms_status_enu_t instantiate() = 0;
     virtual oms_status_enu_t initialize() = 0;
     virtual oms_status_enu_t terminate() = 0;
+    virtual oms_status_enu_t reset() = 0;
+    virtual oms_status_enu_t stepUntil(double stopTime) {return oms_status_ok;}
+
 
     const DirectedGraph& getInitialUnknownsGraph() {return initialUnknownsGraph;}
     const DirectedGraph& getOutputsGraph() {return outputsGraph;}
@@ -84,7 +96,9 @@ namespace oms3
     virtual oms_status_enu_t setReal(const ComRef& cref, double value) {return logError_NotImplemented;}
 
     virtual oms_status_enu_t registerSignalsForResultFile(ResultWriter& resultFile) = 0;
-    virtual oms_status_enu_t updateSignals(ResultWriter& resultWriter, double time) = 0;
+    virtual oms_status_enu_t updateSignals(ResultWriter& resultWriter) = 0;
+    virtual oms_status_enu_t addSignalsToResults(const char* regex) = 0;
+    virtual oms_status_enu_t removeSignalsFromResults(const char* regex) = 0;
 
   protected:
     Component(const ComRef& cref, oms_component_enu_t type, System* parentSystem, const std::string& path);
@@ -95,12 +109,15 @@ namespace oms3
 
     DirectedGraph initialUnknownsGraph;
     DirectedGraph outputsGraph;
-    oms3::Element element;
-    std::vector<oms3::Connector*> connectors;
+    Element element;
+    std::vector<Connector*> connectors;
+#if !defined(NO_TLM)
+    std::vector<TLMBusConnector*> tlmbusconnectors;
+#endif
 
   private:
     System* parentSystem;
-    oms3::ComRef cref;
+    ComRef cref;
     oms_component_enu_t type;
     std::string path;
   };

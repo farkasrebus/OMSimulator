@@ -53,14 +53,17 @@ namespace oms3
     oms_status_enu_t instantiate();
     oms_status_enu_t initialize();
     oms_status_enu_t terminate();
+    oms_status_enu_t reset();
     oms_status_enu_t stepUntil(double stopTime, void (*cb)(const char* ident, double time, oms_status_enu_t status));
 
     double getTolerance() const {return tolerance;}
     double getTime() const {return time;}
     double getStepSize() const {return stepSize;}
     oms_status_enu_t setFixedStepSize(double stepSize) {this->stepSize=stepSize; return oms_status_ok;}
+    oms_status_enu_t setTolerance(double tolerance) {this->tolerance=tolerance; return oms_status_ok;}
 
     oms_status_enu_t updateInputs(DirectedGraph& graph);
+    oms_status_enu_t solveAlgLoop(DirectedGraph& graph, const std::vector< std::pair<int, int> >& SCC);
 
   protected:
     SystemWC(const ComRef& cref, Model* parentModel, System* parentSystem);

@@ -61,6 +61,7 @@ namespace oms3
     oms_status_enu_t instantiate();
     oms_status_enu_t initialize();
     oms_status_enu_t terminate();
+    oms_status_enu_t reset();
 
     oms_status_enu_t stepUntil(double stopTime);
 
@@ -75,7 +76,9 @@ namespace oms3
     oms_status_enu_t setReal(const ComRef& cref, double value);
 
     oms_status_enu_t registerSignalsForResultFile(ResultWriter& resultFile);
-    oms_status_enu_t updateSignals(ResultWriter& resultWriter, double time);
+    oms_status_enu_t updateSignals(ResultWriter& resultWriter);
+    oms_status_enu_t addSignalsToResults(const char* regex);
+    oms_status_enu_t removeSignalsFromResults(const char* regex);
 
   protected:
     ComponentFMUCS(const ComRef& cref, System* parentSystem, const std::string& fmuPath);
@@ -91,6 +94,8 @@ namespace oms3
     fmi2_import_t* fmu = NULL;
     std::string tempDir;
 
+    FMUInfo fmuInfo;
+
     std::vector<Variable> allVariables;
     std::vector<Variable> inputs;
     std::vector<Variable> outputs;
@@ -102,8 +107,6 @@ namespace oms3
     std::map<std::string, Option<bool>> booleanParameters;
 
     std::unordered_map<unsigned int /*result file var ID*/, unsigned int /*allVariables ID*/> resultFileMapping;
-
-    FMUInfo fmuInfo;
 
     double time;
   };

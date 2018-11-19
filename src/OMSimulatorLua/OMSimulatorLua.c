@@ -33,7 +33,6 @@ void* topointer(lua_State *L, int index)
 /* ************************************ */
 /* oms3                                 */
 /*                                      */
-/* Experimental API                     */
 /* ************************************ */
 
 //const char* oms3_getVersion();
@@ -57,6 +56,21 @@ static int OMSimulatorLua_oms3_setLogFile(lua_State *L)
 
   const char* filename = lua_tostring(L, 1);
   oms_status_enu_t status = oms3_setLogFile(filename);
+  lua_pushinteger(L, status);
+  return 1;
+}
+
+//oms_status_enu_t oms3_setLoggingInterval(const char* cref, double loggingInterval);
+static int OMSimulatorLua_oms3_setLoggingInterval(lua_State *L)
+{
+  if (lua_gettop(L) != 2)
+    return luaL_error(L, "expecting exactly 2 arguments");
+  luaL_checktype(L, 1, LUA_TSTRING);
+  luaL_checktype(L, 2, LUA_TNUMBER);
+
+  const char* cref = lua_tostring(L, 1);
+  double loggingInterval = lua_tonumber(L, 2);
+  oms_status_enu_t status = oms3_setLoggingInterval(cref, loggingInterval);
   lua_pushinteger(L, status);
   return 1;
 }
@@ -186,6 +200,26 @@ static int OMSimulatorLua_oms3_list(lua_State *L)
   const char* cref = lua_tostring(L, 1);
   char* contents = NULL;
   oms_status_enu_t status = oms3_list(cref, &contents);
+
+  lua_pushstring(L, contents ? contents : "");
+  lua_pushinteger(L, status);
+
+  if (contents)
+    oms2_freeMemory(contents);
+
+  return 2;
+}
+
+//oms_status_enu_t oms3_listUnconnectedConnectors(const char* cref, char** contents);
+static int OMSimulatorLua_oms3_listUnconnectedConnectors(lua_State *L)
+{
+  if (lua_gettop(L) != 1)
+    return luaL_error(L, "expecting exactly 1 argument");
+  luaL_checktype(L, 1, LUA_TSTRING);
+
+  const char* cref = lua_tostring(L, 1);
+  char* contents = NULL;
+  oms_status_enu_t status = oms3_listUnconnectedConnectors(cref, &contents);
 
   lua_pushstring(L, contents ? contents : "");
   lua_pushinteger(L, status);
@@ -677,15 +711,43 @@ static int OMSimulatorLua_oms3_terminate(lua_State *L)
   return 1;
 }
 
-//oms_status_enu_t oms3_simulate(const char* ident);
-static int OMSimulatorLua_oms3_simulate(lua_State *L)
+//oms_status_enu_t oms3_reset(const char* ident);
+static int OMSimulatorLua_oms3_reset(lua_State *L)
 {
   if (lua_gettop(L) != 1)
     return luaL_error(L, "expecting exactly 1 argument");
   luaL_checktype(L, 1, LUA_TSTRING);
 
   const char* ident = lua_tostring(L, 1);
-  oms_status_enu_t status = oms3_simulate(ident);
+  oms_status_enu_t status = oms3_reset(ident);
+  lua_pushinteger(L, status);
+  return 1;
+}
+
+//oms_status_enu_t oms3_simulate(const char* cref);
+static int OMSimulatorLua_oms3_simulate(lua_State *L)
+{
+  if (lua_gettop(L) != 1)
+    return luaL_error(L, "expecting exactly 1 argument");
+  luaL_checktype(L, 1, LUA_TSTRING);
+
+  const char* cref = lua_tostring(L, 1);
+  oms_status_enu_t status = oms3_simulate(cref);
+  lua_pushinteger(L, status);
+  return 1;
+}
+
+//oms_status_enu_t oms3_stepUntil(const char* cref, double stopTime);
+static int OMSimulatorLua_oms3_stepUntil(lua_State *L)
+{
+  if (lua_gettop(L) != 2)
+    return luaL_error(L, "expecting exactly 2 arguments");
+  luaL_checktype(L, 1, LUA_TSTRING);
+  luaL_checktype(L, 2, LUA_TNUMBER);
+
+  const char* cref = lua_tostring(L, 1);
+  double stopTime = lua_tonumber(L, 2);
+  oms_status_enu_t status = oms3_stepUntil(cref, stopTime);
   lua_pushinteger(L, status);
   return 1;
 }
@@ -758,67 +820,6 @@ static int OMSimulatorLua_oms3_setTLMPositionAndOrientation(lua_State *L)
                                                               A[3], A[4], A[5],
                                                               A[6], A[7], A[8]);
 
-  lua_pushinteger(L, status);
-  return 1;
-}
-
-//oms_status_enu_t oms3_setTLMInitialValues(const char *cref, const char *ifc, double value1, double value2...));
-static int OMSimulatorLua_oms3_setTLMInitialValues(lua_State *L)
-{
-  //First parse initial arguments (3 or 8)
-  if(lua_gettop(L) != 3 && lua_gettop(L) != 4 && lua_gettop(L) != 14) {
-    return luaL_error(L, "expecting exactly 3, 4 or 14 arguments");
-  }
-
-  luaL_checktype(L, 1, LUA_TSTRING);
-  luaL_checktype(L, 2, LUA_TSTRING);
-  luaL_checktype(L, 3, LUA_TNUMBER);
-  if(lua_gettop(L) > 3) {
-    luaL_checktype(L, 4, LUA_TNUMBER);
-  }
-  if(lua_gettop(L) > 4) {
-    luaL_checktype(L, 5, LUA_TNUMBER);
-    luaL_checktype(L, 6, LUA_TNUMBER);
-    luaL_checktype(L, 7, LUA_TNUMBER);
-    luaL_checktype(L, 8, LUA_TNUMBER);
-    luaL_checktype(L, 9, LUA_TNUMBER);
-    luaL_checktype(L, 10, LUA_TNUMBER);
-    luaL_checktype(L, 11, LUA_TNUMBER);
-    luaL_checktype(L, 12, LUA_TNUMBER);
-    luaL_checktype(L, 13, LUA_TNUMBER);
-    luaL_checktype(L, 14, LUA_TNUMBER);
-  }
-
-  oms_status_enu_t status;
-  const char *cref =    lua_tostring(L, 1);
-  const char *subref =  lua_tostring(L, 2);
-  if(lua_gettop(L) == 3) {
-    double values[1];
-    values[0] = lua_tonumber(L,3);
-    status = oms3_setTLMInitialValues(cref, subref, values, 1);
-  }
-  else if(lua_gettop(L) == 4) {
-    double values[2];
-    values[0] = lua_tonumber(L,3);
-    values[1] = lua_tonumber(L,4);
-    status = oms3_setTLMInitialValues(cref, subref, values, 2);
-  }
-  else {
-    double values[12];
-    values[0] = lua_tonumber(L,3);
-    values[1] = lua_tonumber(L,4);
-    values[2] = lua_tonumber(L,5);
-    values[3] = lua_tonumber(L,6);
-    values[4] = lua_tonumber(L,7);
-    values[5] = lua_tonumber(L,8);
-    values[6] = lua_tonumber(L,9);
-    values[7] = lua_tonumber(L,10);
-    values[8] = lua_tonumber(L,11);
-    values[9] = lua_tonumber(L,12);
-    values[10] = lua_tonumber(L,13);
-    values[11] = lua_tonumber(L,14);
-    status = oms3_setTLMInitialValues(cref, subref, values, 12);
-  }
   lua_pushinteger(L, status);
   return 1;
 }
@@ -2509,7 +2510,6 @@ DLLEXPORT int luaopen_OMSimulatorLua(lua_State *L)
   /* ************************************ */
   /* oms3                                 */
   /*                                      */
-  /* Experimental API                     */
   /* ************************************ */
   REGISTER_LUA_CALL(oms3_addBus);
   REGISTER_LUA_CALL(oms3_addConnection);
@@ -2541,26 +2541,29 @@ DLLEXPORT int luaopen_OMSimulatorLua(lua_State *L)
   REGISTER_LUA_CALL(oms3_initialize);
   REGISTER_LUA_CALL(oms3_instantiate);
   REGISTER_LUA_CALL(oms3_list);
+  REGISTER_LUA_CALL(oms3_listUnconnectedConnectors);
   REGISTER_LUA_CALL(oms3_newModel);
   REGISTER_LUA_CALL(oms3_parseModelName);
   REGISTER_LUA_CALL(oms3_removeSignalsFromResults);
   REGISTER_LUA_CALL(oms3_rename);
+  REGISTER_LUA_CALL(oms3_reset);
   REGISTER_LUA_CALL(oms3_setBoolean);
   REGISTER_LUA_CALL(oms3_setCommandLineOption);
   REGISTER_LUA_CALL(oms3_setFixedStepSize);
   REGISTER_LUA_CALL(oms3_setInteger);
   REGISTER_LUA_CALL(oms3_setLogFile);
+  REGISTER_LUA_CALL(oms3_setLoggingInterval);
   REGISTER_LUA_CALL(oms3_setMaxLogFileSize);
   REGISTER_LUA_CALL(oms3_setReal);
   REGISTER_LUA_CALL(oms3_setResultFile);
   REGISTER_LUA_CALL(oms3_setStartTime);
   REGISTER_LUA_CALL(oms3_setStopTime);
   REGISTER_LUA_CALL(oms3_setTempDirectory);
-  REGISTER_LUA_CALL(oms3_setTLMInitialValues);
   REGISTER_LUA_CALL(oms3_setTLMPositionAndOrientation);
   REGISTER_LUA_CALL(oms3_setTLMSocketData);
   REGISTER_LUA_CALL(oms3_setWorkingDirectory);
   REGISTER_LUA_CALL(oms3_simulate);
+  REGISTER_LUA_CALL(oms3_stepUntil);
   REGISTER_LUA_CALL(oms3_terminate);
   /* ************************************ */
   /* OMSimulator 2.0                      */

@@ -56,11 +56,11 @@ namespace oms3
     oms_status_enu_t instantiate();
     oms_status_enu_t initialize();
     oms_status_enu_t terminate();
+    oms_status_enu_t reset();
     oms_status_enu_t stepUntil(double stopTime, void (*cb)(const char* ident, double time, oms_status_enu_t status));
 
     oms_status_enu_t connectToSockets(const oms3::ComRef cref, std::string server);
     void disconnectFromSockets(const oms3::ComRef cref);
-    oms_status_enu_t setInitialValues(ComRef cref, std::vector<double> values);
     oms_status_enu_t updateInitialValues(const oms3::ComRef cref);
 
     oms_status_enu_t initializeSubSystem(ComRef cref);
@@ -86,7 +86,7 @@ namespace oms3
     std::vector<ComRef> connectedsubsystems;
     std::map<System*, TLMPlugin*> plugins;
     std::vector<ComRef> initializedsubsystems;
-    std::map<ComRef, std::vector<double> > initialValues;
+    std::mutex pluginsMutex;
     std::mutex setConnectedMutex;
     std::mutex setInitializedMutex;
     std::map<System*, std::mutex> socketMutexes;

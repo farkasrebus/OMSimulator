@@ -37,6 +37,7 @@
 #include "Scope.h"
 #include "ssd/Tags.h"
 #include "System.h"
+#include "Component.h"
 
 #include <OMSBoost.h>
 #include <minizip.h>
@@ -44,7 +45,6 @@
 /* ************************************ */
 /* oms3                                 */
 /*                                      */
-/* Experimental API                     */
 /* ************************************ */
 
 oms3::Model::Model(const oms3::ComRef& cref, const std::string& tempDir)
@@ -70,7 +70,7 @@ oms3::Model* oms3::Model::NewModel(const oms3::ComRef& cref)
 {
   if (!cref.isValidIdent())
   {
-    logError("\"" + std::string(cref) + "\" is not a valid ident");
+    logError_InvalidIdent(cref);
     return NULL;
   }
 
@@ -291,7 +291,7 @@ oms_status_enu_t oms3::Model::exportToFile(const std::string& filename) const
   pugi::xml_document doc;
 
   std::string extension = "";
-  if (filename.length() > 5)
+  if (filename.length() > 4)
     extension = filename.substr(filename.length() - 4);
 
   if (extension != ".ssp")
@@ -399,6 +399,7 @@ oms_status_enu_t oms3::Model::initialize()
   clock.tic();
 
   cancelSim = false;
+  lastEmit = startTime;
 
   if (!resultFilename.empty())
   {
@@ -417,7 +418,7 @@ oms_status_enu_t oms3::Model::initialize()
     }
   }
   else
-    resultFile = new VoidWriter(1);
+    logInfo("No result file will be created");
 
   if (oms_status_ok != system->initialize())
   {
@@ -450,7 +451,7 @@ oms_status_enu_t oms3::Model::initialize()
     }
 
     // dump results
-    emit(startTime);
+    emit(startTime, true);
   }
 
   clock.toc();
@@ -474,6 +475,7 @@ oms_status_enu_t oms3::Model::simulate_asynchronous(void (*cb)(const char* cref,
   }
 
   std::thread([=]{system->stepUntil(stopTime, cb);}).detach();
+  emit(stopTime, true);
   clock.toc();
 
   return oms_status_ok;
@@ -495,6 +497,28 @@ oms_status_enu_t oms3::Model::simulate()
   }
 
   oms_status_enu_t status = system->stepUntil(stopTime, NULL);
+  emit(stopTime, true);
+  clock.toc();
+  return status;
+}
+
+oms_status_enu_t oms3::Model::stepUntil(double stopTime)
+{
+  clock.tic();
+  if (oms_modelState_simulation != modelState)
+  {
+    clock.toc();
+    return logError_ModelInWrongState(this);
+  }
+
+  if (!system)
+  {
+    clock.toc();
+    return logError("Model doesn't contain a system");
+  }
+
+  oms_status_enu_t status = system->stepUntil(stopTime, NULL);
+  emit(stopTime, true);
   clock.toc();
   return status;
 }
@@ -523,8 +547,40 @@ oms_status_enu_t oms3::Model::terminate()
   return oms_status_ok;
 }
 
+oms_status_enu_t oms3::Model::reset()
+{
+  if (oms_modelState_simulation != modelState)
+    return logError_ModelInWrongState(this);
+
+  if (!system)
+    return logError("Model doesn't contain a system");
+
+  if (oms_status_ok != system->reset())
+    return logError_ResetFailed(system->getFullCref());
+
+  if (resultFile)
+  {
+    delete resultFile;
+    resultFile = NULL;
+  }
+
+  modelState = oms_modelState_instantiated;
+  return oms_status_ok;
+}
+
+oms_status_enu_t oms3::Model::setLoggingInterval(double loggingInterval)
+{
+  if (loggingInterval < 0.0)
+    this->loggingInterval = 0.0;
+  this->loggingInterval = loggingInterval;
+  return oms_status_ok;
+}
+
 oms_status_enu_t oms3::Model::registerSignalsForResultFile()
 {
+  if (!resultFile)
+    return oms_status_ok;
+
   clock_id = resultFile->addSignal("wallTime", "wall-clock time [s]", SignalType_REAL);
   if (system)
     if (oms_status_ok != system->registerSignalsForResultFile(*resultFile))
@@ -532,15 +588,22 @@ oms_status_enu_t oms3::Model::registerSignalsForResultFile()
   return oms_status_ok;
 }
 
-oms_status_enu_t oms3::Model::emit(double time)
+oms_status_enu_t oms3::Model::emit(double time, bool force)
 {
+  if (!resultFile)
+    return oms_status_ok;
+  if (!force && time < lastEmit + loggingInterval)
+    return oms_status_ok;
+
   SignalValue_t wallTime;
   wallTime.realValue = clock.getElapsedWallTime();
   resultFile->updateSignal(clock_id, wallTime);
   if (system)
-    if (oms_status_ok != system->updateSignals(*resultFile, time))
+    if (oms_status_ok != system->updateSignals(*resultFile))
       return oms_status_error;
+
   resultFile->emit(time);
+  lastEmit = time;
   return oms_status_ok;
 }
 
@@ -589,12 +652,18 @@ oms_status_enu_t oms3::Model::setResultFile(const std::string& filename, int buf
 
 oms_status_enu_t oms3::Model::addSignalsToResults(const char* regex)
 {
-  return logError_NotImplemented;
+  if (system)
+    if (oms_status_ok != system->addSignalsToResults(regex))
+      return oms_status_error;
+  return oms_status_ok;
 }
 
 oms_status_enu_t oms3::Model::removeSignalsFromResults(const char* regex)
 {
-  return logError_NotImplemented;
+  if (system)
+    if (oms_status_ok != system->removeSignalsFromResults(regex))
+      return oms_status_error;
+  return oms_status_ok;
 }
 
 oms_status_enu_t oms3::Model::cancelSimulation_asynchronous()
@@ -961,14 +1030,14 @@ oms_status_enu_t oms2::Model::initialize()
       resulttype = resultFilename.substr(resultFilename.length() - 4);
 
     if (".csv" == resulttype)
-      resultFile = new CSVWriter(bufferSize);
+      resultFile = new oms3::CSVWriter(bufferSize);
     else if (".mat" == resulttype)
-      resultFile = new MATWriter(bufferSize);
+      resultFile = new oms3::MATWriter(bufferSize);
     else
       return logError("Unsupported format of the result file: " + resultFilename);
   }
   else
-    resultFile = new VoidWriter(1);
+    resultFile = new oms3::VoidWriter(1);
 
   modelState = oms_modelState_initialization;
   oms_status_enu_t status = compositeModel->initialize(startTime, tolerance);
@@ -1021,14 +1090,14 @@ oms_status_enu_t oms2::Model::reset(bool terminate)
         resulttype = resultFilename.substr(resultFilename.length() - 4);
 
       if (".csv" == resulttype)
-        resultFile = new CSVWriter(bufferSize);
+        resultFile = new oms3::CSVWriter(bufferSize);
       else if (".mat" == resulttype)
-        resultFile = new MATWriter(bufferSize);
+        resultFile = new oms3::MATWriter(bufferSize);
       else
         return logError("Unsupported format of the result file: " + resultFilename);
     }
     else
-      resultFile = new VoidWriter(1);
+      resultFile = new oms3::VoidWriter(1);
   }
 
   oms_status_enu_t status = compositeModel->reset(terminate);
@@ -1106,9 +1175,9 @@ void oms2::Model::setResultFile(const std::string& value, unsigned int bufferSiz
         resulttype = resultFilename.substr(resultFilename.length() - 4);
 
       if (".csv" == resulttype)
-        resultFile = new CSVWriter(bufferSize);
+        resultFile = new oms3::CSVWriter(bufferSize);
       else if (".mat" == resulttype)
-        resultFile = new MATWriter(bufferSize);
+        resultFile = new oms3::MATWriter(bufferSize);
       else
       {
         logError("Unsupported format of the result file: " + resultFilename);

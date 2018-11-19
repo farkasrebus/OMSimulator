@@ -29,30 +29,4 @@
  *
  */
 
-#ifndef _OMS_MATREADER_H_
-#define _OMS_MATREADER_H_
-
-#include "MatVer4.h"
-#include "ResultReader.h"
-
-namespace oms3
-{
-  class MatReader : public ResultReader
-  {
-  public:
-    MatReader(const char* filename);
-    ~MatReader();
-
-    ResultReader::Series* getSeries(const char* var);
-
-  private:
-    bool transposed;
-    MatVer4Matrix* AClass;
-    MatVer4Matrix* name;
-    MatVer4Matrix* dataInfo;
-    MatVer4Matrix* data_1;
-    MatVer4Matrix* data_2;
-  };
-}
-
-#endif
+#include "TLMInterface.h"
