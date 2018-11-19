@@ -1982,10 +1982,8 @@ oms_status_enu_t oms2::Scope::addEventIndicator(const oms2::SignalRef& signal)
     ComRef modelCref=cref.first();
     Model* model=getModel(modelCref);
     if (!model)
-    {
-      logError("[oms2::Scope::addEventIndicator] failed");
-      return oms_status_error;
-    }
+      return logError_ModelNotInScope(cref.toString());   
+    
     model -> addEventIndicator(signal);
     
     return oms_status_ok;
@@ -2003,10 +2001,8 @@ oms_status_enu_t oms2::Scope::addTimeIndicator(const oms2::SignalRef& signal)
     ComRef modelCref=cref.first();
     Model* model=getModel(modelCref);
     if (!model)
-    {
-      logError("[oms2::Scope::addTimeIndicator] failed");
-      return oms_status_error;
-    }
+      return logError_ModelNotInScope(cref.toString());
+    
     model -> addTimeIndicator(signal);
     
     return oms_status_ok;
@@ -2024,10 +2020,8 @@ oms_status_enu_t oms2::Scope::addStaticValueIndicator(const oms2::SignalRef& sig
     ComRef modelCref=cref.first();
     Model* model=getModel(modelCref);
     if (!model)
-    {
-      logError("[oms2::Scope::addStaticValueIndicator] failed");
-      return oms_status_error;
-    }
+      return logError_ModelNotInScope(cref.toString());
+    
     model -> addStaticValueIndicator(signal,lower,upper,stepSize);
     
     return oms_status_ok;
@@ -2045,10 +2039,8 @@ oms_status_enu_t oms2::Scope::addDynamicValueIndicator(const oms2::SignalRef& si
     ComRef modelCref=cref.first();
     Model* model=getModel(modelCref);
     if (!model)
-    {
-      logError("[oms2::Scope::addDynamicValueIndicator] failed");
-      return oms_status_error;
-    }
+      return logError_ModelNotInScope(cref.toString());
+    
     model -> addDynamicValueIndicator(signal,lower,upper,stepSize);
     
     return oms_status_ok;
@@ -2065,10 +2057,7 @@ oms_status_enu_t oms2::Scope::setMinimalStepSize(const ComRef& cref, double min)
   if (cref.isIdent()) {
     Model* model = getModel(cref);
     if (!model)
-    {
-      logError("[oms2::Scope::setMinimalStepSize] failed");
-      return oms_status_error;
-    }
+      return logError_ModelNotInScope(cref.toString());
 
     model -> setMinimalStepSize(min);
 
@@ -2085,10 +2074,7 @@ oms_status_enu_t oms2::Scope::setMaximalStepSize(const ComRef& cref, double max)
   if (cref.isIdent()) {
     Model* model = getModel(cref);
     if (!model)
-    {
-      logError("[oms2::Scope::setMaximalStepSize] failed");
-      return oms_status_error;
-    }
+      return logError_ModelNotInScope(cref.toString());
 
     model -> setMaximalStepSize(max);
 
