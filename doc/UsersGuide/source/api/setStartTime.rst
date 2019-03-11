@@ -8,21 +8,21 @@ Set the start time of the simulation.
 #LUA#
 .. code-block:: lua
 
-  status = oms2_setStartTime(cref, startTime)
+  status = oms_setStartTime(cref, startTime)
 
 #END#
 
 #PYTHON#
 .. code-block:: python
 
-  status = session.setStartTime(cref, startTime)
+  status = oms.setStartTime(cref, startTime)
 
 #END#
 
 #CAPI#
 .. code-block:: c
 
-  oms_status_enu_t oms2_setStartTime(const char* cref, double startTime);
+  oms_status_enu_t oms_setStartTime(const char* cref, double startTime);
 
 #END#
 

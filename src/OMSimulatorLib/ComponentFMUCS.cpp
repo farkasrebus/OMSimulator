@@ -31,6 +31,7 @@
 
 #include "ComponentFMUCS.h"
 
+#include "Flags.h"
 #include "Logging.h"
 #include "Model.h"
 #include "ssd/Tags.h"
@@ -39,29 +40,29 @@
 #include "SystemWC.h"
 #include <fmilib.h>
 #include <JM/jm_portability.h>
-#include <OMSBoost.h>
+#include <OMSFileSystem.h>
 #include <RegEx.h>
 
-oms3::ComponentFMUCS::ComponentFMUCS(const ComRef& cref, System* parentSystem, const std::string& fmuPath)
-  : oms3::Component(cref, oms_component_fmu, parentSystem, fmuPath), fmuInfo(fmuPath, oms_fmi_kind_cs)
+oms::ComponentFMUCS::ComponentFMUCS(const ComRef& cref, System* parentSystem, const std::string& fmuPath)
+  : oms::Component(cref, oms_component_fmu, parentSystem, fmuPath), fmuInfo(fmuPath, oms_fmi_kind_cs)
 {
 }
 
-oms3::ComponentFMUCS::~ComponentFMUCS()
+oms::ComponentFMUCS::~ComponentFMUCS()
 {
   fmi2_import_free_instance(fmu);
   fmi2_import_destroy_dllfmu(fmu);
   fmi2_import_free(fmu);
   fmi_import_free_context(context);
 
-  if (!tempDir.empty() && boost::filesystem::is_directory(tempDir))
+  if (!tempDir.empty() && filesystem::is_directory(tempDir))
   {
-    boost::filesystem::remove_all(tempDir);
+    filesystem::remove_all(tempDir);
     logDebug("removed working directory: \"" + tempDir + "\"");
   }
 }
 
-oms3::Component* oms3::ComponentFMUCS::NewComponent(const oms3::ComRef& cref, oms3::System* parentSystem, const std::string& fmuPath)
+oms::Component* oms::ComponentFMUCS::NewComponent(const oms::ComRef& cref, oms::System* parentSystem, const std::string& fmuPath)
 {
   if (!cref.isValidIdent())
   {
@@ -75,12 +76,12 @@ oms3::Component* oms3::ComponentFMUCS::NewComponent(const oms3::ComRef& cref, om
     return NULL;
   }
 
-  boost::filesystem::path temp_root(parentSystem->getModel()->getTempDirectory());
-  boost::filesystem::path temp_temp = temp_root / "temp";
-  boost::filesystem::path temp_resources = temp_root / "resources";
+  filesystem::path temp_root(parentSystem->getModel()->getTempDirectory());
+  filesystem::path temp_temp = temp_root / "temp";
+  filesystem::path temp_resources = temp_root / "resources";
 
-  boost::filesystem::path relFMUPath = boost::filesystem::path("resources") / (std::string(cref) + ".fmu");
-  boost::filesystem::path absFMUPath = temp_root / relFMUPath;
+  filesystem::path relFMUPath = filesystem::path("resources") / (std::string(cref) + ".fmu");
+  filesystem::path absFMUPath = temp_root / relFMUPath;
 
   ComponentFMUCS* component = new ComponentFMUCS(cref, parentSystem, "resources/" + std::string(cref) + ".fmu");
 
@@ -88,17 +89,17 @@ oms3::Component* oms3::ComponentFMUCS::NewComponent(const oms3::ComRef& cref, om
   component->callbacks.calloc = calloc;
   component->callbacks.realloc = realloc;
   component->callbacks.free = free;
-  component->callbacks.logger = oms3::fmiLogger;
+  component->callbacks.logger = oms::fmiLogger;
   component->callbacks.log_level = jm_log_level_all;
   component->callbacks.context = 0;
 
   if (parentSystem->copyResources())
-    boost::filesystem::copy_file(boost::filesystem::path(fmuPath), absFMUPath, boost::filesystem::copy_option::overwrite_if_exists);
+    oms_copy_file(filesystem::path(fmuPath), absFMUPath);
 
   // set temp directory
-  boost::filesystem::path tempDir = temp_temp / std::string(cref);
+  filesystem::path tempDir = temp_temp / std::string(cref);
   component->tempDir = tempDir.string();
-  if (!boost::filesystem::is_directory(tempDir) && !boost::filesystem::create_directory(tempDir))
+  if (!filesystem::is_directory(tempDir) && !filesystem::create_directory(tempDir))
   {
     logError("Creating temp directory for component \"" + std::string(cref) + "\" failed");
     return NULL;
@@ -140,7 +141,7 @@ oms3::Component* oms3::ComponentFMUCS::NewComponent(const oms3::ComRef& cref, om
     return NULL;
   }
 
-  component->callbackFunctions.logger = oms3::fmi2logger;
+  component->callbackFunctions.logger = oms::fmi2logger;
   component->callbackFunctions.allocateMemory = calloc;
   component->callbackFunctions.freeMemory = free;
   component->callbackFunctions.componentEnvironment = component->fmu;
@@ -155,7 +156,7 @@ oms3::Component* oms3::ComponentFMUCS::NewComponent(const oms3::ComRef& cref, om
   for (size_t i = 0; i < varListSize; ++i)
   {
     fmi2_import_variable_t* var = fmi2_import_get_variable(varList, i);
-    oms3::Variable v(var, i + 1);
+    oms::Variable v(var, i + 1);
     component->allVariables.push_back(v);
     component->exportVariables.push_back(true);
   }
@@ -204,13 +205,6 @@ oms3::Component* oms3::ComponentFMUCS::NewComponent(const oms3::ComRef& cref, om
   // create some special variable maps
   for (auto const& v : component->allVariables)
   {
-    if (v.isParameter() && v.isTypeReal())
-      component->realParameters[std::string(v)] = oms3::Option<double>();
-    else if (v.isParameter() && v.isTypeInteger())
-      component->integerParameters[std::string(v)] = oms3::Option<int>();
-    else if (v.isParameter() && v.isTypeBoolean())
-      component->booleanParameters[std::string(v)] = oms3::Option<bool>();
-
     if (v.isInput())
       component->inputs.push_back(v);
     else if (v.isOutput())
@@ -250,7 +244,7 @@ oms3::Component* oms3::ComponentFMUCS::NewComponent(const oms3::ComRef& cref, om
   return component;
 }
 
-oms3::Component* oms3::ComponentFMUCS::NewComponent(const pugi::xml_node& node, oms3::System* parentSystem)
+oms::Component* oms::ComponentFMUCS::NewComponent(const pugi::xml_node& node, oms::System* parentSystem)
 {
   ComRef cref = ComRef(node.attribute("name").as_string());
   std::string type = node.attribute("type").as_string();
@@ -262,7 +256,7 @@ oms3::Component* oms3::ComponentFMUCS::NewComponent(const pugi::xml_node& node, 
     return NULL;
   }
 
-  oms3::ComponentFMUCS* component = dynamic_cast<oms3::ComponentFMUCS*>(oms3::ComponentFMUCS::NewComponent(cref, parentSystem, source));
+  oms::ComponentFMUCS* component = dynamic_cast<oms::ComponentFMUCS*>(oms::ComponentFMUCS::NewComponent(cref, parentSystem, source));
   if (!component)
     return NULL;
 
@@ -273,17 +267,17 @@ oms3::Component* oms3::ComponentFMUCS::NewComponent(const pugi::xml_node& node, 
   for(pugi::xml_node_iterator it = node.begin(); it != node.end(); ++it)
   {
     std::string name = it->name();
-    if(name == oms2::ssd::ssd_connectors)
+    if(name == oms::ssd::ssd_connectors)
     {
       // import connectors
       for(pugi::xml_node_iterator itConnectors = (*it).begin(); itConnectors != (*it).end(); ++itConnectors)
       {
-        component->connectors.push_back(oms3::Connector::NewConnector(*itConnectors));
+        component->connectors.push_back(oms::Connector::NewConnector(*itConnectors));
       }
     }
-    else if(name == oms2::ssd::ssd_element_geometry)
+    else if(name == oms::ssd::ssd_element_geometry)
     {
-      oms3::ssd::ElementGeometry geometry;
+      oms::ssd::ElementGeometry geometry;
       geometry.importFromSSD(*it);
       component->setGeometry(geometry);
     }
@@ -301,13 +295,13 @@ oms3::Component* oms3::ComponentFMUCS::NewComponent(const pugi::xml_node& node, 
   return component;
 }
 
-oms_status_enu_t oms3::ComponentFMUCS::exportToSSD(pugi::xml_node& node) const
+oms_status_enu_t oms::ComponentFMUCS::exportToSSD(pugi::xml_node& node) const
 {
 #if !defined(NO_TLM)
   if (tlmbusconnectors[0])
   {
-    pugi::xml_node annotations_node = node.append_child(oms2::ssd::ssd_annotations);
-    pugi::xml_node annotation_node = annotations_node.append_child(oms2::ssd::ssd_annotation);
+    pugi::xml_node annotations_node = node.append_child(oms::ssd::ssd_annotations);
+    pugi::xml_node annotation_node = annotations_node.append_child(oms::ssd::ssd_annotation);
     annotation_node.append_attribute("type") = oms::annotation_type;
     for (const auto& tlmbusconnector : tlmbusconnectors)
       if (tlmbusconnector)
@@ -318,7 +312,7 @@ oms_status_enu_t oms3::ComponentFMUCS::exportToSSD(pugi::xml_node& node) const
   node.append_attribute("name") = this->getCref().c_str();
   node.append_attribute("type") = "application/x-fmu-sharedlibrary";
   node.append_attribute("source") = getPath().c_str();
-  pugi::xml_node node_connectors = node.append_child(oms2::ssd::ssd_connectors);
+  pugi::xml_node node_connectors = node.append_child(oms::ssd::ssd_connectors);
 
   if (element.getGeometry())
     element.getGeometry()->exportToSSD(node);
@@ -330,7 +324,7 @@ oms_status_enu_t oms3::ComponentFMUCS::exportToSSD(pugi::xml_node& node) const
   return oms_status_ok;
 }
 
-oms_status_enu_t oms3::ComponentFMUCS::initializeDependencyGraph_initialUnknowns()
+oms_status_enu_t oms::ComponentFMUCS::initializeDependencyGraph_initialUnknowns()
 {
   if (initialUnknownsGraph.getEdges().size() > 0)
   {
@@ -375,7 +369,7 @@ oms_status_enu_t oms3::ComponentFMUCS::initializeDependencyGraph_initialUnknowns
   return oms_status_ok;
 }
 
-oms_status_enu_t oms3::ComponentFMUCS::initializeDependencyGraph_outputs()
+oms_status_enu_t oms::ComponentFMUCS::initializeDependencyGraph_outputs()
 {
   if (outputsGraph.getEdges().size() > 0)
   {
@@ -419,7 +413,7 @@ oms_status_enu_t oms3::ComponentFMUCS::initializeDependencyGraph_outputs()
   return oms_status_ok;
 }
 
-oms_status_enu_t oms3::ComponentFMUCS::instantiate()
+oms_status_enu_t oms::ComponentFMUCS::instantiate()
 {
   jm_status_enu_t jmstatus;
   fmi2_status_t fmistatus;
@@ -433,10 +427,31 @@ oms_status_enu_t oms3::ComponentFMUCS::instantiate()
   if (jm_status_error == jmstatus)
     return logError_FMUCall("fmi2_import_instantiate", this);
 
+  // set start values
+  for (const auto& v : booleanStartValues)
+  {
+    if (oms_status_ok != setBoolean(v.first, v.second))
+      return logError("Failed to set start value for " + std::string(v.first));
+  }
+  booleanStartValues.clear();
+  for (const auto& v : integerStartValues)
+  {
+    if (oms_status_ok != setInteger(v.first, v.second))
+      return logError("Failed to set start value for " + std::string(v.first));
+  }
+  integerStartValues.clear();
+  for (const auto& v : realStartValues)
+  {
+    if (oms_status_ok != setReal(v.first, v.second))
+      return logError("Failed to set start value for " + std::string(v.first));
+  }
+  realStartValues.clear();
+
   // enterInitialization
-  time = getParentSystem()->getModel()->getStartTime();
-  double tolerance = dynamic_cast<SystemWC*>(getParentSystem())->getTolerance();
-  fmistatus = fmi2_import_setup_experiment(fmu, fmi2_true, tolerance, time, fmi2_false, 1.0);
+  time = getModel()->getStartTime();
+  double relativeTolerance = 0.0;
+  dynamic_cast<SystemWC*>(getParentSystem())->getTolerance(NULL, &relativeTolerance);
+  fmistatus = fmi2_import_setup_experiment(fmu, fmi2_true, relativeTolerance, time, fmi2_false, 1.0);
   if (fmi2_status_ok != fmistatus) return logError_FMUCall("fmi2_import_setup_experiment", this);
 
   fmistatus = fmi2_import_enter_initialization_mode(fmu);
@@ -445,8 +460,11 @@ oms_status_enu_t oms3::ComponentFMUCS::instantiate()
   return oms_status_ok;
 }
 
-oms_status_enu_t oms3::ComponentFMUCS::initialize()
+oms_status_enu_t oms::ComponentFMUCS::initialize()
 {
+  clock.reset();
+  CallClock callClock(clock);
+
   fmi2_status_t fmistatus;
 
   // exitInitialization
@@ -456,7 +474,7 @@ oms_status_enu_t oms3::ComponentFMUCS::initialize()
   return oms_status_ok;
 }
 
-oms_status_enu_t oms3::ComponentFMUCS::terminate()
+oms_status_enu_t oms::ComponentFMUCS::terminate()
 {
   fmi2_status_t fmistatus = fmi2_import_terminate(fmu);
   if (fmi2_status_ok != fmistatus)
@@ -467,16 +485,17 @@ oms_status_enu_t oms3::ComponentFMUCS::terminate()
   return oms_status_ok;
 }
 
-oms_status_enu_t oms3::ComponentFMUCS::reset()
+oms_status_enu_t oms::ComponentFMUCS::reset()
 {
   fmi2_status_t fmistatus = fmi2_import_reset(fmu);
   if (fmi2_status_ok != fmistatus)
     return logError_ResetFailed(getCref());
 
   // enterInitialization
-  time = getParentSystem()->getModel()->getStartTime();
-  double tolerance = dynamic_cast<SystemWC*>(getParentSystem())->getTolerance();
-  fmistatus = fmi2_import_setup_experiment(fmu, fmi2_true, tolerance, time, fmi2_false, 1.0);
+  time = getModel()->getStartTime();
+  double relativeTolerance = 0.0;
+  dynamic_cast<SystemWC*>(getParentSystem())->getTolerance(NULL, &relativeTolerance);
+  fmistatus = fmi2_import_setup_experiment(fmu, fmi2_true, relativeTolerance, time, fmi2_false, 1.0);
   if (fmi2_status_ok != fmistatus) return logError_FMUCall("fmi2_import_setup_experiment", this);
 
   fmistatus = fmi2_import_enter_initialization_mode(fmu);
@@ -485,8 +504,9 @@ oms_status_enu_t oms3::ComponentFMUCS::reset()
   return oms_status_ok;
 }
 
-oms_status_enu_t oms3::ComponentFMUCS::stepUntil(double stopTime)
+oms_status_enu_t oms::ComponentFMUCS::stepUntil(double stopTime)
 {
+  CallClock callClock(clock);
   System *topLevelSystem = getModel()->getTopLevelSystem();
 
   fmi2_status_t fmistatus;
@@ -497,8 +517,22 @@ oms_status_enu_t oms3::ComponentFMUCS::stepUntil(double stopTime)
 #if !defined(NO_TLM)
     //Read from TLM sockets if top level system is of TLM type
     if(topLevelSystem->getType() == oms_system_tlm)
-      reinterpret_cast<SystemTLM*>(topLevelSystem)->readFromSockets(reinterpret_cast<SystemWC*>(getParentSystem()),time,this);
+      reinterpret_cast<SystemTLM*>(topLevelSystem)->readFromSockets(reinterpret_cast<SystemWC*>(getParentSystem()), time, this);
 #endif
+
+    // HACK for certain FMUs
+    if (fetchAllVars_)
+    {
+      for (auto &v : allVariables)
+      {
+        if (v.isTypeReal())
+        {
+          double realValue;
+          if (oms_status_ok != getReal(v.getCref(), realValue))
+            logError("failed to fetch variable " + std::string(v));
+        }
+      }
+    }
 
     fmistatus = fmi2_import_do_step(fmu, time, hdef, fmi2_true);
     time += hdef;
@@ -506,29 +540,17 @@ oms_status_enu_t oms3::ComponentFMUCS::stepUntil(double stopTime)
 #if !defined(NO_TLM)
     //Write to TLM sockets if top level system is of TLM type
     if(topLevelSystem->getType() == oms_system_tlm)
-      reinterpret_cast<SystemTLM*>(topLevelSystem)->writeToSockets(reinterpret_cast<SystemWC*>(getParentSystem()),time,this);
+      reinterpret_cast<SystemTLM*>(topLevelSystem)->writeToSockets(reinterpret_cast<SystemWC*>(getParentSystem()), time, this);
 #endif
   }
   time = stopTime;
   return oms_status_ok;
 }
 
-oms_status_enu_t oms3::ComponentFMUCS::getBoolean(const ComRef& cref, bool& value)
+oms_status_enu_t oms::ComponentFMUCS::getBoolean(const fmi2_value_reference_t& vr, bool& value)
 {
-  int j=-1;
-  for (size_t i = 0; i < allVariables.size(); i++)
-  {
-    if (allVariables[i].getCref() == cref && allVariables[i].isTypeBoolean())
-    {
-      j = i;
-      break;
-    }
-  }
+  CallClock callClock(clock);
 
-  if (!fmu || j < 0)
-    return oms_status_error;
-
-  fmi2_value_reference_t vr = allVariables[j].getValueReference();
   int value_;
   if (fmi2_status_ok != fmi2_import_get_boolean(fmu, &vr, 1, &value_))
     return oms_status_error;
@@ -537,56 +559,9 @@ oms_status_enu_t oms3::ComponentFMUCS::getBoolean(const ComRef& cref, bool& valu
   return oms_status_ok;
 }
 
-oms_status_enu_t oms3::ComponentFMUCS::getInteger(const ComRef& cref, int& value)
+oms_status_enu_t oms::ComponentFMUCS::getBoolean(const ComRef& cref, bool& value)
 {
-  int j=-1;
-  for (size_t i = 0; i < allVariables.size(); i++)
-  {
-    if (allVariables[i].getCref() == cref && allVariables[i].isTypeInteger())
-    {
-      j = i;
-      break;
-    }
-  }
-
-  if (!fmu || j < 0)
-    return oms_status_error;
-
-  fmi2_value_reference_t vr = allVariables[j].getValueReference();
-  if (fmi2_status_ok != fmi2_import_get_integer(fmu, &vr, 1, &value))
-    return oms_status_error;
-
-  return oms_status_ok;
-}
-
-oms_status_enu_t oms3::ComponentFMUCS::getReal(const ComRef& cref, double& value)
-{
-  int j=-1;
-  for (size_t i = 0; i < allVariables.size(); i++)
-  {
-    if (allVariables[i].getCref() == cref && allVariables[i].isTypeReal())
-    {
-      j = i;
-      break;
-    }
-  }
-
-  if (!fmu || j < 0)
-    return oms_status_error;
-
-  fmi2_value_reference_t vr = allVariables[j].getValueReference();
-  if (fmi2_status_ok != fmi2_import_get_real(fmu, &vr, 1, &value))
-    return oms_status_error;
-
-  if (std::isnan(value))
-    return logError("getReal returned NAN");
-  if (std::isinf(value))
-    return logError("getReal returned +/-inf");
-  return oms_status_ok;
-}
-
-oms_status_enu_t oms3::ComponentFMUCS::setBoolean(const ComRef& cref, bool value)
-{
+  CallClock callClock(clock);
   int j=-1;
   for (size_t i = 0; i < allVariables.size(); i++)
   {
@@ -598,18 +573,25 @@ oms_status_enu_t oms3::ComponentFMUCS::setBoolean(const ComRef& cref, bool value
   }
 
   if (!fmu || j < 0)
-    return oms_status_error;
+    return logError_UnknownSignal(getFullCref() + cref);
 
   fmi2_value_reference_t vr = allVariables[j].getValueReference();
-  int value_ = value ? 1 : 0;
-  if (fmi2_status_ok != fmi2_import_set_boolean(fmu, &vr, 1, &value_))
+  return getBoolean(vr, value);
+}
+
+oms_status_enu_t oms::ComponentFMUCS::getInteger(const fmi2_value_reference_t& vr, int& value)
+{
+  CallClock callClock(clock);
+
+  if (fmi2_status_ok != fmi2_import_get_integer(fmu, &vr, 1, &value))
     return oms_status_error;
 
   return oms_status_ok;
 }
 
-oms_status_enu_t oms3::ComponentFMUCS::setInteger(const ComRef& cref, int value)
+oms_status_enu_t oms::ComponentFMUCS::getInteger(const ComRef& cref, int& value)
 {
+  CallClock callClock(clock);
   int j=-1;
   for (size_t i = 0; i < allVariables.size(); i++)
   {
@@ -621,17 +603,30 @@ oms_status_enu_t oms3::ComponentFMUCS::setInteger(const ComRef& cref, int value)
   }
 
   if (!fmu || j < 0)
-    return oms_status_error;
+    return logError_UnknownSignal(getFullCref() + cref);
 
   fmi2_value_reference_t vr = allVariables[j].getValueReference();
-  if (fmi2_status_ok != fmi2_import_set_integer(fmu, &vr, 1, &value))
+  return getInteger(vr, value);
+}
+
+oms_status_enu_t oms::ComponentFMUCS::getReal(const fmi2_value_reference_t& vr, double& value)
+{
+  CallClock callClock(clock);
+
+  if (fmi2_status_ok != fmi2_import_get_real(fmu, &vr, 1, &value))
     return oms_status_error;
+
+  if (std::isnan(value))
+    return logError("getReal returned NAN");
+  if (std::isinf(value))
+    return logError("getReal returned +/-inf");
 
   return oms_status_ok;
 }
 
-oms_status_enu_t oms3::ComponentFMUCS::setReal(const ComRef& cref, double value)
+oms_status_enu_t oms::ComponentFMUCS::getReal(const ComRef& cref, double& value)
 {
+  CallClock callClock(clock);
   int j=-1;
   for (size_t i = 0; i < allVariables.size(); i++)
   {
@@ -643,18 +638,172 @@ oms_status_enu_t oms3::ComponentFMUCS::setReal(const ComRef& cref, double value)
   }
 
   if (!fmu || j < 0)
-    return oms_status_error;
+    return logError_UnknownSignal(getFullCref() + cref);
 
   fmi2_value_reference_t vr = allVariables[j].getValueReference();
-  if (fmi2_status_ok != fmi2_import_set_real(fmu, &vr, 1, &value))
-    return oms_status_error;
+  return getReal(vr, value);
+}
+
+oms_status_enu_t oms::ComponentFMUCS::getRealOutputDerivative(const ComRef& cref, double*& value)
+{
+  CallClock callClock(clock);
+  int j=-1;
+  for (size_t i = 0; i < allVariables.size(); i++)
+  {
+    if (allVariables[i].getCref() == cref && allVariables[i].isTypeReal() && allVariables[i].isOutput())
+    {
+      j = i;
+      break;
+    }
+  }
+
+  if (!fmu || j < 0)
+    return logError_UnknownSignal(getFullCref() + cref);
+
+  fmi2_value_reference_t vr = allVariables[j].getValueReference();
+  fmi2_integer_t order = getFMUInfo()->getMaxOutputDerivativeOrder();
+  if (order > 0)
+  {
+    if (fmi2_status_ok != fmi2_import_get_real_output_derivatives(fmu, &vr, 1, &order, value))
+      return oms_status_error;
+
+    if (std::isnan(value[0]))
+      return logError("getRealOutputDerivative returned NAN");
+    if (std::isinf(value[0]))
+      return logError("getRealOutputDerivative returned +/-inf");
+  }
 
   return oms_status_ok;
 }
 
-oms_status_enu_t oms3::ComponentFMUCS::registerSignalsForResultFile(ResultWriter& resultFile)
+oms_status_enu_t oms::ComponentFMUCS::setRealInputDerivative(const ComRef& cref, double* value, unsigned int order)
+{
+  CallClock callClock(clock);
+  int j=-1;
+  for (size_t i = 0; i < allVariables.size(); i++)
+  {
+    if (allVariables[i].getCref() == cref)
+    {
+      if (allVariables[i].isTypeReal() && allVariables[i].isInput())
+      {
+        j = i;
+        break;
+      }
+      else
+        return logError_OnlyForRealInputs(getFullCref() + cref);
+    }
+  }
+
+  if (!fmu || j < 0)
+    return logError_UnknownSignal(getFullCref() + cref);
+
+  fmi2_value_reference_t vr = allVariables[j].getValueReference();
+  if (order > 0)
+  {
+    if (fmi2_status_ok != fmi2_import_set_real_input_derivatives(fmu, &vr, 1, (fmi2_integer_t*)&order, value))
+      return oms_status_error;
+  }
+
+  return oms_status_ok;
+}
+
+oms_status_enu_t oms::ComponentFMUCS::setBoolean(const ComRef& cref, bool value)
+{
+  CallClock callClock(clock);
+  int j=-1;
+  for (size_t i = 0; i < allVariables.size(); i++)
+  {
+    if (allVariables[i].getCref() == cref && allVariables[i].isTypeBoolean())
+    {
+      j = i;
+      break;
+    }
+  }
+
+  if (!fmu || j < 0)
+    return logError_UnknownSignal(getFullCref() + cref);
+
+  if (oms_modelState_virgin == getModel()->getModelState())
+    booleanStartValues[allVariables[j].getCref()] = value;
+  else
+  {
+    fmi2_value_reference_t vr = allVariables[j].getValueReference();
+    int value_ = value ? 1 : 0;
+    if (fmi2_status_ok != fmi2_import_set_boolean(fmu, &vr, 1, &value_))
+      return oms_status_error;
+  }
+
+  return oms_status_ok;
+}
+
+oms_status_enu_t oms::ComponentFMUCS::setInteger(const ComRef& cref, int value)
+{
+  CallClock callClock(clock);
+  int j=-1;
+  for (size_t i = 0; i < allVariables.size(); i++)
+  {
+    if (allVariables[i].getCref() == cref && allVariables[i].isTypeInteger())
+    {
+      j = i;
+      break;
+    }
+  }
+
+  if (!fmu || j < 0)
+    return logError_UnknownSignal(getFullCref() + cref);
+
+  if (oms_modelState_virgin == getModel()->getModelState())
+    integerStartValues[allVariables[j].getCref()] = value;
+  else
+  {
+    fmi2_value_reference_t vr = allVariables[j].getValueReference();
+    if (fmi2_status_ok != fmi2_import_set_integer(fmu, &vr, 1, &value))
+      return oms_status_error;
+  }
+
+  return oms_status_ok;
+}
+
+oms_status_enu_t oms::ComponentFMUCS::setReal(const ComRef& cref, double value)
+{
+  CallClock callClock(clock);
+  int j=-1;
+  for (size_t i = 0; i < allVariables.size(); i++)
+  {
+    if (allVariables[i].getCref() == cref && allVariables[i].isTypeReal())
+    {
+      j = i;
+      break;
+    }
+  }
+
+  if (!fmu || j < 0)
+    return logError_UnknownSignal(getFullCref() + cref);
+
+  if (getModel()->validState(oms_modelState_virgin|oms_modelState_enterInstantiation|oms_modelState_instantiated))
+    if (allVariables[j].isCalculated() || allVariables[j].isIndependent())
+      return logWarning("It is not allowed to provide a start value if initial=\"calculated\" or causality=\"independent\".");
+
+  if (oms_modelState_virgin == getModel()->getModelState())
+    realStartValues[allVariables[j].getCref()] = value;
+  else
+  {
+    fmi2_value_reference_t vr = allVariables[j].getValueReference();
+    if (fmi2_status_ok != fmi2_import_set_real(fmu, &vr, 1, &value))
+      return oms_status_error;
+  }
+
+  return oms_status_ok;
+}
+
+oms_status_enu_t oms::ComponentFMUCS::registerSignalsForResultFile(ResultWriter& resultFile)
 {
   resultFileMapping.clear();
+
+  if (Flags::WallTime())
+    clock_id = resultFile.addSignal(std::string(getFullCref() + ComRef("$wallTime")), "wall-clock time [s]", SignalType_REAL);
+  else
+    clock_id = 0;
 
   for (unsigned int i=0; i<allVariables.size(); ++i)
   {
@@ -710,28 +859,38 @@ oms_status_enu_t oms3::ComponentFMUCS::registerSignalsForResultFile(ResultWriter
   return oms_status_ok;
 }
 
-oms_status_enu_t oms3::ComponentFMUCS::updateSignals(ResultWriter& resultWriter)
+oms_status_enu_t oms::ComponentFMUCS::updateSignals(ResultWriter& resultWriter)
 {
+  CallClock callClock(clock);
+
+  if (clock_id)
+  {
+    SignalValue_t wallTime;
+    wallTime.realValue = clock.getElapsedWallTime();
+    resultWriter.updateSignal(clock_id, wallTime);
+  }
+
   for (auto const &it : resultFileMapping)
   {
     unsigned int ID = it.first;
     Variable& var = allVariables[it.second];
+    fmi2_value_reference_t vr = var.getValueReference();
     SignalValue_t value;
     if (var.isTypeReal())
     {
-        if (oms_status_ok != getReal(var.getCref(), value.realValue))
+        if (oms_status_ok != getReal(vr, value.realValue))
         return logError("failed to fetch variable " + std::string(var.getCref()));
       resultWriter.updateSignal(ID, value);
     }
     else if (var.isTypeInteger())
     {
-      if (oms_status_ok != getInteger(var.getCref(), value.intValue))
+      if (oms_status_ok != getInteger(vr, value.intValue))
         return logError("failed to fetch variable " + std::string(var.getCref()));
       resultWriter.updateSignal(ID, value);
     }
     else if (var.isTypeBoolean())
     {
-      if (oms_status_ok != getBoolean(var.getCref(), value.boolValue))
+      if (oms_status_ok != getBoolean(vr, value.boolValue))
         return logError("failed to fetch variable " + std::string(var.getCref()));
       resultWriter.updateSignal(ID, value);
     }
@@ -740,7 +899,7 @@ oms_status_enu_t oms3::ComponentFMUCS::updateSignals(ResultWriter& resultWriter)
   return oms_status_ok;
 }
 
-oms_status_enu_t oms3::ComponentFMUCS::addSignalsToResults(const char* regex)
+oms_status_enu_t oms::ComponentFMUCS::addSignalsToResults(const char* regex)
 {
   oms_regex exp(regex);
   for (unsigned int i=0; i<allVariables.size(); ++i)
@@ -759,7 +918,7 @@ oms_status_enu_t oms3::ComponentFMUCS::addSignalsToResults(const char* regex)
   return oms_status_ok;
 }
 
-oms_status_enu_t oms3::ComponentFMUCS::removeSignalsFromResults(const char* regex)
+oms_status_enu_t oms::ComponentFMUCS::removeSignalsFromResults(const char* regex)
 {
   oms_regex exp(regex);
   for (unsigned int i=0; i<allVariables.size(); ++i)

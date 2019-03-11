@@ -37,7 +37,7 @@
 #include "System.h"
 #include "Types.h"
 
-namespace oms3
+namespace oms
 {
   class Model;
 
@@ -56,14 +56,19 @@ namespace oms3
     oms_status_enu_t reset();
     oms_status_enu_t stepUntil(double stopTime, void (*cb)(const char* ident, double time, oms_status_enu_t status));
 
-    double getTolerance() const {return tolerance;}
     double getTime() const {return time;}
-    double getStepSize() const {return stepSize;}
-    oms_status_enu_t setFixedStepSize(double stepSize) {this->stepSize=stepSize; return oms_status_ok;}
-    oms_status_enu_t setTolerance(double tolerance) {this->tolerance=tolerance; return oms_status_ok;}
+
+    std::string getSolverName() const;
+    oms_status_enu_t setSolverMethod(std::string);
+    oms_status_enu_t setSolver(oms_solver_enu_t solver) {if (solver > oms_solver_wc_min && solver < oms_solver_wc_max) {solverMethod=solver; return oms_status_ok;} return oms_status_error;}
 
     oms_status_enu_t updateInputs(DirectedGraph& graph);
     oms_status_enu_t solveAlgLoop(DirectedGraph& graph, const std::vector< std::pair<int, int> >& SCC);
+
+    oms_status_enu_t getRealOutputDerivative(const ComRef& cref, double*& value, unsigned int& order);
+    oms_status_enu_t setRealInputDerivative(const ComRef& cref, double* value, unsigned int order);
+    oms_status_enu_t setRealInputDerivative(const ComRef& cref, double value);
+    unsigned int getMaxOutputDerivativeOrder();
 
   protected:
     SystemWC(const ComRef& cref, Model* parentModel, System* parentSystem);
@@ -73,10 +78,9 @@ namespace oms3
     SystemWC& operator=(SystemWC const& copy); ///< not implemented
 
   private:
-    std::string solverName = "oms-ma";
     double time;
-    double stepSize = 1e-1;
-    double tolerance = 1e-4;
+
+    double* derBuffer = NULL;
   };
 }
 

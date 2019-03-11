@@ -35,7 +35,7 @@
 
 #include <cstring>
 
-oms3::FMUInfo::FMUInfo(const std::string& path, oms_fmi_kind_enu_t fmuKind)
+oms::FMUInfo::FMUInfo(const std::string& path, oms_fmi_kind_enu_t fmuKind)
 {
   this->author = NULL;
   this->copyright = NULL;
@@ -57,9 +57,10 @@ oms3::FMUInfo::FMUInfo(const std::string& path, oms_fmi_kind_enu_t fmuKind)
   this->needsExecutionTool = false;
   this->providesDirectionalDerivative = false;
   this->canInterpolateInputs = false;
+  this->maxOutputDerivativeOrder = 0;
 }
 
-oms3::FMUInfo::~FMUInfo()
+oms::FMUInfo::~FMUInfo()
 {
   if (this->author) delete[] this->author;
   if (this->copyright) delete[] this->copyright;
@@ -74,35 +75,7 @@ oms3::FMUInfo::~FMUInfo()
   if (this->version) delete[] this->version;
 }
 
-oms_status_enu_t oms3::FMUInfo::setKind(fmi2_import_t* fmu)
-{
-  // read FMU kind
-  fmi2_fmu_kind_enu_t fmuKind = fmi2_import_get_fmu_kind(fmu);
-  if (fmi2_fmu_kind_me == fmuKind)
-  {
-    logDebug("FMU ME");
-    this->fmiKind = oms_fmi_kind_me;
-  }
-  else if (fmi2_fmu_kind_cs == fmuKind)
-  {
-    logDebug("FMU CS");
-    this->fmiKind = oms_fmi_kind_cs;
-  }
-  else if (fmi2_fmu_kind_me_and_cs == fmuKind)
-  {
-    logDebug("FMU ME & CS");
-    this->fmiKind = oms_fmi_kind_me_and_cs;
-  }
-  else
-  {
-    logError("Unsupported FMU kind: " + std::string(fmi2_fmu_kind_to_string(fmuKind)));
-    return oms_status_error;
-  }
-
-  return oms_status_ok;
-}
-
-oms_status_enu_t oms3::FMUInfo::update(fmi_version_enu_t version, fmi2_import_t* fmu)
+oms_status_enu_t oms::FMUInfo::update(fmi_version_enu_t version, fmi2_import_t* fmu)
 {
   std::string value;
 
@@ -138,24 +111,25 @@ oms_status_enu_t oms3::FMUInfo::update(fmi_version_enu_t version, fmi2_import_t*
 
   if (oms_fmi_kind_cs == fmiKind)
   {
-    this->canBeInstantiatedOnlyOncePerProcess = fmi2_import_get_capability(fmu, fmi2_cs_canBeInstantiatedOnlyOncePerProcess) > 0 ? true : false;
-    this->canGetAndSetFMUstate = fmi2_import_get_capability(fmu, fmi2_cs_canGetAndSetFMUstate) > 0 ? true : false;
-    this->canNotUseMemoryManagementFunctions = fmi2_import_get_capability(fmu, fmi2_cs_canNotUseMemoryManagementFunctions) > 0 ? true : false;
-    this->canSerializeFMUstate = fmi2_import_get_capability(fmu, fmi2_cs_canSerializeFMUstate) > 0 ? true : false;
+    this->canBeInstantiatedOnlyOncePerProcess = fmi2_import_get_capability(fmu, fmi2_cs_canBeInstantiatedOnlyOncePerProcess) > 0;
+    this->canGetAndSetFMUstate = fmi2_import_get_capability(fmu, fmi2_cs_canGetAndSetFMUstate) > 0;
+    this->canNotUseMemoryManagementFunctions = fmi2_import_get_capability(fmu, fmi2_cs_canNotUseMemoryManagementFunctions) > 0;
+    this->canSerializeFMUstate = fmi2_import_get_capability(fmu, fmi2_cs_canSerializeFMUstate) > 0;
     this->completedIntegratorStepNotNeeded = false;
-    this->needsExecutionTool = fmi2_import_get_capability(fmu, fmi2_cs_needsExecutionTool) > 0 ? true : false;
-    this->providesDirectionalDerivative = fmi2_import_get_capability(fmu, fmi2_cs_providesDirectionalDerivatives) > 0 ? true : false;
-    this->canInterpolateInputs = fmi2_import_get_capability(fmu, fmi2_cs_canInterpolateInputs) > 0 ? true : false;
+    this->needsExecutionTool = fmi2_import_get_capability(fmu, fmi2_cs_needsExecutionTool) > 0;
+    this->providesDirectionalDerivative = fmi2_import_get_capability(fmu, fmi2_cs_providesDirectionalDerivatives) > 0;
+    this->canInterpolateInputs = fmi2_import_get_capability(fmu, fmi2_cs_canInterpolateInputs) > 0;
+    this->maxOutputDerivativeOrder = fmi2_import_get_capability(fmu, fmi2_cs_maxOutputDerivativeOrder);
   }
   else
   {
-    this->canBeInstantiatedOnlyOncePerProcess = fmi2_import_get_capability(fmu, fmi2_me_canBeInstantiatedOnlyOncePerProcess) > 0 ? true : false;
-    this->canGetAndSetFMUstate = fmi2_import_get_capability(fmu, fmi2_me_canGetAndSetFMUstate) > 0 ? true : false;
-    this->canNotUseMemoryManagementFunctions = fmi2_import_get_capability(fmu, fmi2_me_canNotUseMemoryManagementFunctions) > 0 ? true : false;
-    this->canSerializeFMUstate = fmi2_import_get_capability(fmu, fmi2_me_canSerializeFMUstate) > 0 ? true : false;
-    this->completedIntegratorStepNotNeeded = fmi2_import_get_capability(fmu, fmi2_me_completedIntegratorStepNotNeeded) > 0 ? true : false;
-    this->needsExecutionTool = fmi2_import_get_capability(fmu, fmi2_me_needsExecutionTool) > 0 ? true : false;
-    this->providesDirectionalDerivative = fmi2_import_get_capability(fmu, fmi2_me_providesDirectionalDerivatives) > 0 ? true : false;
+    this->canBeInstantiatedOnlyOncePerProcess = fmi2_import_get_capability(fmu, fmi2_me_canBeInstantiatedOnlyOncePerProcess) > 0;
+    this->canGetAndSetFMUstate = fmi2_import_get_capability(fmu, fmi2_me_canGetAndSetFMUstate) > 0;
+    this->canNotUseMemoryManagementFunctions = fmi2_import_get_capability(fmu, fmi2_me_canNotUseMemoryManagementFunctions) > 0;
+    this->canSerializeFMUstate = fmi2_import_get_capability(fmu, fmi2_me_canSerializeFMUstate) > 0;
+    this->completedIntegratorStepNotNeeded = fmi2_import_get_capability(fmu, fmi2_me_completedIntegratorStepNotNeeded) > 0;
+    this->needsExecutionTool = fmi2_import_get_capability(fmu, fmi2_me_needsExecutionTool) > 0;
+    this->providesDirectionalDerivative = fmi2_import_get_capability(fmu, fmi2_me_providesDirectionalDerivatives) > 0;
   }
 
   return oms_status_ok;

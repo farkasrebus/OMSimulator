@@ -35,15 +35,15 @@
 #include "Model.h"
 #include "ssd/Tags.h"
 #include "System.h"
-#include <OMSBoost.h>
+#include <OMSFileSystem.h>
 #include <RegEx.h>
 
-oms3::ComponentTable::ComponentTable(const ComRef& cref, System* parentSystem, const std::string& path)
-  : oms3::Component(cref, oms_component_table, parentSystem, path), resultReader(NULL)
+oms::ComponentTable::ComponentTable(const ComRef& cref, System* parentSystem, const std::string& path)
+  : oms::Component(cref, oms_component_table, parentSystem, path), resultReader(NULL)
 {
 }
 
-oms3::ComponentTable::~ComponentTable()
+oms::ComponentTable::~ComponentTable()
 {
   for (auto it=series.begin(); it != series.end(); it++)
     ResultReader::deleteSeries(&it->second);
@@ -53,7 +53,7 @@ oms3::ComponentTable::~ComponentTable()
     delete resultReader;
 }
 
-oms3::Component* oms3::ComponentTable::NewComponent(const oms3::ComRef& cref, oms3::System* parentSystem, const std::string& path)
+oms::Component* oms::ComponentTable::NewComponent(const oms::ComRef& cref, oms::System* parentSystem, const std::string& path)
 {
   if (!cref.isValidIdent())
   {
@@ -71,14 +71,14 @@ oms3::Component* oms3::ComponentTable::NewComponent(const oms3::ComRef& cref, om
   if (path.length() > 4)
     extension = path.substr(path.length() - 4);
 
-  boost::filesystem::path temp_root(parentSystem->getModel()->getTempDirectory());
-  boost::filesystem::path relPath = boost::filesystem::path("resources") / (std::string(cref) + extension);
-  boost::filesystem::path absPath = temp_root / relPath;
+  filesystem::path temp_root(parentSystem->getModel()->getTempDirectory());
+  filesystem::path relPath = filesystem::path("resources") / (std::string(cref) + extension);
+  filesystem::path absPath = temp_root / relPath;
 
   ComponentTable* component = new ComponentTable(cref, parentSystem, "resources/" + std::string(cref) + extension);
 
   if (parentSystem->copyResources())
-    boost::filesystem::copy_file(boost::filesystem::path(path), absPath, boost::filesystem::copy_option::overwrite_if_exists);
+    oms_copy_file(filesystem::path(path), absPath);
 
   component->resultReader = ResultReader::newReader(path.c_str());
   if (!component->resultReader)
@@ -92,7 +92,7 @@ oms3::Component* oms3::ComponentTable::NewComponent(const oms3::ComRef& cref, om
   int size = 1 + component->resultReader->getAllSignals().size();
   for (auto const &signal : component->resultReader->getAllSignals())
   {
-    component->exportSeries[component->getFullCref() + ComRef(signal)] = true;
+    component->exportSeries[ComRef(signal)] = true;
     component->connectors.back() = new Connector(oms_causality_output, oms_signal_type_real, ComRef(signal), i++/(double)size);
     component->connectors.push_back(NULL);
   }
@@ -101,7 +101,7 @@ oms3::Component* oms3::ComponentTable::NewComponent(const oms3::ComRef& cref, om
   return component;
 }
 
-oms3::Component* oms3::ComponentTable::NewComponent(const pugi::xml_node& node, oms3::System* parentSystem)
+oms::Component* oms::ComponentTable::NewComponent(const pugi::xml_node& node, oms::System* parentSystem)
 {
   ComRef cref = ComRef(node.attribute("name").as_string());
   std::string type = node.attribute("type").as_string();
@@ -113,7 +113,7 @@ oms3::Component* oms3::ComponentTable::NewComponent(const pugi::xml_node& node, 
     return NULL;
   }
 
-  oms3::ComponentTable* component = dynamic_cast<oms3::ComponentTable*>(oms3::ComponentTable::NewComponent(cref, parentSystem, source));
+  oms::ComponentTable* component = dynamic_cast<oms::ComponentTable*>(oms::ComponentTable::NewComponent(cref, parentSystem, source));
   if (!component)
     return NULL;
 
@@ -123,18 +123,24 @@ oms3::Component* oms3::ComponentTable::NewComponent(const pugi::xml_node& node, 
       delete connector;
   component->connectors.clear();
 
+  for (auto const &signal : component->resultReader->getAllSignals())
+    component->exportSeries[component->getFullCref() + ComRef(signal)] = false;
+
   for(pugi::xml_node_iterator it = node.begin(); it != node.end(); ++it)
   {
     std::string name = it->name();
-    if(name == oms2::ssd::ssd_connectors)
+    if(name == oms::ssd::ssd_connectors)
     {
       // import connectors
       for(pugi::xml_node_iterator itConnectors = (*it).begin(); itConnectors != (*it).end(); ++itConnectors)
-        component->connectors.push_back(oms3::Connector::NewConnector(*itConnectors));
+      {
+        component->connectors.push_back(oms::Connector::NewConnector(*itConnectors));
+        component->exportSeries[component->connectors.back()->getName()] = true;
+      }
     }
-    else if(name == oms2::ssd::ssd_element_geometry)
+    else if(name == oms::ssd::ssd_element_geometry)
     {
-      oms3::ssd::ElementGeometry geometry;
+      oms::ssd::ElementGeometry geometry;
       geometry.importFromSSD(*it);
       component->setGeometry(geometry);
     }
@@ -152,12 +158,12 @@ oms3::Component* oms3::ComponentTable::NewComponent(const pugi::xml_node& node, 
   return component;
 }
 
-oms_status_enu_t oms3::ComponentTable::exportToSSD(pugi::xml_node& node) const
+oms_status_enu_t oms::ComponentTable::exportToSSD(pugi::xml_node& node) const
 {
   node.append_attribute("name") = this->getCref().c_str();
   node.append_attribute("type") = "application/table";
   node.append_attribute("source") = getPath().c_str();
-  pugi::xml_node node_connectors = node.append_child(oms2::ssd::ssd_connectors);
+  pugi::xml_node node_connectors = node.append_child(oms::ssd::ssd_connectors);
 
   if (element.getGeometry())
     element.getGeometry()->exportToSSD(node);
@@ -169,13 +175,19 @@ oms_status_enu_t oms3::ComponentTable::exportToSSD(pugi::xml_node& node) const
   return oms_status_ok;
 }
 
-oms_status_enu_t oms3::ComponentTable::initialize()
+oms_status_enu_t oms::ComponentTable::instantiate()
 {
   time = getModel()->getStartTime();
   return oms_status_ok;
 }
 
-oms_status_enu_t oms3::ComponentTable::getReal(const oms3::ComRef& cref, double& value)
+oms_status_enu_t oms::ComponentTable::reset()
+{
+  time = getModel()->getStartTime();
+  return oms_status_ok;
+}
+
+oms_status_enu_t oms::ComponentTable::getReal(const oms::ComRef& cref, double& value)
 {
   if (!resultReader)
     logError("the table isn't initialized properly");
@@ -198,22 +210,21 @@ oms_status_enu_t oms3::ComponentTable::getReal(const oms3::ComRef& cref, double&
     }
   }
 
-  logError("out of range");
+  logError("out of range (cref=" + std::string(cref) + ", time=" + std::to_string(time) + ")");
   value = 0.0;
   return oms_status_error;
 }
 
-oms_status_enu_t oms3::ComponentTable::registerSignalsForResultFile(ResultWriter& resultFile)
+oms_status_enu_t oms::ComponentTable::registerSignalsForResultFile(ResultWriter& resultFile)
 {
   resultFileMapping.clear();
 
-  for (unsigned int i=0; i<resultReader->getAllSignals().size(); ++i)
+  for (unsigned int i=0; i<connectors.size(); ++i)
   {
-    if (!exportSeries[ComRef(resultReader->getAllSignals()[i])])
+    if (!connectors[i] || !exportSeries[connectors[i]->getName()])
       continue;
 
-    std::string name = std::string(getFullCref()) + "." + resultReader->getAllSignals()[i];
-
+    std::string name = std::string(getFullCref() + connectors[i]->getName());
     unsigned int ID = resultFile.addSignal(name, "lookup table", SignalType_REAL);
     resultFileMapping[ID] = i;
   }
@@ -221,12 +232,12 @@ oms_status_enu_t oms3::ComponentTable::registerSignalsForResultFile(ResultWriter
   return oms_status_ok;
 }
 
-oms_status_enu_t oms3::ComponentTable::updateSignals(ResultWriter& resultWriter)
+oms_status_enu_t oms::ComponentTable::updateSignals(ResultWriter& resultWriter)
 {
   for (auto const &it : resultFileMapping)
   {
     unsigned int ID = it.first;
-    const std::string& var = resultReader->getAllSignals()[it.second];
+    const ComRef& var = connectors[it.second]->getName();
     SignalValue_t value;
 
     if (oms_status_ok != getReal(var, value.realValue))
@@ -237,7 +248,7 @@ oms_status_enu_t oms3::ComponentTable::updateSignals(ResultWriter& resultWriter)
   return oms_status_ok;
 }
 
-oms_status_enu_t oms3::ComponentTable::addSignalsToResults(const char* regex)
+oms_status_enu_t oms::ComponentTable::addSignalsToResults(const char* regex)
 {
   oms_regex exp(regex);
   for (auto& x: exportSeries)
@@ -246,16 +257,13 @@ oms_status_enu_t oms3::ComponentTable::addSignalsToResults(const char* regex)
       continue;
 
     if (regex_match(std::string(x.first), exp))
-    {
-      //logInfo("added \"" + std::string(x.first) + "\" to results");
       x.second = true;
-    }
   }
 
   return oms_status_ok;
 }
 
-oms_status_enu_t oms3::ComponentTable::removeSignalsFromResults(const char* regex)
+oms_status_enu_t oms::ComponentTable::removeSignalsFromResults(const char* regex)
 {
   oms_regex exp(regex);
   for (auto& x: exportSeries)
@@ -264,10 +272,7 @@ oms_status_enu_t oms3::ComponentTable::removeSignalsFromResults(const char* rege
       continue;
 
     if (regex_match(std::string(x.first), exp))
-    {
-      //logInfo("removed \"" + std::string(x.first) + "\" from results");
       x.second = false;
-    }
   }
 
   return oms_status_ok;

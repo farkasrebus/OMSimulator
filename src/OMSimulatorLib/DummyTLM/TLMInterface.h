@@ -29,7 +29,8 @@
  *
  */
 
-#ifndef _OMS2_TLM_INTERFACE_H_
+#ifndef _DUMMY_TLM_INTERFACE_H_
+#define _DUMMY_TLM_INTERFACE_H_
 #define NO_TLM 1
 #define THROW_NO_TLM() throw std::invalid_argument("OMSimulator was compiled without TLM support.")
 #define LOG_NO_TLM() logError("OMSimulator was compiled without TLM support. " + std::string(__FUNCTION_NAME__) + " will return a failure.")

@@ -7,9 +7,25 @@ pipeline {
     newContainerPerStage()
   }
   parameters {
-    booleanParam(name: 'MSVC64', defaultValue: false, description: 'Build with MSVC64 (often hangs)')
+    booleanParam(name: 'MSVC64', defaultValue: true, description: 'Build with MSVC64 (often hangs)')
+    booleanParam(name: 'MINGW32', defaultValue: false, description: 'Build with MINGW32 (does not link boost)')
+    booleanParam(name: 'SUBMODULE_UPDATE', defaultValue: false, description: 'Allow pull request to update submodules (disabled by default due to common user errors)')
+    string(name: 'RUNTESTS_FLAG', defaultValue: '', description: 'runtests.pl flag')
   }
   stages {
+    stage('check') {
+      when {
+        changeRequest()
+        beforeAgent true
+      }
+      agent {
+        label 'linux'
+      }
+      steps {
+        submoduleNoChange("3rdParty")
+        submoduleNoChange("OMTLMSimulator")
+      }
+    }
     stage('build') {
       parallel {
         stage('linux64') {
@@ -36,10 +52,7 @@ pipeline {
             sh '''
             # No so-files should ever exist in a bin/ folder
             ! ls install/linux/bin/*.so 1> /dev/null 2>&1
-            (cd install/linux && tar czf "../../OMSimulator-linux-amd64-`git describe`.tar.gz" *)
             '''
-
-            archiveArtifacts "OMSimulator-linux-amd64-*.tar.gz"
 
             partest()
 
@@ -86,7 +99,7 @@ pipeline {
                    */
                   label 'linux'
                   args "--mount type=volume,source=runtest-omsimulator-cache-linux64-asan,target=/cache/runtest " +
-                       "--cap-add SYS_PTRACE " + // Needed for ASAN
+                       "--cap-add SYS_PTRACE --privileged " + // Needed for ASAN
                        "--oom-kill-disable -m 1024m --memory-swap 1024m" // Needed for ASAN
                 }
               }
@@ -112,10 +125,47 @@ pipeline {
           }
           environment {
             SHELLSTART = """
-            export CC="/opt/rh/devtoolset-6/root/usr/bin/gcc"
-            export CXX="/opt/rh/devtoolset-6/root/usr/bin/g++"
+            export CC="/opt/rh/devtoolset-7/root/usr/bin/gcc"
+            export CXX="/opt/rh/devtoolset-7/root/usr/bin/g++"
+            export CXXFLAGS="-std=c++17"
             """
-            OMSFLAGS = "CERES=OFF"
+            OMSFLAGS = "CERES=OFF OMSYSIDENT=OFF OMTLM=OFF"
+          }
+          steps {
+            buildOMS()
+            sh '''
+            # No so-files should ever exist in a bin/ folder
+            ! ls install/linux/bin/*.so 1> /dev/null 2>&1
+            (cd install/linux && tar czf "../../OMSimulator-linux-amd64-`git describe`.tar.gz" *)
+            '''
+            archiveArtifacts "OMSimulator-linux-amd64-*.tar.gz"
+          }
+        }
+        stage('centos7') {
+          agent {
+            dockerfile {
+              additionalBuildArgs '--pull'
+              dir '.CI/centos7'
+              label 'linux'
+            }
+          }
+          environment {
+            OMSFLAGS = "CERES=OFF OMSYSIDENT=OFF OMTLM=OFF"
+          }
+          steps {
+            buildOMS()
+          }
+        }
+        stage('alpine') {
+          agent {
+            dockerfile {
+              additionalBuildArgs '--pull'
+              dir '.CI/alpine'
+              label 'linux'
+            }
+          }
+          environment {
+            OMSFLAGS = "CERES=OFF OMSYSIDENT=OFF OMTLM=OFF"
           }
           steps {
             buildOMS()
@@ -309,6 +359,42 @@ pipeline {
           }
         }
 
+        stage('mingw32-cross') {
+          when {
+            expression { return params.MINGW32 }
+            beforeAgent true
+          }
+          agent {
+            docker {
+              image 'docker.openmodelica.org/msyscross-omsimulator:v2.0'
+              label 'linux'
+              alwaysPull true
+            }
+          }
+          environment {
+            CROSS_TRIPLE = "i686-w64-mingw32"
+            CC = "${env.CROSS_TRIPLE}-gcc-posix"
+            CXX = "${env.CROSS_TRIPLE}-g++-posix"
+            CPPFLAGS = '-I/opt/pacman/mingw32/include'
+            LDFLAGS = '-L/opt/pacman/mingw32/lib'
+            AR = "${env.CROSS_TRIPLE}-ar-posix"
+            RANLIB = "${env.CROSS_TRIPLE}-ranlib-posix"
+            detected_OS = 'MINGW32'
+            VERBOSE = '1'
+            BOOST_ROOT = '/opt/pacman/mingw32/'
+          }
+
+          steps {
+            buildOMS()
+            sh '''
+            (cd install/mingw && zip -r "../../OMSimulator-mingw32-`git describe`.zip" *)
+            '''
+
+            archiveArtifacts "OMSimulator-mingw32*.zip"
+            stash name: 'mingw32-install', includes: "install/mingw/**"
+          }
+        }
+
         stage('msvc64') {
           when {
             expression { return params.MSVC64 }
@@ -331,7 +417,7 @@ cd "${env.WORKSPACE}/install/win"
 zip -r "../../OMSimulator-win64-`git describe`.zip" *
 """
 
-            bat """
+            retry(2) { bat """
 set BOOST_ROOT=C:\\local\\boost_1_64_0
 set PATH=C:\\bin\\cmake\\bin;%PATH%
 
@@ -351,7 +437,7 @@ EXIT /b 0
 :fail
 ECHO Something went wrong!
 EXIT /b 1
-"""
+""" }
 
             archiveArtifacts "OMSimulator-win64*.zip"
           }
@@ -421,7 +507,7 @@ def numPhysicalCPU() {
 void partest(cache=true, extraArgs='') {
   echo "cache: ${cache}, asan: ${env.ASAN}"
   sh """
-  make -C testsuite difftool
+  make -C testsuite difftool resources
   cp -f "${env.RUNTESTDB}/"* testsuite/ || true
   """
 
@@ -433,7 +519,7 @@ void partest(cache=true, extraArgs='') {
   ${env.ASAN ? "" : "ulimit -v 6291456" /* Max 6GB per process */}
 
   cd testsuite/partest
-  ./runtests.pl ${env.ASAN ? "-asan -fast": ""} -j${numPhysicalCPU()} -nocolour -with-xml ${extraArgs}
+  ./runtests.pl ${env.ASAN ? "-asan": ""} -j${numPhysicalCPU()} -nocolour -with-xml ${params.RUNTESTS_FLAG} ${extraArgs}
   CODE=\$?
   test \$CODE = 0 -o \$CODE = 7 || exit 1
   """
@@ -455,6 +541,18 @@ void buildOMS() {
   git fetch --tags
   make config-3rdParty ${env.CC ? "CC=" + env.CC : ""} ${env.CXX ? "CXX=" + env.CXX : ""} ${env.OMSFLAGS ?: ""} -j${nproc}
   make config-OMSimulator -j${nproc} ${env.ASAN ? "ASAN=ON" : ""} ${env.OMSFLAGS ?: ""}
-  make OMSimulator -j${nproc} ${env.ASAN ? "DISABLE_RUN_OMSIMULATOR_VERSION=1" : ""}
+  make OMSimulator -j${nproc} ${env.ASAN ? "DISABLE_RUN_OMSIMULATOR_VERSION=1" : ""} ${env.OMSFLAGS ?: ""}
   """
+}
+
+void submoduleNoChange(path) {
+  if (params.SUBMODULE_UPDATE) {
+    // Don't need to check
+    return
+  }
+  a=sh(returnStdout: true, script: "git ls-tree origin/${env.CHANGE_TARGET} ${path}").trim()
+  b=sh(returnStdout: true, script: "git ls-tree HEAD ${path}").trim()
+  if (a != b) {
+    throw new Exception("Did you intend to change a submodule? Set SUBMODULE_UPDATE in the run options.")
+  }
 }

@@ -32,6 +32,7 @@
 #ifndef _OMS_COMPONENT_H_
 #define _OMS_COMPONENT_H_
 
+#include "Clock.h"
 #include "ComRef.h"
 #include "DirectedGraph.h"
 #include "Element.h"
@@ -42,7 +43,7 @@
 #include <fmilib.h>
 #include <pugixml.hpp>
 
-namespace oms3
+namespace oms
 {
   class System;
   class Model;
@@ -59,19 +60,21 @@ namespace oms3
     ComRef getFullCref() const;
     Element* getElement() {return &element;}
     Connector* getConnector(const ComRef& cref);
+    Connector** getConnectors() {return &connectors[0];}
     oms_status_enu_t deleteConnector(const ComRef& cref);
     oms_status_enu_t deleteResources();
     oms_status_enu_t getAllResources(std::vector<std::string>& resources) const {resources.push_back(path); return oms_status_ok;}
     const std::string& getPath() const {return path;}
     oms_component_enu_t getType() const {return type;}
     virtual const FMUInfo* getFMUInfo() const {return NULL;}
+    void fetchAllVars() {fetchAllVars_ = true;}
     System* getParentSystem() const {return parentSystem;}
     Model* getModel() const;
     void setGeometry(const ssd::ElementGeometry& geometry) {element.setGeometry(&geometry);}
 
-    oms_status_enu_t addTLMBus(const oms3::ComRef& cref, const std::string domain, const int dimensions, const oms_tlm_interpolation_t interpolation);
+    oms_status_enu_t addTLMBus(const oms::ComRef& cref, oms_tlm_domain_t domain, const int dimensions, const oms_tlm_interpolation_t interpolation);
 #if !defined(NO_TLM)
-    oms3::TLMBusConnector *getTLMBusConnector(const oms3::ComRef &cref);
+    oms::TLMBusConnector *getTLMBusConnector(const oms::ComRef &cref);
     TLMBusConnector **getTLMBusConnectors() {return &tlmbusconnectors[0];}
 #endif
     oms_status_enu_t addConnectorToTLMBus(const ComRef& busCref, const ComRef& connectorCref, const std::string type);
@@ -114,6 +117,10 @@ namespace oms3
 #if !defined(NO_TLM)
     std::vector<TLMBusConnector*> tlmbusconnectors;
 #endif
+
+    Clock clock;
+    unsigned int clock_id;
+    bool fetchAllVars_ = false;
 
   private:
     System* parentSystem;

@@ -29,13 +29,13 @@
  *
  */
 
-#ifndef _OMS2_COM_REF_H_
-#define _OMS2_COM_REF_H_
+#ifndef _OMS_COM_REF_H_
+#define _OMS_COM_REF_H_
 
 #include <string>
 #include <cstring>
 
-namespace oms3
+namespace oms
 {
   /**
    * \brief ComRef - component reference
@@ -43,6 +43,7 @@ namespace oms3
   class ComRef
   {
   public:
+    ComRef();
     ComRef(const std::string& path);
     ComRef(const char* path);
     ~ComRef();
@@ -55,15 +56,17 @@ namespace oms3
     static bool isValidIdent(const std::string& ident);
     bool isValidIdent() const;
     bool isEmpty() const;
+    bool isRootOf(ComRef child) const;
 
     ComRef front() const;
     ComRef pop_front();
 
     const char* c_str() const {return cref;}
+    size_t size() {return strlen(cref);}
     operator std::string() const {return std::string(cref);}
 
   private:
-    char* cref = NULL;
+    char* cref;
   };
 
   bool operator==(const ComRef& lhs, const ComRef& rhs);
@@ -74,82 +77,13 @@ namespace oms3
 namespace std
 {
   template <>
-  struct hash<oms3::ComRef>
+  struct hash<oms::ComRef>
   {
-    std::size_t operator()(const oms3::ComRef& cref) const
+    size_t operator()(const oms::ComRef& cref) const
     {
-      using std::size_t;
-      using std::hash;
-      using std::string;
-
-      return hash<string>()(string(cref));
+      return hash<std::string>()(std::string(cref));
     }
   };
-}
-
-/* ************************************ */
-/* oms2                                 */
-/*                                      */
-/*                                      */
-/* ************************************ */
-
-#include <deque>
-
-namespace oms2
-{
-  /**
-   * \brief ComRef - component reference
-   */
-  class ComRef
-  {
-  public:
-    ComRef();
-    ComRef(const std::string& path);
-    ~ComRef();
-
-    // methods to copy the component reference
-    ComRef(ComRef const& copy);
-    ComRef& operator=(ComRef const& copy);
-    ComRef operator+(const ComRef& rhs);
-
-    static bool isValidIdent(const std::string& ident);
-    bool isValidIdent() const;
-    bool isValidQualified() const;
-
-    const char* c_str() const {return isIdent() ? path[0].c_str() : NULL;}
-
-    bool isQualified() const; // true if qualified component name, e.g. a.b.c
-    bool isIdent() const;     // true if non-qualifed component name, e.g. x
-
-    std::string toString() const;
-    ComRef first() const;
-    ComRef last() const;
-    void popFirst();
-    void popLast();
-    ComRef& append(const ComRef& cref);
-
-    /**
-     * \brief Can be used to compare crefs.
-     *
-     * x.y.z == x.y.z
-     * x.y.z == z
-     *     z == x.y.z
-     * x.y   != x
-     * x     != x.y
-     */
-    bool match(const ComRef& cref);
-
-    bool isEqual(const char* str) const {return toString().compare(str) == 0;}
-
-  private:
-    std::deque<std::string> path;
-
-    friend bool operator==(const ComRef& lhs, const ComRef& rhs);
-  };
-
-  std::string operator+(const std::string& lhs, const ComRef& rhs);
-  bool operator<(const ComRef& lhs, const ComRef& rhs);
-  bool operator==(const ComRef& lhs, const ComRef& rhs);
 }
 
 #endif

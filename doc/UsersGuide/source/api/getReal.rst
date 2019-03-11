@@ -8,21 +8,21 @@ Get real value.
 #LUA#
 .. code-block:: lua
 
-  value, status = oms2_getReal(signal)
+  value, status = oms_getReal(cref)
 
 #END#
 
 #PYTHON#
 .. code-block:: python
 
-  value, status = session.getReal(signal)
+  value, status = oms.getReal(cref)
 
 #END#
 
 #CAPI#
 .. code-block:: c
 
-  oms_status_enu_t oms2_getReal(const char* signal, double* value);
+  oms_status_enu_t oms_getReal(const char* cref, double* value);
 
 #END#
 

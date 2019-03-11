@@ -29,16 +29,22 @@
  *
  */
 
-#ifndef _OMS3_FLAGS_H_
-#define _OMS3_FLAGS_H_
+#ifndef _OMS_FLAGS_H_
+#define _OMS_FLAGS_H_
 
-namespace oms3
+#include "Types.h"
+#include <string>
+#include <vector>
+#include <map>
+
+namespace oms
 {
   class Flags
   {
   private:
     Flags();
     ~Flags();
+    void setDefaults();
 
     // stop the compiler generating methods copying the object
     Flags(Flags const&);            ///< not implemented
@@ -47,11 +53,115 @@ namespace oms3
     static Flags& GetInstance();
 
   public:
+    static oms_status_enu_t SetCommandLineOption(const std::string& cmd);
+
+    static bool DefaultModeIsCS() {return GetInstance().defaultModeIsCS;}
+    static bool IgnoreInitialUnknowns() {return GetInstance().ignoreInitialUnknowns;}
+    static bool InputDerivatives() {return GetInstance().inputDerivatives;}
+    static bool ProgressBar() {return GetInstance().progressBar;}
+    static bool RealTime() {return GetInstance().realTime;}
+    static bool StripRoot() {return GetInstance().stripRoot;}
     static bool SuppressPath() {return GetInstance().suppressPath;}
-    static void SuppressPath(bool value) {GetInstance().suppressPath = value;}
+    static bool WallTime() {return GetInstance().wallTime;}
+    static double StartTime() {return GetInstance().startTime;}
+    static double StopTime() {return GetInstance().stopTime;}
+    static double Timeout() {return GetInstance().timeout;}
+    static double Tolerance() {return GetInstance().tolerance;}
+    static std::string ResultFile() {return GetInstance().resultFile;}
+    static oms_solver_enu_t Solver() {return GetInstance().solver;}
+    static oms_solver_enu_t MasterAlgorithm() {return GetInstance().masterAlgorithm;}
+    static unsigned int Intervals() {return GetInstance().intervals;}
 
   private:
+    bool defaultModeIsCS;
+    bool ignoreInitialUnknowns;
+    bool inputDerivatives;
+    bool progressBar;
+    bool realTime;
+    bool stripRoot;
     bool suppressPath;
+    bool wallTime;
+    unsigned int intervals;
+    double startTime;
+    double stopTime;
+    double timeout;
+    double tolerance;
+    oms_solver_enu_t solver;
+    oms_solver_enu_t masterAlgorithm;
+    std::string resultFile;
+
+  private:
+    struct Flag
+    {
+      const std::string name;
+      const std::string abbr;
+      const std::string desc;
+      const std::string regex;
+      oms_status_enu_t (*fnc)(const std::string& value);
+      const bool interrupt;
+    };
+
+    std::map<std::string, unsigned int> lookup;
+
+    const std::string re_void = "";
+    const std::string re_default = ".+";
+    const std::string re_bool = "(true|false)";
+    const std::string re_mode = "(me|cs)";
+    const std::string re_double = "((\\+|-)?[[:digit:]]+)(\\.(([[:digit:]]+)?))?((e|E)((\\+|-)?)[[:digit:]]+)?";
+    const std::string re_number = "[[:digit:]]+";
+    const std::string re_filename = ".+(\\.fmu|\\.ssp)";
+
+    const std::vector<Flag> flags = {
+      {"", "", "FMU or SSP file", re_filename, Flags::Filename, false},
+      {"--clearAllOptions", "", "Reset all flags to default values", re_void, Flags::ClearAllOptions, false},
+      {"--fetchAllVars", "", "", re_default, Flags::FetchAllVars, false},
+      {"--help", "-h", "Displays the help text", re_void, Flags::Help, true},
+      {"--ignoreInitialUnknowns", "", "Ignore the initial unknowns from the modelDesction.xml", re_bool, Flags::IgnoreInitialUnknowns, false},
+      {"--intervals", "-i", "Specifies the number of communication points (arg > 1)", re_number, Flags::Intervals, false},
+      {"--logFile", "-l", "Specifies the logfile (stdout is used if no log file is specified)", re_default, Flags::LogFile, false},
+      {"--logLevel", "", "0 default, 1 default+debug, 2 default+debug+trace", re_number, Flags::LogLevel, false},
+      {"--mode", "-m", "Forces a certain FMI mode iff the FMU provides cs and me [arg: cs (default) or me]", re_mode, Flags::Mode, false},
+      {"--progressBar", "", "", re_bool, Flags::ProgressBar, false},
+      {"--realTime", "", "Experimental feature for (soft) real-time co-simulation", re_bool, Flags::RealTime, false},
+      {"--resultFile", "-r", "Specifies the name of the output result file", re_default, Flags::ResultFile, false},
+      {"--setInputDerivatives", "", "", re_bool, Flags::SetInputDerivatives, false},
+      {"--solver", "", "Specifies the integration method (euler, cvode)", re_default, Flags::Solver, false},
+      {"--startTime", "-s", "Specifies the start time", re_double, Flags::StartTime, false},
+      {"--stopTime", "-t", "Specifies the stop time", re_double, Flags::StopTime, false},
+      {"--stripRoot", "", "Removes the root system prefix from all exported signals", re_bool, Flags::StripRoot, false},
+      {"--suppressPath", "", "", re_bool, Flags::SuppressPath, false},
+      {"--tempDir", "", "Specifies the temp directory", re_default, Flags::TempDir, false},
+      {"--timeout", "", "Specifies the maximum allowed time in seconds for running a simulation (0 disables)", re_number, Flags::Timeout, false},
+      {"--tolerance", "", "Specifies the relative tolerance", re_double, Flags::Tolerance, false},
+      {"--version", "-v", "Displays version information", re_void, Flags::Version, false},
+      {"--wallTime", "", "Add wall time information for to the result file", re_bool, Flags::WallTime, false},
+      {"--workingDir", "", "Specifies the working directory", re_default, Flags::WorkingDir, false}
+    };
+
+    static oms_status_enu_t ClearAllOptions(const std::string& value);
+    static oms_status_enu_t FetchAllVars(const std::string& value);
+    static oms_status_enu_t Filename(const std::string& value);
+    static oms_status_enu_t Help(const std::string& value);
+    static oms_status_enu_t IgnoreInitialUnknowns(const std::string& value);
+    static oms_status_enu_t Intervals(const std::string& value);
+    static oms_status_enu_t LogFile(const std::string& value);
+    static oms_status_enu_t LogLevel(const std::string& value);
+    static oms_status_enu_t Mode(const std::string& value);
+    static oms_status_enu_t ProgressBar(const std::string& value);
+    static oms_status_enu_t RealTime(const std::string& value);
+    static oms_status_enu_t ResultFile(const std::string& value);
+    static oms_status_enu_t SetInputDerivatives(const std::string& value);
+    static oms_status_enu_t Solver(const std::string& value);
+    static oms_status_enu_t StartTime(const std::string& value);
+    static oms_status_enu_t StopTime(const std::string& value);
+    static oms_status_enu_t StripRoot(const std::string& value);
+    static oms_status_enu_t SuppressPath(const std::string& value);
+    static oms_status_enu_t TempDir(const std::string& value);
+    static oms_status_enu_t Timeout(const std::string& value);
+    static oms_status_enu_t Tolerance(const std::string& value);
+    static oms_status_enu_t Version(const std::string& value);
+    static oms_status_enu_t WallTime(const std::string& value);
+    static oms_status_enu_t WorkingDir(const std::string& value);
   };
 }
 

@@ -39,16 +39,16 @@
 #include <map>
 #include <iostream>
 
-oms3::ExternalModel::ExternalModel(const oms3::ComRef& cref, System* parentSystem, const std::string& path, const std::string& startscript)
-  : oms3::Component(cref, oms_component_external, parentSystem, path), startscript(startscript)
+oms::ExternalModel::ExternalModel(const oms::ComRef& cref, System* parentSystem, const std::string& path, const std::string& startscript)
+  : oms::Component(cref, oms_component_external, parentSystem, path), startscript(startscript)
 {
 }
 
-oms3::ExternalModel::~ExternalModel()
+oms::ExternalModel::~ExternalModel()
 {
 }
 
-oms3::ExternalModel* oms3::ExternalModel::NewComponent(const oms3::ComRef& cref, System* parentSystem, const std::string& path, const std::string& startscript)
+oms::ExternalModel* oms::ExternalModel::NewComponent(const oms::ComRef& cref, System* parentSystem, const std::string& path, const std::string& startscript)
 {
   if (!cref.isValidIdent())
   {
@@ -56,13 +56,13 @@ oms3::ExternalModel* oms3::ExternalModel::NewComponent(const oms3::ComRef& cref,
     return NULL;
   }
 
-  oms3::ExternalModel* model = new oms3::ExternalModel(cref, parentSystem, path, startscript);
+  oms::ExternalModel* model = new oms::ExternalModel(cref, parentSystem, path, startscript);
   return model;
 }
 
-oms_status_enu_t oms3::ExternalModel::setRealParameter(const std::string &var, double value)
+oms_status_enu_t oms::ExternalModel::setRealParameter(const std::string &var, double value)
 {
-  std::map<std::string, oms3::Option<double>>::iterator it;
+  std::map<std::string, oms::Option<double>>::iterator it;
   it = realParameters.find(var);
 
   if(it != realParameters.end()) {
@@ -73,9 +73,9 @@ oms_status_enu_t oms3::ExternalModel::setRealParameter(const std::string &var, d
   return oms_status_error;
 }
 
-oms_status_enu_t oms3::ExternalModel::getRealParameter(const std::string &var, double &value)
+oms_status_enu_t oms::ExternalModel::getRealParameter(const std::string &var, double &value)
 {
-  std::map<std::string, oms3::Option<double>>::iterator it;
+  std::map<std::string, oms::Option<double>>::iterator it;
   it = realParameters.find(var);
 
   if(it != realParameters.end()) {
@@ -86,12 +86,12 @@ oms_status_enu_t oms3::ExternalModel::getRealParameter(const std::string &var, d
   return oms_status_error;
 }
 
-oms_status_enu_t oms3::ExternalModel::exportToSSD(pugi::xml_node& node) const
+oms_status_enu_t oms::ExternalModel::exportToSSD(pugi::xml_node& node) const
 {
   if (tlmbusconnectors[0])
   {
-    pugi::xml_node annotations_node = node.append_child(oms2::ssd::ssd_annotations);
-    pugi::xml_node annotation_node = annotations_node.append_child(oms2::ssd::ssd_annotation);
+    pugi::xml_node annotations_node = node.append_child(oms::ssd::ssd_annotations);
+    pugi::xml_node annotation_node = annotations_node.append_child(oms::ssd::ssd_annotation);
     annotation_node.append_attribute("type") = oms::annotation_type;
     for (const auto& tlmbusconnector : tlmbusconnectors)
       if (tlmbusconnector)
@@ -100,9 +100,9 @@ oms_status_enu_t oms3::ExternalModel::exportToSSD(pugi::xml_node& node) const
 
   node.append_attribute("name") = this->getCref().c_str();
   node.append_attribute("source") = this->getPath().c_str();
-  pugi::xml_node siminfo_node = node.append_child(oms2::ssd::ssd_simulation_information);
-  pugi::xml_node annotations_node = siminfo_node.append_child(oms2::ssd::ssd_annotations);
-  pugi::xml_node annotation_node = annotations_node.append_child(oms2::ssd::ssd_annotation);
+  pugi::xml_node siminfo_node = node.append_child(oms::ssd::ssd_simulation_information);
+  pugi::xml_node annotations_node = siminfo_node.append_child(oms::ssd::ssd_annotations);
+  pugi::xml_node annotation_node = annotations_node.append_child(oms::ssd::ssd_annotation);
   annotation_node.append_attribute("type") = oms::annotation_type;
   pugi::xml_node externalmodel_node = annotation_node.append_child(oms::external_model);
   externalmodel_node.append_attribute("startscript") = this->startscript.c_str();
@@ -110,140 +110,42 @@ oms_status_enu_t oms3::ExternalModel::exportToSSD(pugi::xml_node& node) const
   return oms_status_ok;
 }
 
-oms_status_enu_t oms3::ExternalModel::instantiate()
+oms_status_enu_t oms::ExternalModel::instantiate()
+{
+  return oms_status_ok;
+}
+
+oms_status_enu_t oms::ExternalModel::initialize()
 {
   return logError_NotImplemented;
 }
 
-oms_status_enu_t oms3::ExternalModel::initialize()
+oms_status_enu_t oms::ExternalModel::terminate()
+{
+  return oms_status_ok;
+}
+
+oms_status_enu_t oms::ExternalModel::reset()
 {
   return logError_NotImplemented;
 }
 
-oms_status_enu_t oms3::ExternalModel::terminate()
+oms_status_enu_t oms::ExternalModel::registerSignalsForResultFile(ResultWriter& resultFile)
+{
+  return oms_status_ok;
+}
+
+oms_status_enu_t oms::ExternalModel::updateSignals(ResultWriter& resultWriter)
+{
+  return oms_status_ok;
+}
+
+oms_status_enu_t oms::ExternalModel::addSignalsToResults(const char* regex)
 {
   return logError_NotImplemented;
 }
 
-oms_status_enu_t oms3::ExternalModel::reset()
+oms_status_enu_t oms::ExternalModel::removeSignalsFromResults(const char* regex)
 {
   return logError_NotImplemented;
 }
-
-oms_status_enu_t oms3::ExternalModel::registerSignalsForResultFile(ResultWriter& resultFile)
-{
-  return logError_NotImplemented;
-}
-
-oms_status_enu_t oms3::ExternalModel::updateSignals(ResultWriter& resultWriter)
-{
-  return logError_NotImplemented;
-}
-
-oms_status_enu_t oms3::ExternalModel::addSignalsToResults(const char* regex)
-{
-  return logError_NotImplemented;
-}
-
-oms_status_enu_t oms3::ExternalModel::removeSignalsFromResults(const char* regex)
-{
-  return logError_NotImplemented;
-}
-
-/* ************************************ */
-/* oms2                                 */
-/*                                      */
-/*                                      */
-/* ************************************ */
-
-oms_status_enu_t oms2::ExternalModel::setRealParameter(const std::string &var, double value)
-{
-  std::map<std::string, oms3::Option<double>>::iterator it;
-  it = realParameters.find(var);
-
-  if(it != realParameters.end()) {
-    it->second.setValue(value);
-    return oms_status_ok;
-  }
-
-  return oms_status_error;
-}
-
-oms_status_enu_t oms2::ExternalModel::getRealParameter(const std::string &var, double &value)
-{
-  std::map<std::string, oms3::Option<double>>::iterator it;
-  it = realParameters.find(var);
-
-  if(it != realParameters.end()) {
-    value = it->second.getValue();
-    return oms_status_ok;
-  }
-
-  return oms_status_error;
-}
-
-oms2::ExternalModel::ExternalModel(const oms2::ComRef &cref, const std::string &filename, const std::string &startScript)
-  : element(oms_component_external_old, cref)
-{
-  logTrace();
-
-  this->filename = filename;
-  this->startScript = startScript;
-  this->cref = cref;
-}
-
-
-
-//oms2::ExternalModel::ExternalModel(oms2::ExternalModel& rhs)
-//{
-//  geometry.x1 = rhs.getGeometry()->x1;
-//  geometry.y1 = rhs.getGeometry()->y1;
-//  geometry.x2 = rhs.getGeometry()->x2;
-//  geometry.y2 = rhs.getGeometry()->y2;
-//  component.name() = rhs.getName();
-
-//  component.type = oms_component_external_old;
-//  component.interfaces = NULL;
-
-//  this->filename = filename;
-//  this->startScript = startScript;
-//  this->cref = cref;
-//}
-
-//oms2::ExternalModel::ExternalModel(const oms2::ExternalModel& rhs)
-//{
-//  geometry.x1 = rhs.getGeometry()->x1;
-//  geometry.y1 = rhs.getGeometry()->y1;
-//  geometry.x2 = rhs.getGeometry()->x2;
-//  geometry.y2 = rhs.getGeometry()->y2;
-//  component.name() = rhs.getName();
-
-//  component.type = oms_component_external_old;
-//  component.interfaces = NULL;
-
-//  this->filename = filename;
-//  this->startScript = startScript;
-//  this->cref = cref;
-//}
-
-//oms2::ExternalModel& oms2::ExternalModel::operator=(const oms2::ExternalModel& rhs)
-//{
-//  // check for self-assignment
-//  if(&rhs == this)
-//    return *this;
-
-//  geometry.x1 = rhs.getGeometry()->x1;
-//  geometry.y1 = rhs.getGeometry()->y1;
-//  geometry.x2 = rhs.getGeometry()->x2;
-//  geometry.y2 = rhs.getGeometry()->y2;
-//  component.name() = rhs.getName();
-
-//  component.type = oms_component_external_old;
-//  component.interfaces = NULL;
-
-//  this->filename = filename;
-//  this->startScript = startScript;
-//  this->cref = cref;
-
-//  return *this;
-//}

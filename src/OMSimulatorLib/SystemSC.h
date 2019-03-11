@@ -39,7 +39,7 @@
 #include "cvode/cvode.h"             /* prototypes for CVODE fcts., consts. */
 #include "nvector/nvector_serial.h"  /* serial N_Vector types, fcts., macros */
 
-namespace oms3
+namespace oms
 {
   class Model;
   class ComponentFMUME;
@@ -50,7 +50,7 @@ namespace oms3
   public:
     ~SystemSC();
 
-    static System* NewSystem(const oms3::ComRef& cref, Model* parentModel, System* parentSystem);
+    static System* NewSystem(const oms::ComRef& cref, Model* parentModel, System* parentSystem);
     oms_status_enu_t exportToSSD_SimulationInformation(pugi::xml_node& node) const;
     oms_status_enu_t importFromSSD_SimulationInformation(const pugi::xml_node& node);
 
@@ -60,7 +60,6 @@ namespace oms3
     oms_status_enu_t reset();
     oms_status_enu_t stepUntil(double stopTime, void (*cb)(const char* ident, double time, oms_status_enu_t status));
 
-    double getTolerance() const {return relativeTolerance;}
     double getTime() const {return time;}
 
     oms_status_enu_t updateInputs(DirectedGraph& graph);
@@ -69,8 +68,7 @@ namespace oms3
     std::string getSolverName() const;
     oms_status_enu_t setSolverMethod(std::string);
 
-    oms_status_enu_t setFixedStepSize(double stepSize) {this->maximumStepSize=stepSize; return oms_status_ok;}
-    oms_status_enu_t setTolerance(double tolerance) {this->absoluteTolerance=this->relativeTolerance=tolerance; return oms_status_ok;}
+    oms_status_enu_t setSolver(oms_solver_enu_t solver) {if (solver > oms_solver_sc_min && solver < oms_solver_sc_max) {solverMethod=solver; return oms_status_ok;} return oms_status_error;}
 
   protected:
     SystemSC(const ComRef& cref, Model* parentModel, System* parentSystem);
@@ -80,13 +78,7 @@ namespace oms3
     SystemSC& operator=(SystemSC const& copy); ///< not implemented
 
   private:
-    oms_solver_enu_t solverMethod = oms_solver_cvode;
     double time;
-    double absoluteTolerance = 1e-4;
-    double relativeTolerance = 1e-4;
-    double minimumStepSize = 1e-4;
-    double maximumStepSize = 1e-1;
-    double initialStepSize = 1e-4;
 
     std::vector<ComponentFMUME*> fmus;
 
@@ -118,7 +110,7 @@ namespace oms3
       SolverDataCVODE_t cvode;
     } solverData;
 
-    friend int oms3::cvode_rhs(realtype t, N_Vector y, N_Vector ydot, void* user_data);
+    friend int oms::cvode_rhs(realtype t, N_Vector y, N_Vector ydot, void* user_data);
   };
 }
 

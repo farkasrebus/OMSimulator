@@ -15,14 +15,14 @@ Returns the path of a given component.
 #PYTHON#
 .. code-block:: python
 
-  path, status = session.getSubModelPath(cref)
+  path, status = oms.getSubModelPath(cref)
 
 #END#
 
 #CAPI#
 .. code-block:: c
 
-  oms_status_enu_t oms2_getSubModelPath(const char* cref, char** path);
+  oms_status_enu_t oms_getSubModelPath(const char* cref, char** path);
 
 #END#
 

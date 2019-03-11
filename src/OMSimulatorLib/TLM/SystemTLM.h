@@ -37,7 +37,7 @@
 #include "Types.h"
 #include "../../OMTLMSimulator/common/Plugin/PluginImplementer.h"
 
-namespace oms3
+namespace oms
 {
   class Model;
   class SystemWC;
@@ -47,7 +47,7 @@ namespace oms3
   public:
     ~SystemTLM();
 
-    static System* NewSystem(const oms3::ComRef& cref, Model* parentModel, System* parentSystem);
+    static System* NewSystem(const oms::ComRef& cref, Model* parentModel, System* parentSystem);
     oms_status_enu_t exportToSSD_SimulationInformation(pugi::xml_node& node) const;
     oms_status_enu_t importFromSSD_SimulationInformation(const pugi::xml_node& node);
     oms_status_enu_t setSocketData(const std::string& address, int managerPort, int monitorPort);
@@ -59,14 +59,20 @@ namespace oms3
     oms_status_enu_t reset();
     oms_status_enu_t stepUntil(double stopTime, void (*cb)(const char* ident, double time, oms_status_enu_t status));
 
-    oms_status_enu_t connectToSockets(const oms3::ComRef cref, std::string server);
-    void disconnectFromSockets(const oms3::ComRef cref);
-    oms_status_enu_t updateInitialValues(const oms3::ComRef cref);
+    oms_status_enu_t connectToSockets(const oms::ComRef cref, std::string server);
+    void disconnectFromSockets(const oms::ComRef cref);
+    oms_status_enu_t updateInitialValues(const oms::ComRef cref);
 
     oms_status_enu_t initializeSubSystem(ComRef cref);
     oms_status_enu_t simulateSubSystem(ComRef cref, double stopTime);
-    void writeToSockets(oms3::SystemWC *system, double time, Component *component);
+    void writeToSockets(oms::SystemWC *system, double time, Component *component);
     void readFromSockets(SystemWC *system, double time, Component *component);
+    void sendValueToLogger(int varId, double time, double value);
+    int registerLogVariable();
+    void registerLogVariables(System* system, ResultWriter& resultFile);
+    void sendValuesToLogger(System* system, double time);
+    oms_status_enu_t registerSignalsForResultFile(ResultWriter& resultFile);
+    oms_status_enu_t updateSignals(ResultWriter& resultFile);
 
   protected:
     SystemTLM(const ComRef& cref, Model* parentModel, System* parentSystem);
@@ -76,6 +82,13 @@ namespace oms3
     SystemTLM& operator=(SystemTLM const& copy); ///< not implemented
 
   private:
+    double interpolate(double t1, double t2, double x1, double x2, double t)
+    {
+      if(t2 == t1)
+        return x2;
+      return x1 + (x2-x1)/(t2-t1)*(t-t1);
+    }
+
     void* model;
     std::string address = "";
     int desiredManagerPort=0;
@@ -90,6 +103,15 @@ namespace oms3
     std::mutex setConnectedMutex;
     std::mutex setInitializedMutex;
     std::map<System*, std::mutex> socketMutexes;
+    std::mutex logMutex;
+
+    int numLogVars = 0;
+    std::map<int, std::vector<std::pair<double,double> > > logBuffer;
+    double nextLogTime;
+    double logTime;
+    double logStep = 1e-2;
+    std::map<TLMBusConnector*, int> busLogIds;
+    std::map<Connector*, int> connectorLogIds;
 
     // simulation information
   };

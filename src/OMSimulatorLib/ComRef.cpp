@@ -30,279 +30,131 @@
  */
 
 #include "ComRef.h"
-#include "Types.h"
-#include "Identifier.h"
+#include <assert.h>
+#include <RegEx.h>
 
-oms3::ComRef::ComRef(const std::string& path)
+const oms_regex re_ident("^[a-zA-Z][a-zA-Z0-9_]*$");
+
+oms::ComRef::ComRef()
+{
+  cref = new char[1];
+  cref[0] = '\0';
+}
+
+oms::ComRef::ComRef(const std::string& path)
 {
   cref = new char[path.size() + 1];
   strcpy(cref, path.c_str());
 }
 
-oms3::ComRef::ComRef(const char* path)
+oms::ComRef::ComRef(const char* path)
 {
+  assert(path);
   cref = new char[strlen(path) + 1];
   strcpy(cref, path);
 }
 
-oms3::ComRef::~ComRef()
+oms::ComRef::~ComRef()
 {
   delete[] cref;
 }
 
-oms3::ComRef::ComRef(const oms3::ComRef& copy)
+oms::ComRef::ComRef(const oms::ComRef& copy)
 {
-  cref = new char[strlen(copy.c_str()) + 1];
-  strcpy(cref, copy.c_str());
+  cref = new char[strlen(copy.cref) + 1];
+  strcpy(cref, copy.cref);
 }
 
-oms3::ComRef& oms3::ComRef::operator=(const oms3::ComRef& copy)
+oms::ComRef& oms::ComRef::operator=(const oms::ComRef& copy)
 {
   // check for self-assignment
-  if(&copy == this)
+  if (&copy == this)
     return *this;
 
   delete[] cref;
-  cref = new char[strlen(copy.c_str()) + 1];
-  strcpy(cref, copy.c_str());
+  cref = new char[strlen(copy.cref) + 1];
+  strcpy(cref, copy.cref);
 
   return *this;
 }
 
-oms3::ComRef oms3::ComRef::operator+(const oms3::ComRef& rhs) const
+oms::ComRef oms::ComRef::operator+(const oms::ComRef& rhs) const
 {
-  return oms3::ComRef(std::string(*this) + "." + std::string(rhs));
+  return oms::ComRef(std::string(*this) + "." + std::string(rhs));
 }
 
-bool oms3::ComRef::isValidIdent(const std::string& ident)
+bool oms::ComRef::isValidIdent(const std::string& ident)
 {
-  return oms_regex_match(ident, regex_ident);
+  return oms_regex_match(ident, re_ident);
 }
 
-bool oms3::ComRef::isValidIdent() const
+bool oms::ComRef::isValidIdent() const
 {
   return isValidIdent(cref);
 }
 
-bool oms3::ComRef::isEmpty() const
+bool oms::ComRef::isEmpty() const
 {
-  return !(cref && cref[0] != '\0');
+  return (cref[0] == '\0');
 }
 
-oms3::ComRef oms3::ComRef::front() const
+bool oms::ComRef::isRootOf(ComRef child) const
 {
-  int dot=0;
-
-  for(int i=0; cref[i] && dot==0; ++i)
-    if(cref[i] == '.')
-      dot = i;
-
-  if (dot)
-    cref[dot] = '\0';
-
-  oms3::ComRef front(cref);
-
-  if (dot)
-    cref[dot] = '.';
-  return front;
+  ComRef root(*this);
+  while (!root.isEmpty())
+  {
+    if (child.pop_front() != root.pop_front())
+      return false;
+  }
+  return true;
 }
 
-oms3::ComRef oms3::ComRef::pop_front()
+oms::ComRef oms::ComRef::front() const
 {
-  int i=0;
-  for(; cref[i]; ++i)
-    if(cref[i] == '.')
+  for (int i=0; cref[i]; ++i)
+  {
+    if (cref[i] == '.')
     {
       cref[i] = '\0';
-      i++;
-      break;
+      oms::ComRef front(cref);
+      cref[i] = '.';
+      return front;
     }
+  }
 
-  oms3::ComRef front(cref);
-  *this = oms3::ComRef(cref + i);
+  return oms::ComRef(cref);
+}
+
+oms::ComRef oms::ComRef::pop_front()
+{
+  for (int i=0; cref[i]; ++i)
+  {
+    if (cref[i] == '.')
+    {
+      cref[i] = '\0';
+      oms::ComRef front(cref);
+      cref[i] = '.';
+      *this = oms::ComRef(cref + i + 1);
+      return front;
+    }
+  }
+
+  oms::ComRef front(cref);
+  *this = oms::ComRef("");
   return front;
 }
 
-bool oms3::operator==(const oms3::ComRef& lhs, const oms3::ComRef& rhs)
+bool oms::operator==(const oms::ComRef& lhs, const oms::ComRef& rhs)
 {
   return (0 == strcmp(lhs.c_str(), rhs.c_str()));
 }
 
-bool oms3::operator!=(const oms3::ComRef& lhs, const oms3::ComRef& rhs)
+bool oms::operator!=(const oms::ComRef& lhs, const oms::ComRef& rhs)
 {
   return !(lhs == rhs);
 }
 
-bool oms3::operator<(const oms3::ComRef& lhs, const oms3::ComRef& rhs)
+bool oms::operator<(const oms::ComRef& lhs, const oms::ComRef& rhs)
 {
   return (0 < strcmp(lhs.c_str(), rhs.c_str()));
-}
-
-/* ************************************ */
-/* oms2                                 */
-/*                                      */
-/*                                      */
-/* ************************************ */
-
-#include "Logging.h"
-
-#include <deque>
-#include <string>
-
-oms2::ComRef::ComRef()
-{
-}
-
-oms2::ComRef::ComRef(const std::string& path)
-{
-  std::string buf;
-  for(auto n : path)
-  {
-    if(n != '.')
-      buf += n;
-    else
-    {
-      this->path.push_back(buf);
-      buf.clear();
-    }
-  }
-  this->path.push_back(buf);
-}
-
-oms2::ComRef::~ComRef()
-{
-}
-
-oms2::ComRef::ComRef(oms2::ComRef const& copy)
-{
-  path = copy.path;
-}
-
-oms2::ComRef& oms2::ComRef::operator=(oms2::ComRef const& copy)
-{
-  // check for self-assignment
-  if(&copy == this)
-    return *this;
-
-  path = copy.path;
-  return *this;
-}
-
-oms2::ComRef oms2::ComRef::operator+(const oms2::ComRef& rhs)
-{
-  oms2::ComRef cref = *this;
-  cref.append(rhs);
-  return cref;
-}
-
-bool oms2::ComRef::isValidIdent(const std::string& ident)
-{
-  oms_regex re("^[a-zA-Z][a-zA-Z0-9_]*$");
-  return oms_regex_match(ident, re);
-}
-
-bool oms2::ComRef::isValidIdent() const
-{
-  return path.size() == 1 && isValidIdent(path[0]);
-}
-
-bool oms2::ComRef::isValidQualified() const
-{
-  if (path.empty())
-    return false;
-
-  for(auto ident : path)
-    if (!isValidIdent(ident))
-      return false;
-
-  return true;
-}
-
-bool oms2::ComRef::isQualified() const
-{
-  return path.size() > 1;
-}
-
-bool oms2::ComRef::isIdent() const
-{
-  return path.size() == 1;
-}
-
-std::string oms2::ComRef::toString() const
-{
-  std::string buf;
-
-  for(auto n : path)
-    if (buf.empty())
-      buf += n;
-    else
-      buf += "." + n;
-
-  return buf;
-}
-
-oms2::ComRef oms2::ComRef::first() const
-{
-  if (path.empty())
-    return oms2::ComRef();
-
-  return oms2::ComRef(path.front());
-}
-
-oms2::ComRef oms2::ComRef::last() const
-{
-  if (path.empty())
-    return oms2::ComRef();
-
-  return oms2::ComRef(path.back());
-}
-
-void oms2::ComRef::popFirst()
-{
-  if (!path.empty())
-    path.pop_front();
-}
-
-void oms2::ComRef::popLast()
-{
-  if (!path.empty())
-    path.pop_back();
-}
-
-oms2::ComRef& oms2::ComRef::append(const oms2::ComRef& cref)
-{
-  for(auto n : cref.path)
-    this->path.push_back(n);
-
-  return *this;
-}
-
-bool oms2::ComRef::match(const oms2::ComRef& cref)
-{
-  for (int i=path.size()-1, j=cref.path.size()-1; i >= 0 && j >= 0; --i, --j)
-    if (path[i] != cref.path[i])
-      return false;
-  return true;
-}
-
-std::string oms2::operator+(const std::string& lhs, const oms2::ComRef& rhs)
-{
-  return lhs + rhs.toString();
-}
-
-bool oms2::operator<(const oms2::ComRef& lhs, const oms2::ComRef& rhs)
-{
-  return lhs.toString() < rhs.toString();
-}
-
-bool oms2::operator==(const oms2::ComRef& lhs, const oms2::ComRef& rhs)
-{
-  if (lhs.path.size() != rhs.path.size())
-    return false;
-
-  for (int i=0; i<lhs.path.size(); ++i)
-    if (lhs.path[i] != rhs.path[i])
-      return false;
-
-  return true;
 }

@@ -33,10 +33,11 @@
 #include "Version.h"
 #include "Types.h"
 
-#include <iostream>
-#include <fstream>
-#include <stdlib.h>
+#include <cstring>
 #include <ctime>
+#include <fstream>
+#include <iostream>
+#include <stdlib.h>
 
 using namespace std;
 
@@ -57,7 +58,7 @@ Log::Log() : filename(""), cb(NULL)
   numWarnings = 0;
   numErrors = 0;
   numMessages = 0;
-  logLevel = false;
+  logLevel = 0;
 }
 
 Log::~Log()
@@ -75,6 +76,8 @@ Log& Log::getInstance()
 
 void Log::printStringToStream(std::ostream& stream, const std::string& type, const std::string& msg)
 {
+  TerminateBar();
+
   std::string timeStamp, padding;
   if (logFile.is_open())
   {
@@ -88,7 +91,7 @@ void Log::printStringToStream(std::ostream& stream, const std::string& type, con
   bool firstLine = true;
   std::string buffer;
   unsigned int nLines = 1;
-  while(msg[end])
+  while(end < msg.size())
   {
     if (msg[end] == '\n' || msg[end] == '\r')
     {
@@ -181,6 +184,12 @@ oms_status_enu_t Log::Error(const std::string& msg, const std::string& function)
   return oms_status_error;
 }
 
+bool Log::DebugEnabled()
+{
+  Log& log = getInstance();
+  return log.logLevel >= 1;
+}
+
 void Log::Debug(const std::string& msg)
 {
   Log& log = getInstance();
@@ -195,6 +204,12 @@ void Log::Debug(const std::string& msg)
 
   if (log.cb)
     log.cb(oms_message_debug, msg.c_str());
+}
+
+bool Log::TraceEnabled()
+{
+  Log& log = getInstance();
+  return log.logLevel >= 2;
 }
 
 void Log::Trace(const std::string& function, const std::string& file, const long line)
@@ -257,14 +272,63 @@ oms_status_enu_t Log::setLogFile(const std::string& filename)
 oms_status_enu_t Log::setLoggingLevel(int logLevel)
 {
   if (logLevel < 0 || logLevel > 2)
-    return oms_status_error;
+    return logError("Invalid logging level");
 
-#ifdef OMS_DEBUG_LOGGING
   Log& log = getInstance();
   log.logLevel = logLevel;
-#else
-  Warning("Log::setDebugLogging is not available.");
+
+#if defined(NDEBUG)
+  if (logLevel > 1)
+    Warning("debug logging is not available");
 #endif
 
-return oms_status_ok;
+  return oms_status_ok;
+}
+
+const int Log::getLoggingLevel()
+{
+  Log& log = getInstance();
+  return log.logLevel;
+}
+
+void Log::ProgressBar(double start, double stop, double value)
+{
+  Log& log = getInstance();
+
+  if (log.progress)
+    printf("\r");
+  else
+    log.percent = -1;
+
+  const char* label = "info:    ";
+
+  int width = 72 - strlen(label);
+  int pos = ((value - start) * width) / (stop - start) ;
+  int percent = ((value - start) * 100) / (stop - start);
+
+  if (log.percent == percent)
+    return;
+  log.percent = percent;
+
+  printf("%s[", label);
+
+  //fill progress bar with =
+  for (int i = 0; i<pos; i++)
+    printf("%c", '=');
+
+  //fill progress bar with spaces
+  printf("% *s", width - pos + 1, "]");
+  printf(" %3d%%", percent);
+  log.progress = true;
+}
+
+void Log::TerminateBar()
+{
+  Log& log = getInstance();
+
+  if (log.progress)
+  {
+    printf("\n");
+    log.progress = false;
+  }
 }

@@ -29,8 +29,8 @@
  *
  */
 
-#ifndef _OMS2_MODEL_H_
-#define _OMS2_MODEL_H_
+#ifndef _OMS_MODEL_H_
+#define _OMS_MODEL_H_
 
 #include "Clock.h"
 #include "ComRef.h"
@@ -41,7 +41,7 @@
 
 #include <pugixml.hpp>
 
-namespace oms3
+namespace oms
 {
   class Component;
   class System;
@@ -71,7 +71,7 @@ namespace oms3
     void copyResources(bool copy_resources) {this->copy_resources = copy_resources;}
     bool copyResources() {return copy_resources;}
 
-    oms3::Element** getElements() {return &elements[0];}
+    oms::Element** getElements() {return &elements[0];}
     oms_status_enu_t getAllResources(std::vector<std::string>& resources) const;
 
     oms_status_enu_t instantiate();
@@ -90,6 +90,7 @@ namespace oms3
     double getStopTime() const {return stopTime;}
 
     oms_status_enu_t setLoggingInterval(double loggingInterval);
+    double getLoggingInterval() const {return loggingInterval;}
     oms_status_enu_t setResultFile(const std::string& filename, int bufferSize);
     oms_status_enu_t emit(double time, bool force=false);
     oms_status_enu_t addSignalsToResults(const char* regex);
@@ -97,6 +98,11 @@ namespace oms3
 
     oms_status_enu_t cancelSimulation_asynchronous();
     bool cancelSimulation() const {return cancelSim;}
+
+    bool validState(int validStates) const {return (modelState & validStates);}
+
+    bool isIsolatedFMUModel() const {return isolatedFMU;}
+    void setIsolatedFMUModel() {isolatedFMU = true;}
 
   private:
     Model(const ComRef& cref, const std::string& tempDir);
@@ -112,10 +118,10 @@ namespace oms3
     System* system = NULL;
     std::string tempDir;
 
-    std::vector<oms3::Element*> elements;
+    std::vector<oms::Element*> elements;
     bool copy_resources = true;
 
-    oms_modelState_enu_t modelState = oms_modelState_terminated;
+    oms_modelState_enu_t modelState = oms_modelState_virgin;
 
     // ssd:DefaultExperiment
     double startTime = 0.0;
@@ -127,116 +133,9 @@ namespace oms3
     int bufferSize = 10;
     std::string resultFilename;             ///< default <name>_res.mat
     Clock clock;
-    unsigned int clock_id;
 
     bool cancelSim;
-  };
-}
-
-#include "Pkg_oms2.h"
-#include "Element.h"
-#include "CompositeModel.h"
-#include "FMICompositeModel.h"
-#include "TLMCompositeModel.h"
-#include "ssd/SystemGeometry.h"
-#include "SignalRef.h"
-
-#include <string>
-#include <vector>
-
-namespace oms2
-{
-  class Model
-  {
-  public:
-    /**
-     * NewModel() is used instead of a constructor to make sure that only
-     * instances with valid names can be created.
-     */
-    static Model* NewModel(oms_element_type_enu_t type, const ComRef& cref);
-    static oms_status_enu_t ParseString(const std::string& contents, char** ident);
-    static Model* LoadModel(const std::string& filename);
-    static void DeleteModel(Model *model) {if (model) delete model;}
-
-    oms_status_enu_t save(const std::string& filename);
-    oms_status_enu_t list(char** contents);
-
-    void setStartTime(double value) {startTime = value;}
-    double getStartTime() const {return startTime;}
-    void setStopTime(double value) {stopTime = value;}
-    double getStopTime() const {return stopTime;}
-    void setCommunicationInterval(double value) {communicationInterval = value;}
-    void setLoggingInterval(double value) {loggingInterval = value;}
-    double getLoggingInterval() const {return loggingInterval;}
-    void setLoggingSamples(int value);
-    int getLoggingSamples();
-    double getCommunicationInterval() const {return communicationInterval;}
-    void setResultFile(const std::string& value, unsigned int bufferSize);
-    const std::string& getResultFile() const {return resultFilename;}
-    oms3::ResultWriter *getResultWriter() const {return resultFile;}
-    void setMasterAlgorithm(MasterAlgorithm value) {masterAlgorithm = value;}
-    MasterAlgorithm getMasterAlgorithm() const {return masterAlgorithm;}
-    //Functions for configuring adaptive step size control
-    StepSizeConfiguration getStepSizeConfiguration() {return stepSizeConfiguration;};
-    void setMinimalStepSize(double min) {stepSizeConfiguration.setMinimalStepSize(min);}
-    void setMaximalStepSize(double max) {stepSizeConfiguration.setMaximalStepSize(max);}
-    void addEventIndicator(const oms2::SignalRef& signal) {stepSizeConfiguration.addEventIndicator(signal);};
-    void addTimeIndicator(const oms2::SignalRef& signal) {stepSizeConfiguration.addTimeIndicator(signal);};
-    void addStaticValueIndicator(const oms2::SignalRef& signal, double lowerBound, double upperBound, double stepSize)
-      {stepSizeConfiguration.addStaticValueIndicator(signal,lowerBound,upperBound,stepSize);};
-    void addDynamicValueIndicator(const oms2::SignalRef& signal,const oms2::SignalRef& lower,const oms2::SignalRef& upper,double stepSize)
-      {stepSizeConfiguration.addDynamicValueIndicator(signal,lower,upper,stepSize);};
-    //
-    void setTolerance(double value) {tolerance = value;}
-    double getTolerance() const {return tolerance;}
-
-    FMICompositeModel* getFMICompositeModel();
-#if !defined(NO_TLM)
-    TLMCompositeModel* getTLMCompositeModel();
-#endif
-
-    oms_element_type_enu_t getType() {return compositeModel->getType();}
-    oms2::Element* getElement() {return compositeModel->getElement();}
-    const ComRef getName() const {return compositeModel->getName();}
-    void setName(const ComRef& name) {compositeModel->setName(name);}
-
-    oms_status_enu_t setTLMInitialValues(const SignalRef& ifc, std::vector<double> value);
-
-    oms_status_enu_t describe() { return compositeModel->describe(); }
-    oms_status_enu_t initialize();
-    oms_status_enu_t reset(bool terminate=false);
-    oms_status_enu_t simulate();
-    oms_status_enu_t simulate_asynchronous(void (*cb)(const char* ident, double time, oms_status_enu_t status));
-    oms_status_enu_t simulate_realtime();
-    oms_status_enu_t doSteps(const int numberOfSteps);
-    oms_status_enu_t stepUntil(const double timeValue);
-
-  private:
-    Model(const oms2::ComRef& cref);
-    ~Model();
-
-    // stop the compiler generating methods copying the object
-    Model(Model const& copy);            ///< not implemented
-    Model& operator=(Model const& copy); ///< not implemented
-
-    oms_status_enu_t saveOrList(const std::string& filename, char** contents);
-
-  private:
-    oms2::ssd::SystemGeometry systemGeometry;
-    CompositeModel* compositeModel = NULL;
-
-    double startTime = 0.0;                 ///< experiment, default 0.0
-    double stopTime = 1.0;                  ///< experiment, default 1.0
-    double tolerance = 1.0e-4;              ///< experiment, default 1.0e-4
-    double communicationInterval = 1.0e-2;  ///< experiment, default 1.0e-2
-    double loggingInterval = 0.0;           ///< experiment, default 0.0
-    std::string resultFilename;             ///< experiment, default <name>_res.mat
-    unsigned int bufferSize = 1;
-    oms3::ResultWriter *resultFile = NULL;
-    MasterAlgorithm masterAlgorithm = MasterAlgorithm::STANDARD;  ///< master algorithm for FMI co-simulation, default MasterAlgorithm::STANDARD
-    StepSizeConfiguration stepSizeConfiguration;//Configuration data structure for step size control
-
-    oms_modelState_enu_t modelState;  ///< internal model state, e.g. initialization state
+    bool isolatedFMU = false;
   };
 }
 

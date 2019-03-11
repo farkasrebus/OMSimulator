@@ -1,0 +1,8 @@
+loadModel(Modelica); getErrorString();
+loadFile("DualMassOscillator.mo"); getErrorString();
+
+buildModelFMU(DualMassOscillator.System1, version="2.0", fmuType="cs", fileNamePrefix="DualMassOscillator.System1_cs_openmodelica", platforms={"static"}); getErrorString();
+buildModelFMU(DualMassOscillator.System2, version="2.0", fmuType="cs", fileNamePrefix="DualMassOscillator.System2_cs_openmodelica", platforms={"static"}); getErrorString();
+
+//buildModelFMU(DualMassOscillator.System1Eq, version="2.0", fmuType="cs", fileNamePrefix="DualMassOscillator.System1Eq_cs_openmodelica", platforms={"static"}); getErrorString();
+//buildModelFMU(DualMassOscillator.System2Eq, version="2.0", fmuType="cs", fileNamePrefix="DualMassOscillator.System2Eq_cs_openmodelica", platforms={"static"}); getErrorString();

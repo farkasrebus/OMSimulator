@@ -40,7 +40,7 @@
 #include <cstring>
 #include <iostream>
 
-oms3::Element::Element(oms3_element_enu_t type, const oms3::ComRef& name)
+oms::Element::Element(oms_element_enu_t type, const oms::ComRef& name)
 {
   this->type = type;
 
@@ -51,7 +51,7 @@ oms3::Element::Element(oms3_element_enu_t type, const oms3::ComRef& name)
   this->elements = NULL;
   this->connectors = NULL;
 
-  this->geometry = reinterpret_cast<ssd_element_geometry_t*>(new oms3::ssd::ElementGeometry());
+  this->geometry = reinterpret_cast<ssd_element_geometry_t*>(new oms::ssd::ElementGeometry());
 
   this->busconnectors = NULL;
 
@@ -60,7 +60,7 @@ oms3::Element::Element(oms3_element_enu_t type, const oms3::ComRef& name)
 #endif
 }
 
-oms3::Element::~Element()
+oms::Element::~Element()
 {
   if (this->name)
     delete[] this->name;
@@ -68,10 +68,10 @@ oms3::Element::~Element()
   // lochel: don't delete the sub-elements
 
   if (this->geometry)
-    delete reinterpret_cast<oms3::ssd::ElementGeometry*>(this->geometry);
+    delete reinterpret_cast<oms::ssd::ElementGeometry*>(this->geometry);
 }
 
-void oms3::Element::setName(const oms3::ComRef& name)
+void oms::Element::setName(const oms::ComRef& name)
 {
   if (this->name)
     delete[] this->name;
@@ -81,130 +81,38 @@ void oms3::Element::setName(const oms3::ComRef& name)
   strcpy(this->name, str.c_str());
 }
 
-void oms3::Element::setGeometry(const oms3::ssd::ElementGeometry* newGeometry)
+void oms::Element::setGeometry(const oms::ssd::ElementGeometry* newGeometry)
 {
   if (this->geometry)
   {
-    delete reinterpret_cast<oms3::ssd::ElementGeometry*>(this->geometry);
+    delete reinterpret_cast<oms::ssd::ElementGeometry*>(this->geometry);
     this->geometry = NULL;
   }
 
   if (newGeometry)
   {
-    this->geometry = reinterpret_cast<ssd_element_geometry_t*>(new oms3::ssd::ElementGeometry(*newGeometry));
+    this->geometry = reinterpret_cast<ssd_element_geometry_t*>(new oms::ssd::ElementGeometry(*newGeometry));
   }
 }
 
-void oms3::Element::setConnectors(oms3::Connector** newConnectors)
+void oms::Element::setConnectors(oms::Connector** newConnectors)
 {
   this->connectors = reinterpret_cast<oms_connector_t**>(newConnectors);
 }
 
-void oms3::Element::setBusConnectors(oms3::BusConnector **newBusConnectors)
+void oms::Element::setBusConnectors(oms::BusConnector **newBusConnectors)
 {
-  this->busconnectors = reinterpret_cast<oms3_busconnector_t**>(newBusConnectors);
+  this->busconnectors = reinterpret_cast<oms_busconnector_t**>(newBusConnectors);
 }
 
 #if !defined(NO_TLM)
-void oms3::Element::setTLMBusConnectors(oms3::TLMBusConnector **newBusConnectors)
+void oms::Element::setTLMBusConnectors(oms::TLMBusConnector **newBusConnectors)
 {
-  this->tlmbusconnectors = reinterpret_cast<oms3_tlmbusconnector_t**>(newBusConnectors);
+  this->tlmbusconnectors = reinterpret_cast<oms_tlmbusconnector_t**>(newBusConnectors);
 }
 #endif
 
-void oms3::Element::setSubElements(oms3_element_t** subelements)
+void oms::Element::setSubElements(oms_element_t** subelements)
 {
   this->elements = subelements;
-}
-
-/* ************************************ */
-/* oms2                                 */
-/*                                      */
-/*                                      */
-/* ************************************ */
-
-oms2::Element::Element(oms_element_type_enu_t type, const oms2::ComRef& name)
-{
-  this->type = type;
-
-  std::string str = name.toString();
-  this->name = new char[str.size()+1];
-  strcpy(this->name, str.c_str());
-
-  this->connectors = NULL;
-
-  this->geometry = reinterpret_cast<ssd_element_geometry_t*>(new oms2::ssd::ElementGeometry());
-}
-
-oms2::Element::~Element()
-{
-  if (this->name)
-    delete[] this->name;
-  if (this->connectors)
-  {
-    for (int i=0; this->connectors[i]; ++i)
-      delete reinterpret_cast<oms2::Connector*>(this->connectors[i]);
-    delete[] this->connectors;
-  }
-  if (this->geometry)
-    delete reinterpret_cast<oms2::ssd::ElementGeometry*>(this->geometry);
-}
-
-void oms2::Element::setName(const oms2::ComRef& name)
-{
-  if (this->name)
-    delete[] this->name;
-
-  std::string str = name.toString();
-  this->name = new char[str.size()+1];
-  strcpy(this->name, str.c_str());
-}
-
-void oms2::Element::setGeometry(const oms2::ssd::ElementGeometry* newGeometry)
-{
-  if (this->geometry)
-  {
-    delete reinterpret_cast<oms2::ssd::ElementGeometry*>(this->geometry);
-    this->geometry = NULL;
-  }
-
-  if (newGeometry)
-  {
-    this->geometry = reinterpret_cast<ssd_element_geometry_t*>(new oms2::ssd::ElementGeometry(*newGeometry));
-  }
-}
-
-void oms2::Element::setConnectors(const std::vector<oms2::Connector> newConnectors)
-{
-  logTrace();
-
-  if (this->connectors)
-  {
-    for (int i=0; this->connectors[i]; ++i)
-      delete reinterpret_cast<oms2::Connector*>(this->connectors[i]);
-    delete[] this->connectors;
-  }
-
-  this->connectors = reinterpret_cast<oms_connector_t**>(new oms2::Connector*[newConnectors.size()+1]);
-  this->connectors[newConnectors.size()] = NULL;
-
-  for (int i=0; i<newConnectors.size(); ++i)
-    this->connectors[i] = reinterpret_cast<oms_connector_t*>(new oms2::Connector(newConnectors[i]));
-}
-
-void oms2::Element::describe()
-{
-  std::cout << "FMI sub model \"" + getName() + "\"" << std::endl;
-
-  switch(getType())
-  {
-    case oms_component_none_old:
-    case oms_component_tlm:      std::cout << "type: TLM model" << std::endl; break;
-    case oms_component_fmi:      std::cout << "type: FMI model" << std::endl; break;
-    case oms_component_external_old: std::cout << "type: External model" << std::endl; break;
-    case oms_component_fmu_old:      std::cout << "type: FMU" << std::endl; break;
-    case oms_component_table_old:    std::cout << "type: lookup table" << std::endl; break;
-    case oms_component_port:     std::cout << "type: port" << std::endl; break;
-    default:                     std::cout << "type: unknown" << std::endl; break;
-  }
 }

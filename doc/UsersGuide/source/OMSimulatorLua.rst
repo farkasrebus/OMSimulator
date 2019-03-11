@@ -3,7 +3,8 @@
 OMSimulatorLua
 =================
 
-This is a shared library that provides a Lua interface for the OMSimulatorLib library.
+This is a shared library that provides a Lua interface for the OMSimulatorLib
+library.
 
 .. index:: OMSimulatorLua; Examples
 
@@ -12,28 +13,30 @@ Examples
 
 .. code-block:: lua
 
-  oms2_setTempDirectory("./temp/")
-  oms2_newFMIModel("model")
+  oms_setTempDirectory("./temp/")
+  oms_newModel("model")
+  oms_addSystem("model.root", oms_system_sc)
 
   -- instantiate FMUs
-  oms2_addFMU("model", "FMUs/submodelA.fmu", "A")
-  oms2_addFMU("model", "FMUs/submodelB.fmu", "B")
+  oms_addSubModel("model.root.system1", "FMUs/System1.fmu")
+  oms_addSubModel("model.root.system2", "FMUs/System2.fmu")
 
   -- add connections
-  oms2_addConnection("model", "A:in1", "B:out1")
-  oms2_addConnection("model", "A:in2", "B:out2")
-  oms2_addConnection("model", "A:out1", "B:in1")
-  oms2_addConnection("model", "A:out2", "B:in2")
+  oms_addConnection("model.root.system1.y", "model.root.system2.u")
+  oms_addConnection("model.root.system2.y", "model.root.system1.u")
 
-  oms2_describe("model")
+  -- simulation settings
+  oms_setResultFile("model", "results.mat")
+  oms_setStopTime("model", 0.1)
+  oms_setFixedStepSize("model.root", 1e-4)
 
-  oms2_setStopTime("model", 2.0)
-  oms2_setResultFile("model", "results.mat")
+  oms_instantiate("model")
+  oms_setReal("model.root.system1.x_start", 2.5)
 
-  oms2_initialize("model")
-  oms2_simulate("model")
-
-  oms2_unloadModel("model")
+  oms_initialize("model")
+  oms_simulate("model")
+  oms_terminate("model")
+  oms_delete("model")
 
 .. index:: OMSimulatorLua; Scripting Commands
 

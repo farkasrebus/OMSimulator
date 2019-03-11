@@ -33,6 +33,7 @@
 #define _OMS_SYSTEM_H_
 
 #include "BusConnector.h"
+#include "Clock.h"
 #include "ComRef.h"
 #include "Connection.h"
 #include "DirectedGraph.h"
@@ -48,7 +49,7 @@
 #include <pugixml.hpp>
 #include <unordered_map>
 
-namespace oms3
+namespace oms
 {
   class Component;
   class Model;
@@ -66,7 +67,6 @@ namespace oms3
     const ComRef& getCref() const {return cref;}
     ComRef getFullCref() const;
     Element* getElement() {return &element;}
-    oms_status_enu_t list(const ComRef& cref, char** contents);
     oms_status_enu_t listUnconnectedConnectors(char** contents) const;
     oms_system_enu_t getType() const {return type;}
     oms_status_enu_t addSubSystem(const ComRef& cref, oms_system_enu_t type);
@@ -79,13 +79,14 @@ namespace oms3
     void setGeometry(const ssd::ElementGeometry& geometry) {element.setGeometry(&geometry);}
     oms_status_enu_t addConnector(const ComRef& cref, oms_causality_enu_t causality, oms_signal_type_enu_t type);
     Connector* getConnector(const ComRef& cref);
+    Connector** getConnectors() {return &connectors[0];}
     BusConnector* getBusConnector(const ComRef& cref);
     oms_status_enu_t addTLMConnection(const ComRef& crefA, const ComRef& crefB, double delay, double alpha, double linearimpedance, double angularimpedance);
-    oms_status_enu_t setTLMConnectionParameters(const ComRef &crefA, const ComRef &crefB, const oms3_tlm_connection_parameters_t* parameters);
-    oms_status_enu_t addTLMBus(const ComRef& cref, const std::string domain, const int dimensions, const oms_tlm_interpolation_t interpolation);
+    oms_status_enu_t setTLMConnectionParameters(const ComRef &crefA, const ComRef &crefB, const oms_tlm_connection_parameters_t* parameters);
+    oms_status_enu_t addTLMBus(const ComRef& cref, oms_tlm_domain_t domain, const int dimensions, const oms_tlm_interpolation_t interpolation);
     oms_status_enu_t addConnectorToTLMBus(const ComRef& busCref, const ComRef& connectorCref, const std::string type);
     oms_status_enu_t deleteConnectorFromTLMBus(const ComRef& busCref, const ComRef& connectorCref);
-    oms_status_enu_t setTLMBusGeometry(const ComRef& cref, const oms2::ssd::ConnectorGeometry* geometry);
+    oms_status_enu_t setTLMBusGeometry(const ComRef& cref, const oms::ssd::ConnectorGeometry* geometry);
 #if !defined(NO_TLM)
     TLMBusConnector *getTLMBusConnector(const ComRef& cref);
     TLMBusConnector **getTLMBusConnectors() {return &tlmbusconnectors[0];}
@@ -94,12 +95,12 @@ namespace oms3
     Connection** getConnections(const ComRef &cref);
     oms_status_enu_t addConnection(const ComRef& crefA, const ComRef& crefB);
     oms_status_enu_t deleteConnection(const ComRef& crefA, const ComRef& crefB);
-    oms_status_enu_t setConnectorGeometry(const ComRef& cref, const oms2::ssd::ConnectorGeometry* geometry);
-    oms_status_enu_t setConnectionGeometry(const ComRef &crefA, const ComRef &crefB, const oms3::ssd::ConnectionGeometry* geometry);
+    oms_status_enu_t setConnectorGeometry(const ComRef& cref, const oms::ssd::ConnectorGeometry* geometry);
+    oms_status_enu_t setConnectionGeometry(const ComRef &crefA, const ComRef &crefB, const oms::ssd::ConnectionGeometry* geometry);
     oms_status_enu_t addBus(const ComRef& cref);
     oms_status_enu_t addConnectorToBus(const ComRef& busCref, const ComRef& connectorCref);
     oms_status_enu_t deleteConnectorFromBus(const ComRef& busCref, const ComRef& connectorCref);
-    oms_status_enu_t setBusGeometry(const ComRef& cref, const oms2::ssd::ConnectorGeometry* geometry);
+    oms_status_enu_t setBusGeometry(const ComRef& cref, const oms::ssd::ConnectorGeometry* geometry);
     oms_status_enu_t addExternalModel(const ComRef &cref, std::string path, std::string startscript);
     oms_status_enu_t delete_(const ComRef& cref);
     oms_status_enu_t deleteAllConectionsTo(const ComRef& cref);
@@ -134,16 +135,23 @@ namespace oms3
 
     bool isTopLevelSystem() const {return (parentSystem == NULL);}
 
-    oms_status_enu_t registerSignalsForResultFile(ResultWriter& resultFile);
-    oms_status_enu_t updateSignals(ResultWriter& resultFile);
+    virtual oms_status_enu_t registerSignalsForResultFile(ResultWriter& resultFile);
+    virtual oms_status_enu_t updateSignals(ResultWriter& resultFile);
     oms_status_enu_t addSignalsToResults(const char* regex);
     oms_status_enu_t removeSignalsFromResults(const char* regex);
 
-    virtual oms_status_enu_t setFixedStepSize(double stepSize) {return oms_status_error;}
-    virtual oms_status_enu_t setTolerance(double tolerance) {return oms_status_error;}
+    virtual oms_status_enu_t setSolver(oms_solver_enu_t solver) {return oms_status_error;}
+
+    void getTolerance(double* absoluteTolerance, double* relativeTolerance) const {if (absoluteTolerance) *absoluteTolerance=this->absoluteTolerance; if (relativeTolerance) *relativeTolerance=this->relativeTolerance;}
+    void getStepSize(double* initialStepSize, double* minimumStepSize, double* maximumStepSize) const {if (initialStepSize) *initialStepSize=this->initialStepSize; if (minimumStepSize) *minimumStepSize=this->minimumStepSize; if (maximumStepSize) *maximumStepSize=this->maximumStepSize;}
+    oms_status_enu_t setTolerance(double absoluteTolerance, double relativeTolerance) {this->absoluteTolerance=absoluteTolerance; this->relativeTolerance=relativeTolerance; return oms_status_ok;}
+    oms_status_enu_t setFixedStepSize(double stepSize) {this->minimumStepSize=this->maximumStepSize=this->initialStepSize=stepSize; return oms_status_ok;}
+    oms_status_enu_t setVariableStepSize(double initialStepSize, double minimumStepSize, double maximumStepSize) {this->minimumStepSize=minimumStepSize; this->maximumStepSize=maximumStepSize; this->initialStepSize=initialStepSize; return oms_status_ok;}
+    double getMaximumStepSize() {return maximumStepSize;}
+    oms_solver_enu_t getSolver() {return solverMethod;}
 
   protected:
-    System(const ComRef& cref, oms_system_enu_t type, Model* parentModel, System* parentSystem);
+    System(const ComRef& cref, oms_system_enu_t type, Model* parentModel, System* parentSystem, oms_solver_enu_t solverMethod);
 
     // stop the compiler generating methods copying the object
     System(System const& copy);            ///< not implemented
@@ -152,6 +160,16 @@ namespace oms3
     DirectedGraph initialUnknownsGraph;
     DirectedGraph outputsGraph;
 
+    Clock clock;
+    unsigned int clock_id;
+
+    oms_solver_enu_t solverMethod = oms_solver_none;
+
+    double absoluteTolerance = 1e-4;
+    double relativeTolerance = 1e-4;
+    double minimumStepSize = 1e-4;
+    double maximumStepSize = 1e-1;
+    double initialStepSize = 1e-4;
   private:
     ComRef cref;
     oms_system_enu_t type;
@@ -166,7 +184,7 @@ namespace oms3
 
     Element element;
     std::vector<Connector*> connectors;             ///< last element is always NULL
-    std::vector<oms3_element_t*> subelements;       ///< last element is always NULL; don't free it
+    std::vector<oms_element_t*> subelements;       ///< last element is always NULL; don't free it
     std::vector<BusConnector*> busconnectors;
 #if !defined(NO_TLM)
     std::vector<TLMBusConnector*> tlmbusconnectors;

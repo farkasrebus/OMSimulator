@@ -34,7 +34,6 @@
 
 #include "Component.h"
 #include "ComRef.h"
-#include "Option.h"
 #include "ResultWriter.h"
 #include "Variable.h"
 #include <fmilib.h>
@@ -44,14 +43,14 @@
 #include <unordered_map>
 #include <vector>
 
-namespace oms3
+namespace oms
 {
   class ComponentFMUME : public Component
   {
   public:
     ~ComponentFMUME();
 
-    static Component* NewComponent(const oms3::ComRef& cref, System* parentSystem, const std::string& fmuPath);
+    static Component* NewComponent(const oms::ComRef& cref, System* parentSystem, const std::string& fmuPath);
     static Component* NewComponent(const pugi::xml_node& node, System* parentSystem);
     const FMUInfo* getFMUInfo() const {return &(this->fmuInfo);}
 
@@ -65,8 +64,11 @@ namespace oms3
     oms_status_enu_t initializeDependencyGraph_outputs();
 
     oms_status_enu_t getBoolean(const ComRef& cref, bool& value);
+    oms_status_enu_t getBoolean(const fmi2_value_reference_t& vr, bool& value);
     oms_status_enu_t getInteger(const ComRef& cref, int& value);
+    oms_status_enu_t getInteger(const fmi2_value_reference_t& vr, int& value);
     oms_status_enu_t getReal(const ComRef& cref, double& value);
+    oms_status_enu_t getReal(const fmi2_value_reference_t& vr, double& value);
     oms_status_enu_t setBoolean(const ComRef& cref, bool value);
     oms_status_enu_t setInteger(const ComRef& cref, int value);
     oms_status_enu_t setReal(const ComRef& cref, double value);
@@ -115,9 +117,9 @@ namespace oms3
     std::vector<Variable> parameters;
     std::vector<bool> exportVariables;
 
-    std::map<std::string, Option<double>> realParameters;
-    std::map<std::string, Option<int>> integerParameters;
-    std::map<std::string, Option<bool>> booleanParameters;
+    std::map<ComRef, double> realStartValues;  ///< parameters and start values defined before instantiating the FMU
+    std::map<ComRef, int> integerStartValues;  ///< parameters and start values defined before instantiating the FMU
+    std::map<ComRef, bool> booleanStartValues; ///< parameters and start values defined before instantiating the FMU
 
     std::unordered_map<unsigned int /*result file var ID*/, unsigned int /*allVariables ID*/> resultFileMapping;
   };

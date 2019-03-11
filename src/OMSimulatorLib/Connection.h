@@ -29,25 +29,24 @@
  *
  */
 
-#ifndef _OMS2_CONNECTION_H_
-#define _OMS2_CONNECTION_H_
+#ifndef _OMS_CONNECTION_H_
+#define _OMS_CONNECTION_H_
 
 #include "ComRef.h"
-#include "SignalRef.h"
 #include "Types.h"
 #include "ssd/ConnectionGeometry.h"
 
 #include <string>
 
-namespace oms3
+namespace oms
 {
   /// **
   // * \brief Connection
   // * /
-  class Connection : protected oms3_connection_t
+  class Connection : protected oms_connection_t
   {
   public:
-    Connection(const oms3::ComRef& conA, const oms3::ComRef& conB, oms3_connection_type_enu_t type=oms3_connection_single);
+    Connection(const oms::ComRef& conA, const oms::ComRef& conB, oms_connection_type_enu_t type=oms_connection_single);
     ~Connection();
 
     // methods to copy the object
@@ -56,58 +55,20 @@ namespace oms3
 
     oms_status_enu_t exportToSSD(pugi::xml_node& root) const;
 
-    const oms3::ComRef getSignalA() const {return oms3::ComRef(conA);}
-    const oms3::ComRef getSignalB() const {return oms3::ComRef(conB);}
+    const oms::ComRef getSignalA() const {return oms::ComRef(conA);}
+    const oms::ComRef getSignalB() const {return oms::ComRef(conB);}
 
-    const oms3::ssd::ConnectionGeometry* getGeometry() const {return reinterpret_cast<oms3::ssd::ConnectionGeometry*>(geometry);}
-    void setGeometry(const oms3::ssd::ConnectionGeometry* newGeometry);
-    void setTLMParameters(const oms3_tlm_connection_parameters_t* parameters);
+    const oms::ssd::ConnectionGeometry* getGeometry() const {return reinterpret_cast<oms::ssd::ConnectionGeometry*>(geometry);}
+    void setGeometry(const oms::ssd::ConnectionGeometry* newGeometry);
+    void setTLMParameters(const oms_tlm_connection_parameters_t* parameters);
     void setTLMParameters(double delay, double alpha, double linearimpedance, double angualrimpedance);
-    oms3_tlm_connection_parameters_t* getTLMParameters() const {return tlmparameters;}
+    oms_tlm_connection_parameters_t* getTLMParameters() const {return tlmparameters;}
 
-    oms3_connection_type_enu_t getType() const {return type;}
+    oms_connection_type_enu_t getType() const {return type;}
 
-    bool isEqual(const oms3::Connection& connection) const;
-    bool isEqual(const oms3::ComRef& signalA, const oms3::ComRef& signalB) const;
-    bool containsSignal(const oms3::ComRef& signal);
-
-  private:
-    friend bool operator==(const Connection& lhs, const Connection& rhs);
-    friend bool operator!=(const Connection& lhs, const Connection& rhs);
-  };
-
-  inline bool operator==(const Connection& lhs, const Connection& rhs) {return lhs.isEqual(rhs);}
-  inline bool operator!=(const Connection& lhs, const Connection& rhs) {return !(lhs == rhs);}
-}
-
-
-namespace oms2
-{
-  /**
-   * \brief Connection
-   */
-  class Connection : protected oms_connection_t
-  {
-  public:
-    Connection(const oms2::ComRef& parent, const oms2::SignalRef& conA, const oms2::SignalRef& conB);
-    ~Connection();
-
-    // methods to copy the object
-    Connection(const Connection& rhs);
-    Connection& operator=(const Connection& rhs);
-
-    const oms2::ComRef getParent() const {return oms2::ComRef(parent);}
-    void setParent(const oms2::ComRef& parent);
-    const oms2::SignalRef getSignalA() const {return oms2::SignalRef(conA);}
-    const oms2::SignalRef getSignalB() const {return oms2::SignalRef(conB);}
-
-    const oms3::ssd::ConnectionGeometry* getGeometry() const {return reinterpret_cast<oms3::ssd::ConnectionGeometry*>(geometry);}
-    void setGeometry(const oms3::ssd::ConnectionGeometry* newGeometry);
-
-    bool isEqual(const oms2::Connection& connection) const;
-    bool isEqual(const oms2::ComRef& parent, const oms2::SignalRef& signalA, const oms2::SignalRef& signalB) const;
-
-    void describe();
+    bool isEqual(const oms::Connection& connection) const;
+    bool isEqual(const oms::ComRef& signalA, const oms::ComRef& signalB) const;
+    bool containsSignal(const oms::ComRef& signal);
 
   private:
     friend bool operator==(const Connection& lhs, const Connection& rhs);

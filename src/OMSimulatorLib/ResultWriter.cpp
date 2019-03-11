@@ -30,32 +30,47 @@
  */
 
 #include "ResultWriter.h"
+#include "Flags.h"
+#include "Model.h"
+#include "Scope.h"
 
-oms3::ResultWriter::ResultWriter(unsigned int bufferSize)
+oms::ResultWriter::ResultWriter(unsigned int bufferSize)
   : bufferSize(bufferSize),
     nEmits(0),
     data_2(NULL)
 {
 }
 
-oms3::ResultWriter::~ResultWriter()
+oms::ResultWriter::~ResultWriter()
 {
   if (data_2)
     delete[] data_2;
 }
 
-unsigned int oms3::ResultWriter::addSignal(const std::string& name, const std::string& description, SignalType_t type)
+unsigned int oms::ResultWriter::addSignal(const ComRef& name, const std::string& description, SignalType_t type)
 {
   Signal signal;
   signal.name = name;
   signal.description = description;
   signal.type = type;
 
+  oms::Model* model = oms::Scope::GetInstance().getModel(name.front());
+  if (Flags::StripRoot() || (model && model->isIsolatedFMUModel()))
+  {
+    signal.name.pop_front();
+    signal.name.pop_front();
+    if (model && model->isIsolatedFMUModel())
+      signal.name.pop_front();
+  }
+
+  if (signal.name.isEmpty())
+    return 0;
+
   signals.push_back(signal);
   return (unsigned int) signals.size();
 }
 
-void oms3::ResultWriter::addParameter(const std::string& name, const std::string& description, SignalType_t type, SignalValue_t value)
+void oms::ResultWriter::addParameter(const ComRef& name, const std::string& description, SignalType_t type, SignalValue_t value)
 {
   Parameter parameter;
   parameter.signal.name = name;
@@ -63,10 +78,22 @@ void oms3::ResultWriter::addParameter(const std::string& name, const std::string
   parameter.signal.type = type;
   parameter.value = value;
 
+  oms::Model* model = oms::Scope::GetInstance().getModel(name.front());
+  if (Flags::StripRoot() || (model && model->isIsolatedFMUModel()))
+  {
+    parameter.signal.name.pop_front();
+    parameter.signal.name.pop_front();
+    if (model && model->isIsolatedFMUModel())
+      parameter.signal.name.pop_front();
+  }
+
+  if (parameter.signal.name.isEmpty())
+    return;
+
   parameters.push_back(parameter);
 }
 
-bool oms3::ResultWriter::create(const std::string& filename, double startTime, double stopTime)
+bool oms::ResultWriter::create(const std::string& filename, double startTime, double stopTime)
 {
   if (!createFile(filename, startTime, stopTime))
     return false;
@@ -76,7 +103,7 @@ bool oms3::ResultWriter::create(const std::string& filename, double startTime, d
   return true;
 }
 
-void oms3::ResultWriter::close()
+void oms::ResultWriter::close()
 {
   closeFile();
 
@@ -90,7 +117,7 @@ void oms3::ResultWriter::close()
   parameters.clear();
 }
 
-void oms3::ResultWriter::updateSignal(unsigned int id, SignalValue_t value)
+void oms::ResultWriter::updateSignal(unsigned int id, SignalValue_t value)
 {
   if (!data_2)
     return;
@@ -109,7 +136,7 @@ void oms3::ResultWriter::updateSignal(unsigned int id, SignalValue_t value)
   }
 }
 
-void oms3::ResultWriter::emit(double time)
+void oms::ResultWriter::emit(double time)
 {
   if (!data_2)
     return;

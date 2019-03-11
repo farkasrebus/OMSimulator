@@ -32,31 +32,35 @@
 #include "SystemTLM.h"
 
 #include "Component.h"
+#include "Flags.h"
 #include "Model.h"
+#include "OMTLMSimulatorLib/OMTLMSimulatorLib.h"
+#include "ssd/Tags.h"
 #include "SystemWC.h"
 #include "Types.h"
-#include "OMTLMSimulatorLib.h"
-#include "ssd/Tags.h"
-#include "OMTLMSimulatorLib.h"
 
 #include <thread>
 #include <algorithm>
 
-oms3::SystemTLM::SystemTLM(const ComRef& cref, Model* parentModel, System* parentSystem)
-  : oms3::System(cref, oms_system_tlm, parentModel, parentSystem)
+oms::SystemTLM::SystemTLM(const ComRef& cref, Model* parentModel, System* parentSystem)
+  : oms::System(cref, oms_system_tlm, parentModel, parentSystem, oms_solver_none)
 {
   logTrace();
   model = omtlm_newModel(cref.c_str());
-  omtlm_setLogLevel(model, 1);
-  omtlm_setNumLogStep(model, 1000);
+
+  omtlm_setLogLevel(model, TLMLogLevel::Fatal);
+  if(Log::getLoggingLevel() == 1)
+    omtlm_setLogLevel(model, TLMLogLevel::Info);
+  else if(Log::getLoggingLevel() == 2)
+    omtlm_setLogLevel(model, TLMLogLevel::Debug);
 }
 
-oms3::SystemTLM::~SystemTLM()
+oms::SystemTLM::~SystemTLM()
 {
   omtlm_unloadModel(model);
 }
 
-oms3::System* oms3::SystemTLM::NewSystem(const oms3::ComRef& cref, oms3::Model* parentModel, oms3::System* parentSystem)
+oms::System* oms::SystemTLM::NewSystem(const oms::ComRef& cref, oms::Model* parentModel, oms::System* parentSystem)
 {
   if (!cref.isValidIdent())
   {
@@ -74,13 +78,13 @@ oms3::System* oms3::SystemTLM::NewSystem(const oms3::ComRef& cref, oms3::Model* 
   return system;
 }
 
-oms_status_enu_t oms3::SystemTLM::exportToSSD_SimulationInformation(pugi::xml_node& node) const
+oms_status_enu_t oms::SystemTLM::exportToSSD_SimulationInformation(pugi::xml_node& node) const
 {
-  pugi::xml_node node_simulation_information = node.append_child(oms2::ssd::ssd_simulation_information);
+  pugi::xml_node node_simulation_information = node.append_child(oms::ssd::ssd_simulation_information);
 
-  pugi::xml_node node_annotations = node_simulation_information.append_child(oms2::ssd::ssd_annotations);
+  pugi::xml_node node_annotations = node_simulation_information.append_child(oms::ssd::ssd_annotations);
 
-  pugi::xml_node node_annotation = node_annotations.append_child(oms2::ssd::ssd_annotation);
+  pugi::xml_node node_annotation = node_annotations.append_child(oms::ssd::ssd_annotation);
   node_annotation.append_attribute("type") = oms::annotation_type;
 
   pugi::xml_node node_tlm = node_annotation.append_child(oms::tlm_master);
@@ -91,11 +95,11 @@ oms_status_enu_t oms3::SystemTLM::exportToSSD_SimulationInformation(pugi::xml_no
   return oms_status_ok;
 }
 
-oms_status_enu_t oms3::SystemTLM::importFromSSD_SimulationInformation(const pugi::xml_node& node)
+oms_status_enu_t oms::SystemTLM::importFromSSD_SimulationInformation(const pugi::xml_node& node)
 {
-  pugi::xml_node annotationsNode = node.child(oms2::ssd::ssd_annotations);
+  pugi::xml_node annotationsNode = node.child(oms::ssd::ssd_annotations);
   if(annotationsNode) {
-    pugi::xml_node annotationNode = annotationsNode.child(oms2::ssd::ssd_annotation);
+    pugi::xml_node annotationNode = annotationsNode.child(oms::ssd::ssd_annotation);
     if(annotationNode && std::string(annotationNode.attribute("type").as_string()) == "org.openmodelica") {
       pugi::xml_node tlmmasterNode = annotationNode.child("oms:TlmMaster");
       for (auto it = tlmmasterNode.attributes_begin(); it != tlmmasterNode.attributes_end(); ++it)
@@ -114,7 +118,7 @@ oms_status_enu_t oms3::SystemTLM::importFromSSD_SimulationInformation(const pugi
   return oms_status_ok;
 }
 
-oms_status_enu_t oms3::SystemTLM::instantiate()
+oms_status_enu_t oms::SystemTLM::instantiate()
 {
   for (const auto& subsystem : getSubSystems())
     if (oms_status_ok != subsystem.second->instantiate())
@@ -122,8 +126,10 @@ oms_status_enu_t oms3::SystemTLM::instantiate()
   return oms_status_ok;
 }
 
-oms_status_enu_t oms3::SystemTLM::initialize()
+oms_status_enu_t oms::SystemTLM::initialize()
 {
+  omtlm_setLogStepSize(model, getModel()->getLoggingInterval());
+
   actualManagerPort = desiredManagerPort;
   actualMonitorPort = desiredMonitorPort;
 #ifndef _WIN32
@@ -152,20 +158,84 @@ oms_status_enu_t oms3::SystemTLM::initialize()
       if(dimensions == 2) dimensions = 3;
       if(dimensions == 3) dimensions = 6;
 
-      omtlm_addInterface(model, subsystem.second->getCref().c_str(), tlmbus->getName().c_str(),dimensions, causality.c_str(), tlmbus->getDomain().c_str());
+      omtlm_addInterface(model, subsystem.second->getCref().c_str(), tlmbus->getName().c_str(),dimensions, causality.c_str(), tlmbus->getDomainString().c_str());
+    }
+  }
+
+  for(const auto& component : this->getComponents()) {
+    if(component.second->getType() != oms_component_external)
+      continue;
+
+    ExternalModel* externalmodel = reinterpret_cast<ExternalModel*>(component.second);
+
+    //Copy external model file to temporary directory
+    std::string tempModelPath = getModel()->getTempDirectory()+"/"+std::string(externalmodel->getCref());
+
+  #ifdef WIN32
+    std::string cmd = "mkdir \""+tempModelPath+"\" 2> NUL";
+    system(cmd.c_str());
+    std::string externalModelPath = externalmodel->getPath();
+    std::replace(externalModelPath.begin(), externalModelPath.end(), '/', '\\');
+    cmd = "copy \""+externalModelPath+"\" \""+tempModelPath;
+    system(cmd.c_str());
+  #else
+    std::string cmd = "mkdir -p \""+tempModelPath+"\"";
+    system(cmd.c_str());
+    cmd = "cp \""+externalmodel->getPath()+"\" \""+tempModelPath+"\"";
+    system(cmd.c_str());
+  #endif
+
+    //Extract file name from path
+    size_t i1 = externalmodel->getPath().rfind('/', externalmodel->getPath().length());
+    size_t i2 = externalmodel->getPath().rfind('\\', externalmodel->getPath().length());
+    size_t i = i1;
+    if(i2>i1) {
+      i = i2;   //We cannot use std::max with MSVC for some reason
+    }
+    if(i1 == std::string::npos) {
+      i = i2;
+    }
+    else if(i2 == std::string::npos) {
+      i = i1;
+    }
+    std::string fileName = externalmodel->getPath().substr(i+1, externalmodel->getPath().length() - i);
+    tempModelPath = tempModelPath+"/"+fileName;
+
+    //Registser external model for OMTLMSimulator
+    omtlm_addSubModel(model, externalmodel->getCref().c_str(), tempModelPath.c_str(), externalmodel->getStartScript().c_str());
+
+    for(int i=0; component.second->getTLMBusConnectors()[i]; ++i) {
+      TLMBusConnector *tlmbus = component.second->getTLMBusConnectors()[i];
+
+      std::string causality = "input";
+      if(tlmbus->getCausality() == oms_causality_output)
+        causality = "output";
+      else if(tlmbus->getCausality() == oms_causality_bidir)
+        causality = "bidirectional";
+
+      //OMTLMSimulator uses degrees of freedom as "dimensions",
+      //so convert to this:
+      int dimensions = tlmbus->getDimensions();
+      if(dimensions == 2) dimensions = 3;
+      if(dimensions == 3) dimensions = 6;
+
+      omtlm_addInterface(model, component.second->getCref().c_str(), tlmbus->getName().c_str(),dimensions, causality.c_str(), tlmbus->getDomainString().c_str());
     }
   }
 
   Connection** connections = this->getConnections(ComRef(""));
   for(int i=0; connections[i]; ++i) {
-    oms3_tlm_connection_parameters_t* tlmpars = connections[i]->getTLMParameters();
+    oms_tlm_connection_parameters_t* tlmpars = connections[i]->getTLMParameters();
     omtlm_addConnection(model,connections[i]->getSignalA().c_str(),connections[i]->getSignalB().c_str(),tlmpars->delay,tlmpars->linearimpedance,tlmpars->angularimpedance,tlmpars->alpha);
   }
+
+  logStep = (getModel()->getLoggingInterval() > 0) ? getModel()->getLoggingInterval() : 1e-3;
+  nextLogTime = getModel()->getStartTime()+logStep;
 
   return oms_status_ok;
 }
 
-oms_status_enu_t oms3::SystemTLM::terminate()
+oms_status_enu_t oms::SystemTLM::terminate()
 {
   for (const auto& subsystem : getSubSystems())
     if (oms_status_ok != subsystem.second->terminate())
@@ -173,7 +243,7 @@ oms_status_enu_t oms3::SystemTLM::terminate()
   return oms_status_ok;
 }
 
-oms_status_enu_t oms3::SystemTLM::reset()
+oms_status_enu_t oms::SystemTLM::reset()
 {
   for (const auto& subsystem : getSubSystems())
     if (oms_status_ok != subsystem.second->reset())
@@ -181,28 +251,25 @@ oms_status_enu_t oms3::SystemTLM::reset()
   return oms_status_ok;
 }
 
-oms_status_enu_t oms3::SystemTLM::stepUntil(double stopTime, void (*cb)(const char* ident, double time, oms_status_enu_t status))
+oms_status_enu_t oms::SystemTLM::stepUntil(double stopTime, void (*cb)(const char* ident, double time, oms_status_enu_t status))
 {
   omtlm_setStartTime(model, getModel()->getStartTime());
   omtlm_setStopTime(model, stopTime);
 
   if(getSubSystems().empty() && getComponents().empty())
-    logWarning("oms3::TLMCompositeModel::stepUntil: Simulating empty model...");
+    logWarning("oms::TLMCompositeModel::stepUntil: Simulating empty model...");
 
   logInfo("Starting TLM manager in new thread");
 
   std::thread *masterThread = new std::thread(&omtlm_simulate, model);
 
-  logInfo("Connecting submodels to manager (threaded)");
+  logInfo("Connecting submodels to manager (sequential)");
   std::string server = address + ":" + std::to_string(actualManagerPort);
-  std::vector<std::thread> fmiConnectThreads;
   for(auto it = getSubSystems().begin(); it!=getSubSystems().end(); ++it) {
     System* subsystem = it->second;
     ComRef syscref = subsystem->getCref();
-    fmiConnectThreads.push_back(std::thread(&oms3::SystemTLM::connectToSockets, this, syscref, server));
+    connectToSockets(syscref, server);
   }
-  for(auto &thread : fmiConnectThreads)
-    thread.join();
   for(auto it = getSubSystems().begin(); it!=getSubSystems().end(); ++it) {
     if(find(connectedsubsystems.begin(), connectedsubsystems.end(), it->second->getCref()) == connectedsubsystems.end())
       return logError("Failed to connect TLM subsystem: "+std::string(it->second->getCref()));
@@ -213,7 +280,7 @@ oms_status_enu_t oms3::SystemTLM::stepUntil(double stopTime, void (*cb)(const ch
   for(auto it = getSubSystems().begin(); it!=getSubSystems().end(); ++it) {
     System *subsystem = it->second;
     ComRef syscref = subsystem->getCref();
-    fmiInitializeThreads.push_back(std::thread(&oms3::SystemTLM::initializeSubSystem, this, syscref));
+    fmiInitializeThreads.push_back(std::thread(&oms::SystemTLM::initializeSubSystem, this, syscref));
   }
   for(auto &thread : fmiInitializeThreads)
     thread.join();
@@ -227,7 +294,7 @@ oms_status_enu_t oms3::SystemTLM::stepUntil(double stopTime, void (*cb)(const ch
   for(auto it = getSubSystems().begin(); it!=getSubSystems().end(); ++it) {
     System* subsystem = it->second;
     ComRef syscref = subsystem->getCref();
-    fmiSimulateThreads.push_back(std::thread(&oms3::SystemTLM::simulateSubSystem, this, syscref, stopTime));
+    fmiSimulateThreads.push_back(std::thread(&oms::SystemTLM::simulateSubSystem, this, syscref, stopTime));
   }
   for(auto &thread : fmiSimulateThreads)
     thread.join();
@@ -239,7 +306,7 @@ oms_status_enu_t oms3::SystemTLM::stepUntil(double stopTime, void (*cb)(const ch
   std::vector<std::thread> fmiDisconnectThreads;
   for(auto it = getSubSystems().begin(); it!=getSubSystems().end(); ++it) {
     System* subsystem = it->second;
-    fmiDisconnectThreads.push_back(std::thread(&oms3::SystemTLM::disconnectFromSockets, this, subsystem->getCref()));
+    fmiDisconnectThreads.push_back(std::thread(&oms::SystemTLM::disconnectFromSockets, this, subsystem->getCref()));
   }
   for(auto &thread : fmiDisconnectThreads)
     thread.join();
@@ -249,7 +316,7 @@ oms_status_enu_t oms3::SystemTLM::stepUntil(double stopTime, void (*cb)(const ch
   return oms_status_ok;
 }
 
-oms_status_enu_t oms3::SystemTLM::connectToSockets(const oms3::ComRef cref, std::string server)
+oms_status_enu_t oms::SystemTLM::connectToSockets(const oms::ComRef cref, std::string server)
 {
   logInfo("Starting TLM simulation thread for model "+std::string(cref));
 
@@ -263,9 +330,9 @@ oms_status_enu_t oms3::SystemTLM::connectToSockets(const oms3::ComRef cref, std:
   TLMBusConnector** tlmbuses = system->getTLMBusConnectors();
   for (int i=0; tlmbuses[i]; ++i)
   {
-      if(system->getStepSize() > tlmbuses[i]->getDelay()*0.5) {
+      if(system->getMaximumStepSize() > tlmbuses[i]->getDelay()*0.5) {
         system->setFixedStepSize(tlmbuses[i]->getDelay()*0.5);
-        logInfo("Limiting stepSize for "+std::string(getCref())+"."+std::string(tlmbuses[i]->getName())+" to "+std::to_string(system->getStepSize()));
+        logInfo("Limiting stepSize for "+std::string(getCref())+"."+std::string(tlmbuses[i]->getName())+" to "+std::to_string(system->getMaximumStepSize()));
       }
   }
 
@@ -274,24 +341,25 @@ oms_status_enu_t oms3::SystemTLM::connectToSockets(const oms3::ComRef cref, std:
   TLMPlugin* plugin = TLMPlugin::CreateInstance();
   pluginsMutex.lock();
   plugins[system] = plugin;
-  pluginsMutex.unlock();
 
   logInfo("Initializing plugin for "+std::string(cref));
 
   if(!plugin->Init(std::string(cref),
                    getModel()->getStartTime(),
                    1, //Unused argument anyway
-                   system->getStepSize(),
+                   system->getMaximumStepSize(),
                    server)) {
     logError("Error initializing the TLM plugin for "+std::string(cref));
+    pluginsMutex.unlock();
     return oms_status_error;
   }
+  pluginsMutex.unlock();
 
   logInfo("Registering interfaces for "+std::string(cref));
 
   for (int i=0; tlmbuses[i]; ++i)
   {
-    TLMBusConnector* bus = tlmbuses[i];
+    TLMBusConnector* bus = tlmbuses[i]->getActualBus();
     oms_status_enu_t status = bus->registerToSockets(plugin);
     if(status == oms_status_error) {
       return logError("Failed to register interface "+std::string(bus->getName()));
@@ -305,7 +373,7 @@ oms_status_enu_t oms3::SystemTLM::connectToSockets(const oms3::ComRef cref, std:
   return oms_status_ok;
 }
 
-void oms3::SystemTLM::disconnectFromSockets(const oms3::ComRef cref)
+void oms::SystemTLM::disconnectFromSockets(const oms::ComRef cref)
 {
   SystemWC* system = reinterpret_cast<SystemWC*>(getSystem(cref));
   if(system != nullptr)
@@ -320,9 +388,9 @@ void oms3::SystemTLM::disconnectFromSockets(const oms3::ComRef cref)
   }
 }
 
-oms_status_enu_t oms3::SystemTLM::setSocketData(const std::string &address, int managerPort, int monitorPort)
+oms_status_enu_t oms::SystemTLM::setSocketData(const std::string &address, int managerPort, int monitorPort)
 {
-  if (oms_modelState_terminated != getModel()->getModelState())
+  if (!getModel()->validState(oms_modelState_virgin))
     return logError_ModelInWrongState(this);
 
   this->address = address;
@@ -331,7 +399,7 @@ oms_status_enu_t oms3::SystemTLM::setSocketData(const std::string &address, int 
   return oms_status_ok;
 }
 
-oms_status_enu_t oms3::SystemTLM::setPositionAndOrientation(const oms3::ComRef &cref, std::vector<double> x, std::vector<double> A)
+oms_status_enu_t oms::SystemTLM::setPositionAndOrientation(const oms::ComRef &cref, std::vector<double> x, std::vector<double> A)
 {
   ComRef tail = cref;
   ComRef head = tail.pop_front();
@@ -351,7 +419,7 @@ oms_status_enu_t oms3::SystemTLM::setPositionAndOrientation(const oms3::ComRef &
   return oms_status_ok;
 }
 
-oms_status_enu_t oms3::SystemTLM::updateInitialValues(const oms3::ComRef cref)
+oms_status_enu_t oms::SystemTLM::updateInitialValues(const oms::ComRef cref)
 {
   SystemWC* system = reinterpret_cast<SystemWC*>(getSystem(cref));
   if(system == nullptr)
@@ -365,19 +433,20 @@ oms_status_enu_t oms3::SystemTLM::updateInitialValues(const oms3::ComRef cref)
   for (int i=0; tlmbuses[i]; ++i)
   {
     TLMBusConnector* bus = tlmbuses[i];
+    bus = bus->getActualBus();
 
     if(bus->getDimensions() == 1 && bus->getCausality() == oms_causality_input) {
       oms_tlm_sigrefs_signal_t tlmrefs;
       double value;
-      system->getReal(bus->getConnector(tlmrefs.y), value);
+      bus->getReal(tlmrefs.y, value);
       plugin->SetInitialValue(bus->getId(), value);
     }
     else if(bus->getDimensions() == 1 && bus->getCausality() == oms_causality_bidir &&
             bus->getInterpolation() == oms_tlm_coarse_grained) {
       oms_tlm_sigrefs_1d_cg_t tlmrefs;
       double effort,flow;
-      system->getReal(bus->getConnector(tlmrefs.c), effort);
-      system->getReal(bus->getConnector(tlmrefs.v), flow);
+      bus->getReal(tlmrefs.c, effort);
+      bus->getReal(tlmrefs.v, flow);
       plugin->SetInitialForce1D(bus->getId(), effort);
       plugin->SetInitialFlow1D(bus->getId(), flow);
     }
@@ -385,8 +454,8 @@ oms_status_enu_t oms3::SystemTLM::updateInitialValues(const oms3::ComRef cref)
             bus->getInterpolation() == oms_tlm_fine_grained) {
       oms_tlm_sigrefs_1d_fg_t tlmrefs;
       double effort,flow;
-      system->getReal(bus->getConnector(tlmrefs.c[0]), effort);
-      system->getReal(bus->getConnector(tlmrefs.v), flow);
+      bus->getReal(tlmrefs.c[0], effort);
+      bus->getReal(tlmrefs.v, flow);
       plugin->SetInitialForce1D(bus->getId(), effort);
       plugin->SetInitialFlow1D(bus->getId(), flow);
     }
@@ -394,12 +463,11 @@ oms_status_enu_t oms3::SystemTLM::updateInitialValues(const oms3::ComRef cref)
             bus->getInterpolation() == oms_tlm_no_interpolation) {
       oms_tlm_sigrefs_3d_t tlmrefs;
       std::vector<double> effort(6,0);
-      std::vector<double> flow(3,0);
-      std::vector<double> angularflow(3,0);
-      system->getReals(bus->getConnectors(tlmrefs.f), effort);
+      std::vector<double> flow(6,0);
+      bus->getReals(tlmrefs.f, effort);
       std::vector<int> flowrefs = tlmrefs.v;
       flowrefs.insert(flowrefs.end(), tlmrefs.w.begin(), tlmrefs.w.end());
-      system->getReals(bus->getConnectors(flowrefs), flow);
+      bus->getReals(flowrefs, flow);
       plugin->SetInitialForce3D(bus->getId(), effort[0], effort[1], effort[2], effort[3], effort[4], effort[5]);
       plugin->SetInitialFlow3D(bus->getId(), flow[0], flow[1], flow[2], flow[3], flow[4], flow[5]);
     }
@@ -407,12 +475,11 @@ oms_status_enu_t oms3::SystemTLM::updateInitialValues(const oms3::ComRef cref)
             bus->getInterpolation() == oms_tlm_coarse_grained) {
       oms_tlm_sigrefs_3d_cg_t tlmrefs;
       std::vector<double> effort(6,0);
-      std::vector<double> flow(3,0);
-      std::vector<double> angularflow(3,0);
-      system->getReals(bus->getConnectors(tlmrefs.c), effort);
+      std::vector<double> flow(6,0);
+      bus->getReals(tlmrefs.c, effort);
       std::vector<int> flowrefs = tlmrefs.v;
       flowrefs.insert(flowrefs.end(), tlmrefs.w.begin(), tlmrefs.w.end());
-      system->getReals(bus->getConnectors(flowrefs), flow);
+      bus->getReals(flowrefs, flow);
       plugin->SetInitialForce3D(bus->getId(), effort[0], effort[1], effort[2], effort[3], effort[4], effort[5]);
       plugin->SetInitialFlow3D(bus->getId(), flow[0], flow[1], flow[2], flow[3], flow[4], flow[5]);
     }
@@ -420,12 +487,11 @@ oms_status_enu_t oms3::SystemTLM::updateInitialValues(const oms3::ComRef cref)
             bus->getInterpolation() == oms_tlm_fine_grained) {
       oms_tlm_sigrefs_3d_fg_t tlmrefs;
       std::vector<double> effort(6,0);
-      std::vector<double> flow(3,0);
-      std::vector<double> angularflow(3,0);
-      system->getReals(bus->getConnectors(tlmrefs.c[0]), effort);
+      std::vector<double> flow(6,0);
+      bus->getReals(tlmrefs.c[0], effort);
       std::vector<int> flowrefs = tlmrefs.v;
       flowrefs.insert(flowrefs.end(), tlmrefs.w.begin(), tlmrefs.w.end());
-      system->getReals(bus->getConnectors(flowrefs), flow);
+      bus->getReals(flowrefs, flow);
       plugin->SetInitialForce3D(bus->getId(), effort[0], effort[1], effort[2], effort[3], effort[4], effort[5]);
       plugin->SetInitialFlow3D(bus->getId(), flow[0], flow[1], flow[2], flow[3], flow[4], flow[5]);
     }
@@ -434,12 +500,13 @@ oms_status_enu_t oms3::SystemTLM::updateInitialValues(const oms3::ComRef cref)
   return oms_status_ok;
 }
 
-oms_status_enu_t oms3::SystemTLM::initializeSubSystem(oms3::ComRef cref)
+oms_status_enu_t oms::SystemTLM::initializeSubSystem(oms::ComRef cref)
 {
   oms_status_enu_t status = getSubSystem(cref)->initialize();
-  if(status = oms_status_ok)
-    status = updateInitialValues(cref);
-  if(status == oms_status_ok) {
+  if(oms_status_ok != status)
+    return status;
+  status = updateInitialValues(cref);
+  if(oms_status_ok == status) {
     setInitializedMutex.lock();
     initializedsubsystems.push_back(cref);
     setInitializedMutex.unlock();
@@ -447,14 +514,14 @@ oms_status_enu_t oms3::SystemTLM::initializeSubSystem(oms3::ComRef cref)
   return status;
 }
 
-oms_status_enu_t oms3::SystemTLM::simulateSubSystem(oms3::ComRef cref, double stopTime)
+oms_status_enu_t oms::SystemTLM::simulateSubSystem(oms::ComRef cref, double stopTime)
 {
   oms_status_enu_t status = getSubSystem(cref)->stepUntil(stopTime, NULL);
   plugins[getSubSystem(cref)]->AwaitClosePermission();
   return status;
 }
 
-void oms3::SystemTLM::writeToSockets(SystemWC *system, double time, Component* component)
+void oms::SystemTLM::writeToSockets(SystemWC *system, double time, Component* component)
 {
   socketMutexes[system].lock();
 
@@ -463,8 +530,8 @@ void oms3::SystemTLM::writeToSockets(SystemWC *system, double time, Component* c
   for(int i=0; tlmbuses[i]; ++i)
   {
     TLMBusConnector* bus = tlmbuses[i];
-    int id = bus->getId();      //Need socket ID from top-level bus
     bus = bus->getActualBus();  //Communicate with actual bus
+    int id = bus->getId();
 
     if(component && component != bus->getComponent()) {
       continue; //Ignore FMUs not specified in vector
@@ -474,8 +541,9 @@ void oms3::SystemTLM::writeToSockets(SystemWC *system, double time, Component* c
     if(bus->getDimensions() == 1 && bus->getCausality() == oms_causality_output) {
       oms_tlm_sigrefs_signal_t tlmrefs;
       double value;
-      system->getReal(bus->getConnector(tlmrefs.y), value);
+      bus->getReal(tlmrefs.y, value);
       plugin->SetValueSignal(id, time, value);
+      sendValueToLogger(busLogIds[bus], time, value);
     }
     else if(bus->getDimensions() == 1 && bus->getCausality() == oms_causality_bidir) {
       oms_tlm_sigrefs_1d_t tlmrefs;
@@ -489,6 +557,9 @@ void oms3::SystemTLM::writeToSockets(SystemWC *system, double time, Component* c
 
       //Send the resulting motion back to master
       plugin->SetMotion1D(id, time, state, flow);
+      sendValueToLogger(busLogIds[bus], time, state);
+      sendValueToLogger(busLogIds[bus]+1, time, flow);
+      sendValueToLogger(busLogIds[bus]+2, time, force);
     }
     else if(bus->getDimensions() == 3 && bus->getCausality() == oms_causality_bidir) {
 
@@ -500,10 +571,10 @@ void oms3::SystemTLM::writeToSockets(SystemWC *system, double time, Component* c
       std::vector<double> w(3,0);
       std::vector<double> f(6,0);
 
-      system->getReals(bus->getConnectors(tlmrefs.x), x);
-      system->getReals(bus->getConnectors(tlmrefs.A), A);
-      system->getReals(bus->getConnectors(tlmrefs.v), v);
-      system->getReals(bus->getConnectors(tlmrefs.w), w);
+      bus->getReals(tlmrefs.x, x);
+      bus->getReals(tlmrefs.A, A);
+      bus->getReals(tlmrefs.v, v);
+      bus->getReals(tlmrefs.w, w);
 
       //Important: OMTLMSimulator assumes that GetForce is called
       //before SetMotion, in order to calculate the wave variable
@@ -511,13 +582,40 @@ void oms3::SystemTLM::writeToSockets(SystemWC *system, double time, Component* c
 
       //Send the resulting motion back to master
       plugin->SetMotion3D(id, time, &x[0], &A[0], &v[0], &w[0]);
+
+      sendValueToLogger(busLogIds[bus], time, x[0]);
+      sendValueToLogger(busLogIds[bus]+1, time, x[1]);
+      sendValueToLogger(busLogIds[bus]+2, time, x[2]);
+      sendValueToLogger(busLogIds[bus]+3, time, A[0]);
+      sendValueToLogger(busLogIds[bus]+4, time, A[1]);
+      sendValueToLogger(busLogIds[bus]+5, time, A[2]);
+      sendValueToLogger(busLogIds[bus]+6, time, A[3]);
+      sendValueToLogger(busLogIds[bus]+7, time, A[4]);
+      sendValueToLogger(busLogIds[bus]+8, time, A[5]);
+      sendValueToLogger(busLogIds[bus]+9, time, A[6]);
+      sendValueToLogger(busLogIds[bus]+10, time, A[7]);
+      sendValueToLogger(busLogIds[bus]+11, time, A[8]);
+      sendValueToLogger(busLogIds[bus]+12, time, v[0]);
+      sendValueToLogger(busLogIds[bus]+13, time, v[1]);
+      sendValueToLogger(busLogIds[bus]+14, time, v[2]);
+      sendValueToLogger(busLogIds[bus]+15, time, w[0]);
+      sendValueToLogger(busLogIds[bus]+16, time, w[1]);
+      sendValueToLogger(busLogIds[bus]+17, time, w[2]);
+      sendValueToLogger(busLogIds[bus]+18, time, f[0]);
+      sendValueToLogger(busLogIds[bus]+19, time, f[1]);
+      sendValueToLogger(busLogIds[bus]+20, time, f[2]);
+      sendValueToLogger(busLogIds[bus]+21, time, f[3]);
+      sendValueToLogger(busLogIds[bus]+22, time, f[4]);
+      sendValueToLogger(busLogIds[bus]+23, time, f[5]);
     }
   }
+
+  sendValuesToLogger(system, time);
 
   socketMutexes[system].unlock();
 }
 
-void oms3::SystemTLM::readFromSockets(SystemWC* system, double time, Component* component)
+void oms::SystemTLM::readFromSockets(SystemWC* system, double time, Component* component)
 {
   socketMutexes[system].lock();
 
@@ -526,8 +624,8 @@ void oms3::SystemTLM::readFromSockets(SystemWC* system, double time, Component* 
   for(int i=0; tlmbuses[i]; ++i)
   {
     TLMBusConnector* bus = tlmbuses[i];
-    int id = bus->getId();      //Need socket ID from top-level bus
     bus = bus->getActualBus();  //Communicate with actual bus
+    int id = bus->getId();
 
     if(component && component != bus->getComponent()) {
       continue; //Ignore FMUs not specified in vector
@@ -553,7 +651,7 @@ void oms3::SystemTLM::readFromSockets(SystemWC* system, double time, Component* 
       //Get interpolated force
       plugin->GetForce1D(id, time, flow, &effort);
 
-      if(bus->getDomain() != "hydraulic") {
+      if(bus->getDomain() != oms_tlm_domain_hydraulic) {
           effort = -effort;
       }
 
@@ -570,9 +668,9 @@ void oms3::SystemTLM::readFromSockets(SystemWC* system, double time, Component* 
       bus->setReal(tlmrefs.Z, impedance);
 
       double impedance2, wave2;
-      plugin->GetWaveImpedance1D(id, time+system->getStepSize(), &impedance2, &wave2);
+      plugin->GetWaveImpedance1D(id, time+system->getMaximumStepSize(), &impedance2, &wave2);
 
-      double dWave = (wave2-wave)/system->getStepSize();
+      double dWave = (wave2-wave)/system->getMaximumStepSize();
 
       bus->setRealInputDerivatives(tlmrefs.c, 1, dWave);
     }
@@ -586,7 +684,7 @@ void oms3::SystemTLM::readFromSockets(SystemWC* system, double time, Component* 
       double t = time;
       for(size_t i=0; i<10; ++i) {
         plugin->GetWaveImpedance1D(id, t, &impedance, &wave);
-        t += system->getStepSize()/9;
+        t += system->getMaximumStepSize()/9;
 
         bus->setReal(tlmrefs.c[i], wave);
         bus->setReal(tlmrefs.t[i], t);
@@ -631,11 +729,11 @@ void oms3::SystemTLM::readFromSockets(SystemWC* system, double time, Component* 
 
       std::vector<double> waves2(6,0);
       double Zt2, Zr2;
-      plugin->GetWaveImpedance3D(id, time+system->getStepSize(), &Zt2, &Zr2, &waves2[0]);
+      plugin->GetWaveImpedance3D(id, time+system->getMaximumStepSize(), &Zt2, &Zr2, &waves2[0]);
 
       std::vector<double> dWaves(6,0);
       for(size_t i=0; i<6; ++i) {
-        double dWave = (waves2[i]-waves[i])/system->getStepSize();
+        double dWave = (waves2[i]-waves[i])/system->getMaximumStepSize();
         bus->setRealInputDerivatives(tlmrefs.c[i], 1, dWave);
       }
     }
@@ -650,7 +748,7 @@ void oms3::SystemTLM::readFromSockets(SystemWC* system, double time, Component* 
 
       for(size_t i=0; i<10; ++i) {
         plugin->GetWaveImpedance3D(id, t, &Zt, &Zr, &waves[0]);
-        t += system->getStepSize()/9;
+        t += system->getMaximumStepSize()/9;
 
         bus->setReals(tlmrefs.c[i], waves);
         bus->setReal(tlmrefs.t[i], t);
@@ -662,4 +760,183 @@ void oms3::SystemTLM::readFromSockets(SystemWC* system, double time, Component* 
   }
 
   socketMutexes[system].unlock();
+}
+
+
+void oms::SystemTLM::sendValueToLogger(int varId, double time, double value)
+{
+  logMutex.lock();
+  logBuffer[varId].push_back(std::make_pair(time, value));
+
+  double tmax = 1e20;
+  for(auto& varbuffer : logBuffer) {
+    if(varbuffer.second.back().first < tmax) {
+      tmax = varbuffer.second.back().first;
+    }
+  }
+
+  if(tmax >= nextLogTime && logBuffer.size() == numLogVars)
+  {
+    logTime = nextLogTime;
+    getModel()->emit(nextLogTime);
+    nextLogTime += logStep;
+  }
+
+  logMutex.unlock();
+}
+
+oms_status_enu_t oms::SystemTLM::registerSignalsForResultFile(ResultWriter& resultFile)
+{
+  if (Flags::WallTime())
+    clock_id = resultFile.addSignal(std::string(getFullCref() + ComRef("$wallTime")), "wall-clock time [s]", SignalType_REAL);
+  else
+    clock_id = 0;
+
+  for(auto& system : getSubSystems())
+  {
+    TLMBusConnector** tlmbuses = system.second->getTLMBusConnectors();
+    for(int i=0; tlmbuses[i]; ++i)
+    {
+      TLMBusConnector* bus = tlmbuses[i];
+      bus = bus->getActualBus();  //Communicate with actual bus
+      if(bus->getDimensions() == 1 && bus->getCausality() == oms_causality_output) {
+        busLogIds[bus] = registerLogVariable();
+        resultFile.addSignal(std::string(system.second->getFullCref()+bus->getName()), "", SignalType_REAL);
+      }
+      else if(bus->getDimensions() == 1 && bus->getCausality() == oms_causality_bidir) {
+        std::string statename,flowname,effortname;
+        if(bus->getDomain() == oms_tlm_domain_mechanical) {
+          statename = "x";
+          flowname =  "v";
+          effortname = "f";
+        }
+        else if(bus->getDomain() == oms_tlm_domain_electric) {
+          statename = "phi";
+          flowname =  "w";
+          effortname = "T";
+        }
+        else if(bus->getDomain() == oms_tlm_domain_hydraulic) {
+          statename = "V";
+          flowname =  "q";
+          effortname = "p";
+        }
+        else if(bus->getDomain() == oms_tlm_domain_electric) {
+          statename = "Q";
+          flowname =  "i";
+          effortname = "U";
+        }
+        busLogIds[bus] = registerLogVariable();
+        resultFile.addSignal(std::string(system.second->getFullCref()+bus->getName())+"."+statename, "", SignalType_REAL);
+        registerLogVariable();
+        resultFile.addSignal(std::string(system.second->getFullCref()+bus->getName())+"."+flowname, "", SignalType_REAL);
+        registerLogVariable();
+        resultFile.addSignal(std::string(system.second->getFullCref()+bus->getName())+"."+effortname, "", SignalType_REAL);
+      }
+      else if(bus->getDimensions() == 3 && bus->getCausality() == oms_causality_bidir) {
+        busLogIds[bus] = registerLogVariable();
+        resultFile.addSignal(std::string(system.second->getFullCref()+bus->getName())+".x[1]", "", SignalType_REAL);
+        std::vector<std::string> varNames = {"x[2]","x[3]",
+                                             "A[1,1]","A[1,2]","A[1,3]","A[2,1]","A[2,2]","A[2,3]","A[3,1]","A[3,2]","A[3,3]",
+                                             "v[1]","v[2]","v[3]","w[1]","w[2]","w[3]",
+                                             "f[1]","f[2]","f[3]","t[1]","t[2]","t[3]"};
+        for(std::string& varName : varNames) {
+          registerLogVariable();
+          resultFile.addSignal(std::string(system.second->getFullCref()+bus->getName())+"."+varName, "", SignalType_REAL);
+        }
+      }
+    }
+    registerLogVariables(system.second, resultFile);
+  }
+
+  return oms_status_ok;
+}
+
+int oms::SystemTLM::registerLogVariable()
+{
+  return numLogVars++;
+}
+
+void oms::SystemTLM::registerLogVariables(oms::System *system, ResultWriter& resultFile)
+{
+  for(int i=0; system->getConnectors()[i]; ++i) {
+    if(system->getConnectors()[i]->isOutput() && system->getConnectors()[i]->isTypeReal()) {
+      connectorLogIds[system->getConnectors()[i]] = registerLogVariable();
+      resultFile.addSignal(std::string(system->getFullCref()+system->getConnectors()[i]->getName()), "", SignalType_REAL);
+    }
+  }
+
+  for(auto& component : system->getComponents()) {
+    for(int i=0; component.second->getConnectors()[i]; ++i) {
+      if(component.second->getConnectors()[i]->isOutput() && component.second->getConnectors()[i]->isTypeReal()) {
+        connectorLogIds[component.second->getConnectors()[i]] = registerLogVariable();
+        resultFile.addSignal(std::string(system->getFullCref()+component.second->getCref()+component.second->getConnectors()[i]->getName()), "", SignalType_REAL);
+      }
+    }
+  }
+
+  for(auto& subsystem : system->getSubSystems()) {
+    registerLogVariables(subsystem.second, resultFile);
+  }
+}
+
+void oms::SystemTLM::sendValuesToLogger(oms::System *system, double time)
+{
+  for(int i=0; system->getConnectors()[i]; ++i) {
+    if(system->getConnectors()[i]->isOutput() && system->getConnectors()[i]->isTypeReal()) {
+      double value;
+      system->getReal(system->getConnectors()[i]->getName(), value);
+      sendValueToLogger(connectorLogIds[system->getConnectors()[i]], time, value);
+    }
+  }
+
+  for(auto& component : system->getComponents()) {
+    for(int i=0; component.second->getConnectors()[i]; ++i) {
+      if(component.second->getConnectors()[i]->isOutput() && component.second->getConnectors()[i]->isTypeReal()) {
+        double value;
+        component.second->getReal(component.second->getConnectors()[i]->getName(), value);
+        sendValueToLogger(connectorLogIds[component.second->getConnectors()[i]], time, value);
+      }
+    }
+  }
+
+  for(auto& subsystem : system->getSubSystems()) {
+    sendValuesToLogger(subsystem.second, time);
+  }
+}
+
+oms_status_enu_t oms::SystemTLM::updateSignals(oms::ResultWriter &resultFile)
+{
+  if (logBuffer.size() == 0)
+    return oms_status_ok;
+
+  int i = (clock_id) ? 2 : 1;  // TODO: see #596
+
+  if (clock_id)
+  {
+    SignalValue_t wallTime;
+    wallTime.realValue = clock.getElapsedWallTime();
+    resultFile.updateSignal(clock_id, wallTime);
+  }
+
+  for(auto& varbuffer : logBuffer) {
+    auto& databuffer = varbuffer.second;
+    double x1,x2,t1,t2;
+    t2 = databuffer.back().first;
+    x2 = databuffer.back().second;
+    t1 = t2;
+    x1 = x2;
+    for(int i=databuffer.size()-1; i>=0; --i) {
+      if(databuffer[i].first < nextLogTime) {
+        t1 = databuffer[i].first;
+        x1 = databuffer[i].second;
+        break;
+      }
+    }
+
+    SignalValue_t value;
+    value.realValue = interpolate(t1,t2,x1,x2,logTime);
+    resultFile.updateSignal(i, value);
+    ++i;
+  }
+  return oms_status_ok;
 }

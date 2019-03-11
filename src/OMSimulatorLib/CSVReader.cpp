@@ -36,7 +36,7 @@
 
 #include <string.h>
 
-oms3::CSVReader::CSVReader(const char* filename)
+oms::CSVReader::CSVReader(const char* filename)
   : ResultReader(filename)
 {
   std::ifstream file(filename);
@@ -44,7 +44,7 @@ oms3::CSVReader::CSVReader(const char* filename)
 
   if (file.fail())
   {
-    logError("MatReader::MatReader failed opening file \"" + std::string(filename) + "\"");
+    logError("CSVReader::CSVReader failed opening file \"" + std::string(filename) + "\"");
     return;
   }
 
@@ -77,7 +77,7 @@ oms3::CSVReader::CSVReader(const char* filename)
   for(char& c : line)
   {
     if (!quoteSign && '"' == c)
-    quoteSign = true;
+      quoteSign = true;
     else if (quoteSign && '"' == c)
     {
       quoteSign = false;
@@ -110,6 +110,7 @@ oms3::CSVReader::CSVReader(const char* filename)
   int row=0;
   int col=0;
   while (std::getline(file, line))
+  {
     if (!line.empty())
     {
       quoteSign = false;
@@ -152,14 +153,15 @@ oms3::CSVReader::CSVReader(const char* filename)
       }
       row++;
     }
+  }
 }
 
-oms3::CSVReader::~CSVReader()
+oms::CSVReader::~CSVReader()
 {
   delete[] data;
 }
 
-oms3::ResultReader::Series* oms3::CSVReader::getSeries(const char* var)
+oms::ResultReader::Series* oms::CSVReader::getSeries(const char* var)
 {
   // find index
   int index = -1;

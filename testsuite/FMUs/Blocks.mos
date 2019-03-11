@@ -1,0 +1,10 @@
+loadModel(Modelica); getErrorString();
+
+buildModelFMU(Modelica.Blocks.Math.Add, version="2.0", fmuType="me", fileNamePrefix="Modelica.Blocks.Math.Add", platforms={"static"}); getErrorString();
+buildModelFMU(Modelica.Blocks.Math.Feedback, version="2.0", fmuType="me", fileNamePrefix="Modelica.Blocks.Math.Feedback", platforms={"static"}); getErrorString();
+buildModelFMU(Modelica.Blocks.Math.Gain, version="2.0", fmuType="me", fileNamePrefix="Modelica.Blocks.Math.Gain", platforms={"static"}); getErrorString();
+buildModelFMU(Modelica.Blocks.Math.Product, version="2.0", fmuType="me", fileNamePrefix="Modelica.Blocks.Math.Product", platforms={"static"}); getErrorString();
+buildModelFMU(Modelica.Blocks.Sources.Clock, version="2.0", fmuType="me", fileNamePrefix="Modelica.Blocks.Sources.Clock", platforms={"static"}); getErrorString();
+buildModelFMU(Modelica.Blocks.Sources.Constant, version="2.0", fmuType="me", fileNamePrefix="Modelica.Blocks.Sources.Constant", platforms={"static"}); getErrorString();
+buildModelFMU(Modelica.Blocks.Sources.Sine, version="2.0", fmuType="me", fileNamePrefix="Modelica.Blocks.Sources.Sine", platforms={"static"}); getErrorString();
+buildModelFMU(Modelica.Blocks.Sources.Step, version="2.0", fmuType="me", fileNamePrefix="Modelica.Blocks.Sources.Step", platforms={"static"}); getErrorString();

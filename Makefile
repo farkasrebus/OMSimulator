@@ -18,6 +18,8 @@ OMSYSIDENT ?= ON
 OMTLM ?= ON
 # Option to enable AddressSanitizer
 ASAN ?= OFF
+# Statically link dependencies as much as possible
+STATIC ?= OFF
 # Option to switch between Debug and Release builds
 BUILD_TYPE ?= Release
 
@@ -79,6 +81,11 @@ endif
 	CMAKE_FPIC=-DCMAKE_C_FLAGS="-fPIC"
 endif
 
+ifeq ($(STATIC),ON)
+  # Do not use -DBoost_USE_STATIC_LIBS=ON; it messes up -static in alpine/musl
+  CMAKE_STATIC=-DBUILD_SHARED=OFF
+endif
+
 # use cmake from above if is set, otherwise cmake
 ifeq ($(CMAKE),)
 	CMAKE=CC="$(CC)" CXX="$(CXX)" CFLAGS="$(CFLAGS)" CPPFLAGS="$(CPPFLAGS)" CXXFLAGS="$(CXXFLAGS)" cmake
@@ -121,6 +128,9 @@ else
   ifeq (MINGW,$(findstring MINGW,$(detected_OS)))
     CMAKE_TARGET=-G "Unix Makefiles" -DCMAKE_SYSTEM_NAME=Windows -DCMAKE_RC_COMPILER=$(CROSS_TRIPLE)-windres
   endif
+  ifeq ($(detected_OS),Darwin)
+    EXTRA_CMAKE+=-DCMAKE_INSTALL_NAME_TOOL=$(CROSS_TRIPLE)-install_name_tool
+  endif
   DISABLE_RUN_OMSIMULATOR_VERSION ?= 1
 endif
 
@@ -147,8 +157,6 @@ OMSimulatorCore:
 	@echo "# make OMSimulatorCore"
 	@echo
 	@$(MAKE) -C $(BUILD_DIR) install
-	test ! "$(detected_OS)" = Darwin || ($(CROSS_TRIPLE_DASH)install_name_tool -add_rpath "@loader_path/../../../../lib/$(HOST_SHORT_OMC)" $(TOP_INSTALL_DIR)/bin/OMSimulator)
-	test ! "$(detected_OS)" = Darwin || ($(CROSS_TRIPLE_DASH)install_name_tool -add_rpath "@loader_path/../lib/$(HOST_SHORT_OMC)" $(TOP_INSTALL_DIR)/bin/OMSimulator)
 
 ifeq ($(OMTLM),ON)
 OMTLMSimulator: RegEx
@@ -160,7 +168,7 @@ OMTLMSimulator: RegEx
 	test ! `uname` != Darwin || $(MAKE) -C OMTLMSimulator/FMIWrapper install
 	@$(MKDIR) $(TOP_INSTALL_DIR)/lib/$(HOST_SHORT_OMC)
 	@$(MKDIR) $(TOP_INSTALL_DIR)/bin
-	cp OMTLMSimulator/bin/libomtlmsimulator$(FEXT) $(TOP_INSTALL_DIR)/lib/$(HOST_SHORT_OMC)
+	test ! "$(FEXT)" != ".dll" || cp OMTLMSimulator/bin/libomtlmsimulator$(FEXT) $(TOP_INSTALL_DIR)/lib/$(HOST_SHORT_OMC)
 	test ! "$(detected_OS)" = Darwin || ($(CROSS_TRIPLE_DASH)install_name_tool -id "@rpath/libomtlmsimulator$(FEXT)" $(TOP_INSTALL_DIR)/lib/$(HOST_SHORT_OMC)/libomtlmsimulator$(FEXT))
 	test ! "$(FEXT)" = ".dll" || cp OMTLMSimulator/bin/libomtlmsimulator$(FEXT) $(TOP_INSTALL_DIR)/bin/
 	test ! `uname` != Darwin || cp OMTLMSimulator/bin/FMIWrapper $(TOP_INSTALL_DIR)/bin/
@@ -197,7 +205,7 @@ $(BUILD_DIR)/Makefile: RegEx CMakeLists.txt
 	@echo
 	$(eval STD_REGEX := $(shell 3rdParty/RegEx/OMSRegEx$(EEXT)))
 	$(MKDIR) $(BUILD_DIR)
-	cd $(BUILD_DIR) && $(CMAKE) $(CMAKE_TARGET) ../.. -DABI=$(ABI) -DSTD_REGEX=$(STD_REGEX) -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON -DOMSYSIDENT:BOOL=$(OMSYSIDENT) -DOMTLM:BOOL=$(OMTLM) -DASAN:BOOL=$(ASAN) -DCMAKE_BUILD_TYPE=$(BUILD_TYPE) $(CMAKE_BOOST_ROOT) $(CMAKE_INSTALL_PREFIX) $(HOST_SHORT) $(EXTRA_CMAKE)
+	cd $(BUILD_DIR) && $(CMAKE) $(CMAKE_TARGET) ../.. -DABI=$(ABI) -DSTD_REGEX=$(STD_REGEX) -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON -DOMSYSIDENT:BOOL=$(OMSYSIDENT) -DOMTLM:BOOL=$(OMTLM) -DASAN:BOOL=$(ASAN) -DCMAKE_BUILD_TYPE=$(BUILD_TYPE) $(CMAKE_BOOST_ROOT) $(CMAKE_INSTALL_PREFIX) $(HOST_SHORT) $(EXTRA_CMAKE) $(CMAKE_STATIC)
 
 config-fmil: 3rdParty/FMIL/$(INSTALL_DIR)/lib/libfmilib.a
 3rdParty/FMIL/$(INSTALL_DIR)/lib/libfmilib.a: 3rdParty/FMIL/$(BUILD_DIR)/Makefile
@@ -211,7 +219,7 @@ config-fmil: 3rdParty/FMIL/$(INSTALL_DIR)/lib/libfmilib.a
 	cd 3rdParty/FMIL/$(BUILD_DIR) && $(CMAKE) $(CMAKE_TARGET) ../.. -DFMILIB_INSTALL_PREFIX=../../$(INSTALL_DIR) -DFMILIB_BUILD_TESTS:BOOL=0 -DFMILIB_GENERATE_DOXYGEN_DOC:BOOL=0 -DFMILIB_BUILD_STATIC_LIB:BOOL=1 -DFMILIB_BUILD_SHARED_LIB:BOOL=0 -DBUILD_TESTING:BOOL=0 -DFMILIB_BUILD_BEFORE_TESTS:BOOL=0 $(FMIL_FLAGS)
 
 config-lua: 3rdParty/Lua/$(INSTALL_DIR)/liblua.a
-3rdParty/Lua/$(INSTALL_DIR)/liblua.a: 
+3rdParty/Lua/$(INSTALL_DIR)/liblua.a:
 	@echo
 	@echo "# config Lua"
 	@echo
@@ -222,13 +230,13 @@ config-zlib: 3rdParty/zlib/$(INSTALL_DIR)/libminizip.a
 	$(MAKE) -C 3rdParty/zlib/$(BUILD_DIR)/zlib/ install
 3rdParty/zlib/$(INSTALL_DIR)/libminizip.a: 3rdParty/zlib/$(INSTALL_DIR)/libzlibstatic.a 3rdParty/zlib/$(BUILD_DIR)/minizip/Makefile
 	$(MAKE) -C 3rdParty/zlib/$(BUILD_DIR)/minizip/ install
-3rdParty/zlib/$(BUILD_DIR)/zlib/Makefile: 
+3rdParty/zlib/$(BUILD_DIR)/zlib/Makefile:
 	@echo
 	@echo "# config zlib library"
 	@echo
 	$(MKDIR) 3rdParty/zlib/$(BUILD_DIR)/zlib
 	cd 3rdParty/zlib/$(BUILD_DIR)/zlib && $(CMAKE) $(CMAKE_TARGET) ../../../zlib-1.2.11 -DCMAKE_INSTALL_PREFIX=../../../$(INSTALL_DIR)
-3rdParty/zlib/$(BUILD_DIR)/minizip/Makefile: 
+3rdParty/zlib/$(BUILD_DIR)/minizip/Makefile:
 	@echo
 	@echo "# config zlib minizip"
 	@echo
@@ -348,8 +356,6 @@ doc-html:
 doc-doxygen:
 	@$(RM) $(INSTALL_DIR)/doc/OMSimulatorLib
 	@$(MKDIR) $(INSTALL_DIR)/doc/OMSimulatorLib
-	@$(MAKE) -C doc/dev/OMSimulatorLib OMSimulatorLib.png
-	@$(CP) doc/dev/OMSimulatorLib/OMSimulatorLib.png $(INSTALL_DIR)/doc/OMSimulatorLib/
 	@$(MAKE) -C doc/dev/OMSimulatorLib doc-doxygen
 	@$(CP) doc/dev/OMSimulatorLib/html/* $(INSTALL_DIR)/doc/OMSimulatorLib/
 	@$(MAKE) -C doc/dev/OMSimulatorLib clean

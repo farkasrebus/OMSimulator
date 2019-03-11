@@ -50,10 +50,12 @@ typedef enum {
 } oms_status_enu_t;
 
 typedef enum {
-  oms_modelState_terminated,
-  oms_modelState_instantiated,
-  oms_modelState_initialization,
-  oms_modelState_simulation
+  oms_modelState_virgin             = 1<<0,
+  oms_modelState_enterInstantiation = 1<<1,
+  oms_modelState_instantiated       = 1<<2,
+  oms_modelState_initialization     = 1<<3,
+  oms_modelState_simulation         = 1<<4,
+  oms_modelState_error              = 1<<5
 } oms_modelState_enu_t;
 
 typedef enum {
@@ -71,26 +73,30 @@ typedef enum {
 } oms_tlm_interpolation_t;
 
 typedef enum {
-  oms_solver_internal,         ///< internal solver; CS-FMU only
-  oms_solver_explicit_euler,
-  oms_solver_cvode
+  oms_tlm_domain_input,
+  oms_tlm_domain_output,
+  oms_tlm_domain_mechanical,
+  oms_tlm_domain_rotational,
+  oms_tlm_domain_hydraulic,
+  oms_tlm_domain_electric
+} oms_tlm_domain_t;
+
+typedef enum {
+  oms_solver_none,
+  oms_solver_sc_min,
+  oms_solver_sc_explicit_euler,
+  oms_solver_sc_cvode,  ///< default
+  oms_solver_sc_max,
+  oms_solver_wc_min,
+  oms_solver_wc_ma,     ///< Fixed stepsize (default)
+  oms_solver_wc_mav,    ///< Adaptive stepsize
+  oms_solver_wc_max
 } oms_solver_enu_t;
 
 typedef enum {
-  oms_element_none,
   oms_element_system,
   oms_element_component,
-} oms3_element_enu_t;
-
-typedef enum {
-  oms_component_none_old,
-  oms_component_tlm,          ///< TLM composite model
-  oms_component_fmi,          ///< FMI composite model
-  oms_component_external_old, ///< External model
-  oms_component_fmu_old,      ///< FMU
-  oms_component_table_old,    ///< lookup table
-  oms_component_port          ///< port
-} oms_element_type_enu_t;
+} oms_element_enu_t;
 
 typedef enum {
   oms_system_none,
@@ -119,15 +125,10 @@ typedef enum {
  * \brief Connection type
  */
 typedef enum {
-  oms_connection_fmi, ///< FMI conncection (directed & undelayed signal connection)
-  oms_connection_tlm  ///< TLM connection
+  oms_connection_single, ///< FMI conncection (directed & undelayed signal connection)
+  oms_connection_bus,    ///< Bus connection
+  oms_connection_tlm
 } oms_connection_type_enu_t;
-
-typedef enum {
-  oms3_connection_single, ///< FMI conncection (directed & undelayed signal connection)
-  oms3_connection_bus,  ///< Bus connection
-  oms3_connection_tlm
-} oms3_connection_type_enu_t;
 
 /**
  * \brief Message types used by the logging mechanism.
@@ -136,8 +137,8 @@ typedef enum {
   oms_message_info,    ///< Informative message.
   oms_message_warning, ///< Warning; Non-critical issues.
   oms_message_error,   ///< Error; Potentially critical issues.
-  oms_message_debug,   ///< Debug message. (Only enabled if library is configured with OMS_DEBUG_LOGGING.)
-  oms_message_trace    ///< Trace message for detailed debug logging. (Only enabled if library is configured with OMS_DEBUG_LOGGING.)
+  oms_message_debug,   ///< Debug message. (only in debug configuration)
+  oms_message_trace    ///< Trace message for detailed debug logging. (only in debug configuration)
 } oms_message_type_enu_t;
 
 /**
@@ -341,27 +342,18 @@ typedef struct {
   double alpha;
   double linearimpedance;
   double angularimpedance;
-} oms3_tlm_connection_parameters_t;
+} oms_tlm_connection_parameters_t;
 
 /**
  * \brief Connection between two connectors.
  */
 typedef struct {
-  oms_connection_type_enu_t type;      ///< Connection type, e.g. TLM
-  char* parent;                        ///< Name of parent element
-  char* conA;                          ///< Name of connector A
-  char* conB;                          ///< Name of connector B
-  ssd_connection_geometry_t* geometry; ///< Geometry information of the connection
-  /// \todo optional TLM attributes
-} oms_connection_t;
-
-typedef struct {
-  oms3_connection_type_enu_t type;                 ///< Connection type, e.g. TLM
+  oms_connection_type_enu_t type;                  ///< Connection type, e.g. TLM
   char* conA;                                      ///< Name of connector A
   char* conB;                                      ///< Name of connector B
   ssd_connection_geometry_t* geometry;             ///< Geometry information of the connection
-  oms3_tlm_connection_parameters_t* tlmparameters; ///< TLM parameters (only for TLM connections)
-} oms3_connection_t;
+  oms_tlm_connection_parameters_t* tlmparameters;  ///< TLM parameters (only for TLM connections)
+} oms_connection_t;
 
 /**
  * \brief Signal: input, output, and parameter
@@ -380,7 +372,7 @@ typedef struct {
   char* name;
   char** connectors;
   ssd_connector_geometry_t* geometry;
-} oms3_busconnector_t;
+} oms_busconnector_t;
 
 /**
  * \brief TLM Bus connector
@@ -388,32 +380,25 @@ typedef struct {
 typedef struct {
   char* name;
   ssd_connector_geometry_t* geometry;
-  char* domain;
+  oms_tlm_domain_t domain;
   int dimensions;
   double delay;
   oms_tlm_interpolation_t interpolation;
   char** connectornames;
   char** connectortypes;
-} oms3_tlmbusconnector_t;
+} oms_tlmbusconnector_t;
 
 /**
  * \brief Element (aka ssd:Component)
  */
-typedef struct _oms3_element_t{
-  oms3_element_enu_t type;                    ///< Element type, i.e. system or component
+typedef struct _oms_element_t{
+  oms_element_enu_t type;                    ///< Element type, i.e. system or component
   char* name;                                 ///< Name of the element
-  struct _oms3_element_t** elements;          ///< List (null-terminated array) of all sub-elements
+  struct _oms_element_t** elements;          ///< List (null-terminated array) of all sub-elements
   oms_connector_t** connectors;               ///< List (null-terminated array) of all interface variables: inputs, outputs, and parameters.
-  oms3_busconnector_t** busconnectors;        ///< List (null-terminated array) of all bus connectors
-  oms3_tlmbusconnector_t** tlmbusconnectors;  ///< List (null-terminated array) of all TLM bus connectors
+  oms_busconnector_t** busconnectors;        ///< List (null-terminated array) of all bus connectors
+  oms_tlmbusconnector_t** tlmbusconnectors;  ///< List (null-terminated array) of all TLM bus connectors
   ssd_element_geometry_t* geometry;           ///< Geometry information of the element
-} oms3_element_t;
-
-typedef struct {
-  oms_element_type_enu_t type;      ///< Element type, e.g. FMU
-  char* name;                       ///< Name of the element
-  oms_connector_t** connectors;     ///< List (null-terminated array) of all interface variables: inputs, outputs, and parameters.
-  ssd_element_geometry_t* geometry; ///< Geometry information of the element
 } oms_element_t;
 
 typedef enum {
@@ -541,6 +526,12 @@ typedef struct {
    * fmi2SetRealInputDerivatives(...) has an effect for the slave.
    */
   bool canInterpolateInputs;
+  /**
+   * The slave is able to provide derivatives of outputs with maximum order.
+   * Calling of fmi2GetRealOutputDerivatives(...) is allowed up to the order
+   * defined by maxOutputDerivativeOrder.
+   */
+  unsigned int maxOutputDerivativeOrder;
 } oms_fmu_info_t;
 
 #ifdef __cplusplus

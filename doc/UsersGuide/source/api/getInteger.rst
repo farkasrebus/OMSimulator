@@ -8,21 +8,21 @@ Get integer value of given signal.
 #LUA#
 .. code-block:: lua
 
-  value, status = oms2_getInteger(signal)
+  value, status = oms_getInteger(cref)
 
 #END#
 
 #PYTHON#
 .. code-block:: python
 
-  value, status = session.getInteger(signal)
+  value, status = oms.getInteger(cref)
 
 #END#
 
 #CAPI#
 .. code-block:: c
 
-  oms_status_enu_t oms2_getInteger(const char* signal, int* value);
+  oms_status_enu_t oms_getInteger(const char* cref, int* value);
 
 #END#
 

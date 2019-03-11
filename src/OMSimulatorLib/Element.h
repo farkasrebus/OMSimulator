@@ -29,11 +29,10 @@
  *
  */
 
-#ifndef _OMS2_ELEMENT_H_
-#define _OMS2_ELEMENT_H_
+#ifndef _OMS_ELEMENT_H_
+#define _OMS_ELEMENT_H_
 
 #include "ComRef.h"
-#include "SignalRef.h"
 #include "Connector.h"
 #include "BusConnector.h"
 #if !defined(NO_TLM)
@@ -45,39 +44,7 @@
 #include <string>
 #include <vector>
 
-namespace oms3
-{
-  /**
-   * \brief Element
-   */
-  class Element : protected oms3_element_t
-  {
-  public:
-    Element(oms3_element_enu_t type, const ComRef& name);
-    ~Element();
-
-    const oms3_element_enu_t getType() const {return type;}
-    const oms3::ComRef getName() const {return oms3::ComRef(name);}
-    oms3::Connector** getConnectors() const {return reinterpret_cast<oms3::Connector**>(connectors);}
-    const oms3::ssd::ElementGeometry* getGeometry() const {return reinterpret_cast<oms3::ssd::ElementGeometry*>(geometry);}
-
-    void setName(const ComRef& name);
-    void setGeometry(const oms3::ssd::ElementGeometry* newGeometry);
-    void setConnectors(oms3::Connector** newConnectors);
-    void setBusConnectors(oms3::BusConnector **newBusConnectors);
-#if !defined(NO_TLM)
-    void setTLMBusConnectors(oms3::TLMBusConnector **newTLMBusConnectors);
-#endif
-    void setSubElements(oms3_element_t** subelements);
-
-  private:
-    // methods to copy the object
-    Element(const Element& rhs);            ///< not implemented
-    Element& operator=(const Element& rhs); ///< not implemented
-  };
-}
-
-namespace oms2
+namespace oms
 {
   /**
    * \brief Element
@@ -85,19 +52,22 @@ namespace oms2
   class Element : protected oms_element_t
   {
   public:
-    Element(oms_element_type_enu_t type, const ComRef& name);
+    Element(oms_element_enu_t type, const ComRef& name);
     ~Element();
 
-    const oms_element_type_enu_t getType() const {return type;}
-    const oms2::ComRef getName() const {return oms2::ComRef(std::string(name));}
-    oms2::Connector** getConnectors() const {return reinterpret_cast<oms2::Connector**>(connectors);}
-    const oms2::ssd::ElementGeometry* getGeometry() const {return reinterpret_cast<oms2::ssd::ElementGeometry*>(geometry);}
+    const oms_element_enu_t getType() const {return type;}
+    const oms::ComRef getName() const {return oms::ComRef(name);}
+    oms::Connector** getConnectors() const {return reinterpret_cast<oms::Connector**>(connectors);}
+    const oms::ssd::ElementGeometry* getGeometry() const {return reinterpret_cast<oms::ssd::ElementGeometry*>(geometry);}
 
     void setName(const ComRef& name);
-    void setGeometry(const oms2::ssd::ElementGeometry* newGeometry);
-    void setConnectors(const std::vector<oms2::Connector> newConnectors);
-
-    void describe();
+    void setGeometry(const oms::ssd::ElementGeometry* newGeometry);
+    void setConnectors(oms::Connector** newConnectors);
+    void setBusConnectors(oms::BusConnector **newBusConnectors);
+#if !defined(NO_TLM)
+    void setTLMBusConnectors(oms::TLMBusConnector **newTLMBusConnectors);
+#endif
+    void setSubElements(oms_element_t** subelements);
 
   private:
     // methods to copy the object
